@@ -1,0 +1,6 @@
+# Used when Cloud Build installs this package alone (parent monorepo config is not uploaded).
+allowBuilds:
+  '@firebase/util': true
+  protobufjs: true
+
+minimumReleaseAge: 0

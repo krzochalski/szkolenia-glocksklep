@@ -6,6 +6,8 @@ import {
 	ConfirmDialog,
 	FaqSection,
 	PageColumn,
+	PathConnector,
+	PathStepCard,
 	PriceToggle,
 	SiteHeader,
 	SiteNavDrawer,
@@ -55,7 +57,7 @@ describe('SiteHeader', () => {
 	it('renders the wordmark, links, and cart', () => {
 		wrap(
 			<SiteHeader
-				brand='GLOCKACCI'
+				brand='GlockSklep'
 				brandHref='/'
 				cartHref='/koszyk'
 				cartCount={2}
@@ -67,12 +69,26 @@ describe('SiteHeader', () => {
 				]}
 			/>
 		);
-		expect(screen.getByText('GLOCKACCI')).toBeInTheDocument();
+		expect(screen.getByText('GlockSklep')).toBeInTheDocument();
+		expect(screen.queryByText('SZKOLENIA')).not.toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'Główna' })).toHaveAttribute('aria-current', 'page');
 		expect(screen.getByRole('link', { name: 'Spusty' })).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'External' })).toHaveAttribute('target', '_blank');
 		expect(screen.getByRole('link', { name: 'External' }).querySelector('svg')).toBeTruthy();
 		expect(screen.getAllByRole('link', { name: 'Koszyk' })).toHaveLength(2);
+	});
+
+	it('renders an optional brandSublabel beside the wordmark', () => {
+		wrap(
+			<SiteHeader
+				brand='GlockSklep'
+				brandSublabel='SZKOLENIA'
+				brandHref='/'
+				links={[{ href: '/', label: 'Główna' }]}
+			/>
+		);
+		expect(screen.getByText('GlockSklep')).toBeInTheDocument();
+		expect(screen.getByText('SZKOLENIA')).toBeInTheDocument();
 	});
 
 	it('hides the cart and accepts a brand node plus actions', () => {
@@ -120,6 +136,36 @@ describe('PageColumn', () => {
 		const { container } = wrap(<PageColumn>Body</PageColumn>);
 		expect(screen.getByText('Body')).toBeInTheDocument();
 		expect(container.querySelector('.MuiContainer-maxWidthXl')).toBeTruthy();
+	});
+});
+
+describe('PathConnector', () => {
+	it('renders a centered decorative connector', () => {
+		const { container } = wrap(<PathConnector />);
+		expect(container.querySelector('[aria-hidden="true"]')).toBeTruthy();
+	});
+});
+
+describe('PathStepCard', () => {
+	it('renders index, title, meta, and action slots', () => {
+		wrap(
+			<PathStepCard
+				index='01'
+				title='Pistol Basic'
+				meta={<span>6h</span>}
+				action={<button type='button'>Details</button>}
+			/>
+		);
+		expect(screen.getByText('01')).toBeInTheDocument();
+		expect(screen.getByText('Pistol Basic')).toBeInTheDocument();
+		expect(screen.getByText('6h')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Details' })).toBeInTheDocument();
+	});
+
+	it('hides the index badge when omitted', () => {
+		wrap(<PathStepCard title='Solo' />);
+		expect(screen.getByText('Solo')).toBeInTheDocument();
+		expect(screen.queryByText('01')).not.toBeInTheDocument();
 	});
 });
 

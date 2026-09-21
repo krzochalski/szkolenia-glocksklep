@@ -21,6 +21,11 @@ export type SiteHeaderProps = {
 	readonly brand: ReactNode;
 	/** Wraps `brand` in `linkComponent`. Omit when `brand` is already a link. */
 	readonly brandHref?: string;
+	/**
+	 * Optional small grey label beside the wordmark (e.g. product line).
+	 * Omit to hide.
+	 */
+	readonly brandSublabel?: string;
 	readonly links: readonly SiteNavItem[];
 	readonly linkComponent?: SiteNavLinkComponent;
 	/** Accessible name of the link row. Defaults to a string `brand`, otherwise `"Primary"`. */
@@ -63,6 +68,16 @@ const wordmarkSx = {
 	textTransform: 'uppercase',
 } as const;
 
+const brandSublabelSx = {
+	fontFamily: '"Space Mono", monospace',
+	fontSize: { xs: '0.625rem', md: '0.6875rem' },
+	fontWeight: 500,
+	letterSpacing: '0.04em',
+	lineHeight: 1,
+	color: 'text.secondary',
+	textTransform: 'uppercase',
+} as const;
+
 const linkSx = (active: boolean | undefined) =>
 	({
 		fontFamily: '"Space Mono", monospace',
@@ -89,6 +104,7 @@ const clusterDisplay = (from: SiteHeaderDesktopFrom, kind: 'desktop' | 'mobile')
 export const SiteHeader = ({
 	brand,
 	brandHref,
+	brandSublabel,
 	links,
 	linkComponent = 'a',
 	navLabel,
@@ -118,6 +134,16 @@ export const SiteHeader = ({
 		) : (
 			brand
 		);
+	const brandCluster = (
+		<Box sx={{ display: 'flex', alignItems: 'baseline', gap: { xs: 0.75, md: 1 } }}>
+			{wordmark}
+			{brandSublabel ? (
+				<Typography component='span' sx={brandSublabelSx}>
+					{brandSublabel}
+				</Typography>
+			) : null}
+		</Box>
+	);
 	const brandLinkSx = {
 		textDecoration: 'none',
 		display: 'flex',
@@ -170,10 +196,10 @@ export const SiteHeader = ({
 			>
 				{brandHref ? (
 					<Box component={linkComponent} href={brandHref} sx={brandLinkSx}>
-						{wordmark}
+						{brandCluster}
 					</Box>
 				) : (
-					<Box sx={brandLinkSx}>{wordmark}</Box>
+					<Box sx={brandLinkSx}>{brandCluster}</Box>
 				)}
 
 				<Box

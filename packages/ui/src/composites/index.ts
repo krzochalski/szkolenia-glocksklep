@@ -16,6 +16,8 @@ export { HeroCard } from './HeroCard';
 export { ImageGallery } from './ImageGallery';
 export { MobileStickyActionBar, mobileStickyContentPb } from './MobileStickyActionBar';
 export { PageColumn } from './PageColumn';
+export { PathConnector, type PathConnectorProps } from './PathConnector';
+export { PathStepCard, type PathStepCardProps } from './PathStepCard';
 export { type PriceMode, PriceToggle } from './PriceToggle';
 export { SelectableCard } from './SelectableCard';
 export {

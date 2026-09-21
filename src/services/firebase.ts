@@ -5,15 +5,24 @@ type Env = { env?: Record<string, string | undefined> };
 const readEnv = (key: string): string | undefined =>
 	(globalThis as typeof globalThis & { process?: Env }).process?.env?.[key];
 
+const requireEnv = (key: string): string => {
+	const value = readEnv(key)?.trim();
+	if (!value) {
+		throw new Error(
+			`Missing ${key}. Copy .env.example to .env.local and fill Firebase web config values.`,
+		);
+	}
+	return value;
+};
+
 const firebaseConfig = {
-	apiKey: readEnv('NEXT_PUBLIC_FIREBASE_API_KEY') ?? 'AIzaSyD3fQ-uG7RUbdO1WpuSchmoASPDlWcKXsA',
-	authDomain: readEnv('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN') ?? 'szkolenia-glocksklep.firebaseapp.com',
-	projectId: readEnv('NEXT_PUBLIC_FIREBASE_PROJECT_ID') ?? 'szkolenia-glocksklep',
-	storageBucket:
-		readEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET') ?? 'szkolenia-glocksklep.firebasestorage.app',
-	messagingSenderId: readEnv('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID') ?? '799987811307',
-	appId: readEnv('NEXT_PUBLIC_FIREBASE_APP_ID') ?? '1:799987811307:web:65da36f51e4f13d19bcfae',
-	measurementId: readEnv('NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID') ?? 'G-NNQSJWT4K9',
+	apiKey: requireEnv('NEXT_PUBLIC_FIREBASE_API_KEY'),
+	authDomain: requireEnv('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'),
+	projectId: requireEnv('NEXT_PUBLIC_FIREBASE_PROJECT_ID'),
+	storageBucket: requireEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'),
+	messagingSenderId: requireEnv('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
+	appId: requireEnv('NEXT_PUBLIC_FIREBASE_APP_ID'),
+	measurementId: readEnv('NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID')?.trim() || undefined,
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);

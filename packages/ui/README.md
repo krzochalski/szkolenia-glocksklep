@@ -156,6 +156,8 @@ Pass **slots** (`ReactNode`) for images and actions so the app can use Next `Lin
 | `FaqSection` | `items: { title, content }[]`, `title?`, `headingVariant?: 'h1' \| 'h3'` | Accordion FAQ. |
 | `EmptyState` | `title`, `action?` | Loading / not-found page body (no app chrome). |
 | `PageColumn` | see [Page column](#page-column) | Page body. `xl` width, `py: 4`, flex column, `gap: 4`. |
+| `PathConnector` | `sx?` | Centered ink stem + orange chevron between stacked path levels. |
+| `PathStepCard` | `index?`, `title`, `meta?`, `action?`, `sx?` | Progression step tile. App passes links / CTAs as slots. |
 | `ImageGallery` | `images`, `alt`, `objectFit?`, `mixBlendMultiply?`, `aspectRatio?` | Main image + thumbs. Uses `<img>`, not Next Image. |
 | `MobileStickyActionBar` | `summary?`, `action` | Fixed mobile CTA. Pair with `mobileStickyContentPb` on page padding. |
 | `SelectableCard` | `onClick`, `image`, `title`, `description?`, `meta?` | Clickable option tile (configurator). |
@@ -208,6 +210,45 @@ Every MUI `Container` prop is accepted.
 | `component` | `'div'` | Set `'main'` when this column is the page landmark. |
 | `children` | — | Stacked sections. |
 
+### Path progression
+
+Presentational building blocks for a recommended learning / product path. Routing and course data stay in the app.
+
+```tsx
+import { Button, MonoText, PathConnector, PathStepCard } from '@stayfrosty/ui';
+
+<PathStepCard
+	index='01'
+	title={<a href='/courses/basic'>Pistol Basic</a>}
+	meta={<MonoText sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>6h</MonoText>}
+	action={
+		<Button href='/courses/basic' variant='outlined' size='small'>
+			Details
+		</Button>
+	}
+/>
+<PathConnector />
+<PathStepCard index='02' title='Next course' />
+```
+
+#### `PathConnector`
+
+| Prop | Default | Notes |
+|------|---------|---|
+| `sx` | — | Outer wrapper. Always full-width, flex-centered. |
+
+#### `PathStepCard`
+
+| Prop | Default | Notes |
+|------|---------|---|
+| `index` | — | Orange mono badge (e.g. `"01"`). Omit to hide. |
+| `title` | — | Usually a link or heading node. |
+| `meta` | — | Secondary line (duration, level). |
+| `action` | — | CTA slot at the bottom of the card. |
+| `sx` | — | Hard-shadow override. |
+
+Hover lifts the card (pointer devices only); active presses it in — same motion language as `SelectableCard`.
+
 ### Site header
 
 Presentational chrome for any app on this theme. Routing, active state, open/close, and cart count stay in the app. Both components take the same `SiteNavItem` list and an optional `linkComponent` (`'a'` by default, or `next/link`).
@@ -217,6 +258,7 @@ import { SiteHeader, SiteNavDrawer } from '@stayfrosty/ui';
 
 <SiteHeader
 	brand='ACME'
+	brandSublabel='DOCS'
 	brandHref='/'
 	linkComponent={Link}
 	navLabel='Primary'
@@ -260,6 +302,7 @@ Omit `cartHref` when the app has no cart. Omit `onOpenMenu` when there is no dra
 |------|---------|---|
 | `brand` | — | String uses the orange Space Grotesk wordmark. Any other node renders as-is. |
 | `brandHref` | — | Wraps `brand` in `linkComponent`. |
+| `brandSublabel` | — | Optional small grey mono label beside the wordmark. Omit to hide. |
 | `links` | — | Desktop row. Hidden below `desktopFrom`. |
 | `linkComponent` | `'a'` | Router link. Must accept `href`. |
 | `navLabel` | string `brand`, else `"Primary"` | Accessible name of the desktop `<nav>`. |

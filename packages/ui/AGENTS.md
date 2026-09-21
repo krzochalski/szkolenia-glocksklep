@@ -106,6 +106,8 @@ Search the app for these shapes. Prefer a composite over a one-off `sx` copy.
 | FAQ Q/A list or custom accordion | `FaqSection` (`items: { title, content }[]`) |
 | Centered “Ładowanie…” / “nie znaleziony” | `EmptyState` (app still wraps `PageWrapper`) |
 | `Container maxWidth='xl'` + `py: 4` + flex column + `gap: 4` | `PageColumn` — usage in [README](./README.md#page-column). Pass extra `sx` only (`pb`, `component="main"`). |
+| Centered stem + orange chevron between path levels | `PathConnector` |
+| Progression step tile (index badge + title/meta/action slots) | `PathStepCard` — app maps course → slots |
 | Netto / brutto segment control | `PriceToggle` — keep money math in the app |
 | `Box component='button'` option tile with hard shadow | `SelectableCard` |
 | Dialog paper with ink border + offset shadow | `HardShadowDialog` + `hardShadowDialog*Sx` |
