@@ -1,0 +1,16 @@
+---
+description: Stayfrosty UI — import from @ui, sx only, no MUI/Emotion in app source.
+globs: "**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Stayfrosty UI
+
+Full docs: `packages/ui/README.md` (humans) and `packages/ui/AGENTS.md` (migrate existing UI).
+
+- Import primitives and composites from `@ui`. Icons from `@ui/icons`. (Package name remains `@stayfrosty/ui`; Stayfrosty maps it to `@ui`.)
+- Do not import `@mui/material`, `@mui/material/styles`, `@mui/icons-material`, `@emotion/styled`, or `@emotion/react` in app code. Next may import `@mui/material-nextjs` for the App Router cache only.
+- Style with `sx` and theme tokens (`ink`, `surface`, `primary`). No `styled()`, no `.styled.ts`.
+- Repeated brand look → composites (`HardShadow`, `CatalogCard`, `HeroCard`, `FaqSection`, `EmptyState`, `PriceToggle`, `FeatureTile`, `SelectableCard`, `HardShadowDialog`, `ConfirmDialog`). Domain adapters stay in the app.
+- Wrap the tree with `UiProvider`. Tests that render UI do the same. Load Space Grotesk + Space Mono.
+- Missing icon: add a named re-export in `packages/ui/src/icons.ts`, then import it from `@ui/icons`.

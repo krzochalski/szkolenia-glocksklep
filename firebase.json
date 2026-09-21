@@ -1,0 +1,45 @@
+{
+	"firestore": {
+		"rules": "firestore.rules",
+		"indexes": "firestore.indexes.json"
+	},
+	"functions": [
+		{
+			"source": "functions",
+			"codebase": "default",
+			"ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
+			"predeploy": ["pnpm --dir \"$RESOURCE_DIR\" run build"]
+		}
+	],
+	"apphosting": {
+		"backendId": "szkolenia",
+		"rootDir": "/",
+		"ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "functions"]
+	},
+	"auth": {
+		"providers": {
+			"emailPassword": true,
+			"googleSignIn": {
+				"oAuthBrandDisplayName": "Szkolenia Glocksklep",
+				"supportEmail": "szkolenia@glocksklep.pl",
+				"authorizedRedirectUris": [
+					"https://szkolenia.glocksklep.pl",
+					"https://szkolenia.glocksklep.pl/__/auth/handler",
+					"https://szkolenia-glocksklep.firebaseapp.com",
+					"https://szkolenia-glocksklep.firebaseapp.com/__/auth/handler",
+					"http://localhost",
+					"http://127.0.0.1"
+				]
+			}
+		}
+	},
+	"emulators": {
+		"auth": { "port": 9709 },
+		"functions": { "port": 9711 },
+		"firestore": { "port": 9710 },
+		"ui": { "enabled": true, "port": 9700 },
+		"hub": { "port": 9701 },
+		"logging": { "port": 9702 },
+		"singleProjectMode": true
+	}
+}

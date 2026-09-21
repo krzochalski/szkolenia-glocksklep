@@ -1,0 +1,23 @@
+---
+description: "MUI (Material-UI) best practices, styling guidelines, and theming conventions."
+globs: "**/*.{js,jsx,ts,tsx}"
+---
+
+# Material-UI (MUI) Guidelines
+
+Full docs: `packages/ui/README.md`. **Migrate old UI:** `packages/ui/AGENTS.md`.
+
+## 1. Styling Strategies
+- **App UI:** Import primitives and composites from `@ui`. Icons from `@ui/icons`.
+- **Reusable look:** DS composites (`HardShadow`, `CatalogCard`, …) or theme `components` overrides.
+- **One-off Styles:** Use the `sx` prop. Do not use `styled()` or `@emotion/styled`.
+- **Theming:** Do not hardcode colors, spacing, or typography. Reference the theme using `theme.palette`, `theme.spacing`, etc., via the `sx` prop.
+
+## 2. Best Practices & Anti-patterns
+- **Deprecated APIs:** Do not use `@mui/styles` or the `makeStyles`/`withStyles` functions.
+- **Icon Imports:** Import icons from `@ui/icons`. Do not import `@mui/icons-material` in app code.
+- **Typography:** Ensure correct semantic HTML mappings are applied to Typography components (e.g., `<Typography variant="h1" component="h2">` when visually an H1 but semantically an H2).
+
+## 3. Component Composition
+- **Polymorphism:** Use the `component` prop (e.g., `<Button component={Link} to="/home">`) to integrate routing libraries cleanly without losing MUI styling.
+- **Overrides:** Use the `slotProps` or `slots` API (for MUI v5/v6) when deeply customizing child elements of complex components like DataGrid or Autocomplete.

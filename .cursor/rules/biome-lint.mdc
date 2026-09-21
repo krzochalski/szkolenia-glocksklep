@@ -1,0 +1,38 @@
+---
+description: Run Biome, typecheck, and tests at end of every task (also enforced by stop hook)
+alwaysApply: true
+---
+
+# Verification (Biome + typecheck + tests)
+
+Every time you complete a task, make changes, or before finishing your turn, run verification so no lint, type, or test regressions ship.
+
+Project stop hook (`.cursor/hooks.json` → `.cursor/hooks/verify.sh`) runs the same suite after each agent turn and auto-followups on failure.
+
+## Commands
+
+Source NVM when shell may lack Node on PATH:
+
+```bash
+. "$HOME/.nvm/nvm.sh" && pnpm verify
+```
+
+Or stepwise:
+
+```bash
+. "$HOME/.nvm/nvm.sh"
+pnpm lint        # biome
+pnpm typecheck   # tsc --noEmit
+pnpm test:unit   # vitest (no biome re-run)
+```
+
+On Windows PowerShell (Node already on PATH):
+
+```powershell
+pnpm verify
+```
+
+## Actions
+
+- If lint, typecheck, or tests fail — fix immediately.
+- Format / auto-fix lint: `pnpm exec biome check --write <file>` or `pnpm exec biome format --write <file>`.

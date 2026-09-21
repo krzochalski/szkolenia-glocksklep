@@ -1,0 +1,21 @@
+---
+description: Do not use raw MUI/Emotion in app source. Stayfrosty UI is the design system.
+globs: "**/*.{js,jsx,ts,tsx}"
+---
+
+# Material-UI in this repo
+
+Do **not** follow generic MUI starter patterns (`createTheme` in the app, `styled()`, `@mui/base`, `.styled.ts`).
+
+This app uses **`@stayfrosty/ui`** via the `@ui` alias.
+
+| Need | Where |
+|------|--------|
+| Tokens, setup, composites | `packages/ui/README.md` |
+| Migrate existing MUI/Emotion UI | `packages/ui/AGENTS.md` |
+| Cursor rule | `.cursor/rules/stayfrosty-ui.mdc` |
+
+- Import from `@ui` and `@ui/icons`.
+- Style with `sx`. No `styled()`, no `@emotion/styled` in app code.
+- Theme lives in `packages/ui/src/theme.ts`. Wrap with `UiProvider`.
+- Next App Router: `@mui/material-nextjs` cache is the only allowed `@mui/*` import in app source.

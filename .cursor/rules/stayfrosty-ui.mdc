@@ -1,0 +1,14 @@
+---
+description: Stayfrosty UI — @ui only, sx, no styled/MUI in app source. See packages/ui/AGENTS.md to migrate.
+globs: "**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Stayfrosty UI
+
+Read `packages/ui/README.md` and `packages/ui/AGENTS.md` before changing UI.
+
+- Import from `@ui` and `@ui/icons`. Never `@mui/material`, `@mui/icons-material`, `@emotion/styled`, or `@emotion/react` in `src/`.
+- `sx` + theme tokens only. No `styled()`, no `.styled.ts`.
+- Composites for brand look; app keeps routing, data, and domain adapters.
+- `UiProvider` around the tree and around UI tests.

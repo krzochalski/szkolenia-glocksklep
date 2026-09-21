@@ -1,0 +1,113 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"includes": [
+			"**",
+			"!dist",
+			"!.next",
+			"!node_modules",
+			"!build",
+			"!coverage",
+			"!pnpm-lock.yaml",
+			"!pnpm-workspace.yaml",
+			"!functions",
+			"!scripts"
+		]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineWidth": 100,
+		"lineEnding": "lf"
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noConsole": "warn"
+			},
+			"style": {
+				"useImportType": "error",
+				"noNonNullAssertion": "warn",
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"paths": {
+							"@mui/material": "Import from @ui instead.",
+							"@mui/material/styles": "Import from @ui instead.",
+							"@emotion/styled": "Use the sx prop on @ui components.",
+							"@emotion/react": "Use sx @keyframes, not Emotion keyframes."
+						},
+						"patterns": [
+							{
+								"group": ["@mui/icons-material", "@mui/icons-material/**"],
+								"message": "Import from @ui/icons instead."
+							}
+						]
+					}
+				}
+			},
+			"complexity": {
+				"noUselessFragments": "warn",
+				"noForEach": "off"
+			},
+			"a11y": {
+				"noLabelWithoutControl": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"jsxQuoteStyle": "single",
+			"trailingCommas": "es5",
+			"semicolons": "always",
+			"arrowParentheses": "always"
+		}
+	},
+	"css": {
+		"parser": {
+			"cssModules": true,
+			"tailwindDirectives": true
+		},
+		"linter": {
+			"enabled": false
+		}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"packages/ui/src/primitives.ts",
+				"packages/ui/src/icons.ts",
+				"packages/ui/src/theme.ts"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": "off"
+					}
+				}
+			}
+		}
+	]
+}

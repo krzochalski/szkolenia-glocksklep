@@ -1,0 +1,8 @@
+'use client';
+
+import { AdminShell } from '@components';
+import type { ReactNode } from 'react';
+
+export default function AdminLayout({ children }: { readonly children: ReactNode }) {
+	return <AdminShell>{children}</AdminShell>;
+}

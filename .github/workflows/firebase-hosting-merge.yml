@@ -1,0 +1,34 @@
+# Deploy App Hosting + Functions + Firestore rules on merge to master
+name: Deploy to Firebase on merge
+on:
+  push:
+    branches:
+      - master
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.4.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            functions/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir functions install --frozen-lockfile
+      - run: pnpm --dir functions run build
+      - run: pnpm run build
+      - name: Write Firebase service account
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SZKOLENIA_GLOCKSKLEP }}' > "${RUNNER_TEMP}/firebase-sa.json"
+      - name: Deploy Firebase
+        run: npx -y firebase-tools@latest deploy --only apphosting,functions,firestore --project szkolenia-glocksklep
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
