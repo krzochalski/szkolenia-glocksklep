@@ -16,7 +16,6 @@ export type StaticSeoPage =
 	| 'courses'
 	| 'faq'
 	| 'about'
-	| 'contact'
 	| 'regulamin'
 	| 'login'
 	| 'register'
@@ -61,11 +60,6 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 		title: 'O nas | Szkolenia Glocksklep',
 		description: 'Instruktorzy i filozofia szkoleń strzeleckich Glocksklep.',
 		path: '/o-nas',
-	},
-	contact: {
-		title: 'Kontakt | Szkolenia Glocksklep',
-		description: 'Skontaktuj się ze Szkoleniami Glocksklep — pytania o terminy i zapisy.',
-		path: '/kontakt',
 	},
 	regulamin: {
 		title: 'Regulamin | Szkolenia Glocksklep',
@@ -116,12 +110,12 @@ export const SITEMAP_STATIC_PATHS: readonly string[] = [
 	'/szkolenia',
 	'/faq',
 	'/o-nas',
-	'/kontakt',
 	'/regulamin',
 ];
 
 export const Links = {
 	shop: 'https://glocksklep.pl',
+	about: 'https://glocksklep.pl/o-mnie',
 	instagram: 'https://www.instagram.com/',
 	youtube: 'https://www.youtube.com/',
 };

@@ -11,4 +11,4 @@ alwaysApply: true
 - Admin gate: `admins/{uid}` document exists — never client-writable.
 - Clients must **not** update `courses.dates`. Use `/api/enroll` and `/api/unenroll` (Bearer ID token).
 - Admin CRUD of courses/dates/CMS uses Firestore with admin rules.
-- Emulators: Firestore + Functions local; document Auth target in README.
+- Localhost uses the real Firebase project (Auth, Firestore, Cloud Functions) — no emulators.

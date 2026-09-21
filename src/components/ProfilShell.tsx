@@ -3,10 +3,10 @@
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { signOut } from '@services/auth';
-import { Box, Button, Link, Stack, Typography } from '@ui';
+import { Box, Button, ConfirmDialog, Link, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 const NAV = [
 	{ label: 'Profil', href: Paths.profil, exact: true },
@@ -23,10 +23,12 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	const user = useAuthUser();
 	const pathname = usePathname();
 	const router = useRouter();
+	const [logoutOpen, setLogoutOpen] = useState(false);
+	const [loggingOut, setLoggingOut] = useState(false);
 
 	if (!user) {
 		return (
-			<Box sx={{ p: 4, textAlign: 'center' }}>
+			<Box sx={{ textAlign: 'center' }}>
 				<Typography sx={{ mb: 2 }}>Zaloguj się, aby zobaczyć profil.</Typography>
 				<Button component={NextLink} href={Paths.login} variant='contained'>
 					Zaloguj
@@ -36,7 +38,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	}
 
 	return (
-		<Box sx={{ display: 'flex', minHeight: '100vh' }}>
+		<Box sx={{ display: 'flex', gap: { md: 3 }, alignItems: 'flex-start' }}>
 			<Box
 				component='aside'
 				sx={{
@@ -44,7 +46,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 					flexShrink: 0,
 					borderRight: 1,
 					borderColor: 'divider',
-					p: 2,
+					pr: 2,
 					display: { xs: 'none', md: 'flex' },
 					flexDirection: 'column',
 					gap: 1,
@@ -82,19 +84,31 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 						);
 					})}
 				</Stack>
-				<Button
-					variant='contained'
-					onClick={async () => {
-						await signOut();
-						router.push(Paths.home);
-					}}
-				>
+				<Button variant='contained' onClick={() => setLogoutOpen(true)}>
 					Wyloguj
 				</Button>
 			</Box>
-			<Box component='main' sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
-				{children}
-			</Box>
+			<Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+			<ConfirmDialog
+				open={logoutOpen}
+				title='Potwierdź wylogowanie'
+				cancelLabel='Anuluj'
+				confirmLabel='Wyloguj'
+				confirmColor='primary'
+				loading={loggingOut}
+				onCancel={() => setLogoutOpen(false)}
+				onConfirm={() => {
+					setLoggingOut(true);
+					void signOut()
+						.then(() => {
+							setLogoutOpen(false);
+							router.push(Paths.home);
+						})
+						.finally(() => setLoggingOut(false));
+				}}
+			>
+				Czy na pewno chcesz się wylogować?
+			</ConfirmDialog>
 		</Box>
 	);
 };

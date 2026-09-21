@@ -31,6 +31,8 @@ const DatesInner = ({ courseId }: Props) => {
 	});
 	const [toDelete, setToDelete] = useState<CourseClass | null>(null);
 	const [toCancel, setToCancel] = useState<CourseClass | null>(null);
+	const [toClone, setToClone] = useState<CourseClass | null>(null);
+	const [toUncancel, setToUncancel] = useState<CourseClass | null>(null);
 
 	const invalidate = async () => {
 		await queryClient.invalidateQueries({ queryKey: ['course', courseId] });
@@ -38,11 +40,14 @@ const DatesInner = ({ courseId }: Props) => {
 	};
 
 	const clone = useMutation({
-		mutationFn: (date: CourseClass) => {
-			if (!course) throw new Error('Brak kursu');
-			return cloneCourseDate(course, date);
+		mutationFn: () => {
+			if (!course || !toClone) throw new Error('Brak kursu');
+			return cloneCourseDate(course, toClone);
 		},
-		onSuccess: invalidate,
+		onSuccess: async () => {
+			setToClone(null);
+			await invalidate();
+		},
 	});
 
 	const cancel = useMutation({
@@ -57,8 +62,14 @@ const DatesInner = ({ courseId }: Props) => {
 	});
 
 	const uncancel = useMutation({
-		mutationFn: (dateId: string) => setCourseDateCanceled(courseId, dateId, false),
-		onSuccess: invalidate,
+		mutationFn: () => {
+			if (!toUncancel) throw new Error('Brak terminu');
+			return setCourseDateCanceled(courseId, toUncancel.id, false);
+		},
+		onSuccess: async () => {
+			setToUncancel(null);
+			await invalidate();
+		},
 	});
 
 	const remove = useMutation({
@@ -115,9 +126,9 @@ const DatesInner = ({ courseId }: Props) => {
 						dates={futureDates}
 						courseId={courseId}
 						pending={pending}
-						onClone={(d) => clone.mutate(d)}
+						onClone={setToClone}
 						onCancel={setToCancel}
-						onUncancel={(d) => uncancel.mutate(d.id)}
+						onUncancel={setToUncancel}
 						onDelete={setToDelete}
 					/>
 					<DateGroup
@@ -125,13 +136,43 @@ const DatesInner = ({ courseId }: Props) => {
 						dates={pastDates}
 						courseId={courseId}
 						pending={pending}
-						onClone={(d) => clone.mutate(d)}
+						onClone={setToClone}
 						onCancel={setToCancel}
-						onUncancel={(d) => uncancel.mutate(d.id)}
+						onUncancel={setToUncancel}
 						onDelete={setToDelete}
 					/>
 				</Stack>
 			)}
+
+			<ConfirmDialog
+				open={Boolean(toClone)}
+				title='Potwierdź klonowanie terminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Klonuj'
+				confirmColor='primary'
+				loading={clone.isPending}
+				onCancel={() => setToClone(null)}
+				onConfirm={() => clone.mutate()}
+			>
+				<Typography>
+					Czy na pewno chcesz sklonować termin <strong>{toClone?.date}</strong>?
+				</Typography>
+			</ConfirmDialog>
+
+			<ConfirmDialog
+				open={Boolean(toUncancel)}
+				title='Potwierdź przywrócenie terminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Przywróć'
+				confirmColor='primary'
+				loading={uncancel.isPending}
+				onCancel={() => setToUncancel(null)}
+				onConfirm={() => uncancel.mutate()}
+			>
+				<Typography>
+					Czy na pewno chcesz przywrócić termin <strong>{toUncancel?.date}</strong>?
+				</Typography>
+			</ConfirmDialog>
 
 			<ConfirmDialog
 				open={Boolean(toCancel)}

@@ -24,10 +24,11 @@ export const SiteHeader = () => {
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);
 
-	const links = navigationItems.map(({ label, path }) => ({
+	const links = navigationItems.map(({ label, path, external }) => ({
 		href: path,
 		label,
-		active: isCurrentPath(pathname, path),
+		active: !external && isCurrentPath(pathname, path),
+		external,
 	}));
 
 	return (

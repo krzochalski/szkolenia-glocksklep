@@ -5,9 +5,10 @@ import { useAuthUser } from '@hooks';
 import { getCourseBySlug, unenrollFromCourse } from '@services/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import { fillPath } from '@/utils/paths';
-import { Box, Button, CircularProgress, Link, Stack, Typography } from '@ui';
+import { Box, Button, CircularProgress, ConfirmDialog, Link, Stack, Typography } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
+import { useState } from 'react';
 
 type Props = {
 	readonly slug: string;
@@ -17,6 +18,7 @@ type Props = {
 export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
+	const [confirmOpen, setConfirmOpen] = useState(false);
 
 	const { data: course, isLoading } = useQuery({
 		queryKey: ['course', slug],
@@ -37,6 +39,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 			await unenrollFromCourse(course.id, dateId, user.uid);
 		},
 		onSuccess: async () => {
+			setConfirmOpen(false);
 			await queryClient.invalidateQueries({ queryKey: ['courses'] });
 			await queryClient.invalidateQueries({ queryKey: ['course', slug] });
 		},
@@ -91,15 +94,28 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 			</Stack>
 
 			{participant ? (
-				<Button
-					sx={{ mt: 3 }}
-					variant='outlined'
-					color='error'
-					disabled={unenroll.isPending}
-					onClick={() => unenroll.mutate()}
-				>
-					Wypisz się
-				</Button>
+				<>
+					<Button
+						sx={{ mt: 3 }}
+						variant='outlined'
+						color='error'
+						disabled={unenroll.isPending}
+						onClick={() => setConfirmOpen(true)}
+					>
+						Wypisz się
+					</Button>
+					<ConfirmDialog
+						open={confirmOpen}
+						title='Potwierdź wypisanie'
+						cancelLabel='Anuluj'
+						confirmLabel='Wypisz się'
+						loading={unenroll.isPending}
+						onCancel={() => setConfirmOpen(false)}
+						onConfirm={() => unenroll.mutate()}
+					>
+						{`Czy na pewno chcesz wypisać się z „${course.name}” (${date.date})?`}
+					</ConfirmDialog>
+				</>
 			) : (
 				<Typography sx={{ mt: 2 }} color='text.secondary'>
 					Nie jesteś zapisany na ten termin.

@@ -8,9 +8,7 @@
 		"node": "22"
 	},
 	"scripts": {
-		"dev": "concurrently -k -n next,emu -c cyan,magenta \"biome lint . && next dev -p 3417\" \"node scripts/run-emulators.mjs\"",
-		"dev:next": "biome lint . && next dev -p 3417",
-		"emulators": "node scripts/run-emulators.mjs",
+		"dev": "biome lint . && next dev -p 3417",
 		"build": "biome lint . && next build",
 		"lint": "biome lint .",
 		"typecheck": "tsc --noEmit",
@@ -65,7 +63,6 @@
 		"@types/react": "19.3.0",
 		"@types/react-dom": "19.3.0",
 		"@types/uuid": "^10.0.0",
-		"concurrently": "^10.0.5",
 		"fast-check": "^4.10.0",
 		"jsdom": "^30.0.1",
 		"tsx": "4.23.13",

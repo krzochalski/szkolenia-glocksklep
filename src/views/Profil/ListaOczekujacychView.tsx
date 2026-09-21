@@ -6,14 +6,17 @@ import {
 	getUserWaitingListEntries,
 	removeFromWaitingList,
 } from '@services/courseWaitingList';
+import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
 import { fillPath } from '@/utils/paths';
-import { Box, Button, CircularProgress, Link, Paper, Stack, Typography } from '@ui';
+import { Box, Button, CircularProgress, ConfirmDialog, Link, Paper, Stack, Typography } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
+import { useState } from 'react';
 
 export const ListaOczekujacychView = () => {
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
+	const [toRemove, setToRemove] = useState<CourseWaitingListEntry | null>(null);
 
 	const uid = user?.uid;
 
@@ -32,6 +35,7 @@ export const ListaOczekujacychView = () => {
 			return removeFromWaitingList(courseId, uid);
 		},
 		onSuccess: async () => {
+			setToRemove(null);
 			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
 		},
 	});
@@ -69,7 +73,7 @@ export const ListaOczekujacychView = () => {
 							variant='outlined'
 							color='error'
 							disabled={remove.isPending}
-							onClick={() => remove.mutate(entry.courseId)}
+							onClick={() => setToRemove(entry)}
 						>
 							Usuń
 						</Button>
@@ -79,6 +83,20 @@ export const ListaOczekujacychView = () => {
 					<Typography color='text.secondary'>Nie jesteś na żadnej liście oczekujących.</Typography>
 				) : null}
 			</Stack>
+
+			<ConfirmDialog
+				open={Boolean(toRemove)}
+				title='Potwierdź usunięcie z listy'
+				cancelLabel='Anuluj'
+				confirmLabel='Usuń'
+				loading={remove.isPending}
+				onCancel={() => setToRemove(null)}
+				onConfirm={() => {
+					if (toRemove) remove.mutate(toRemove.courseId);
+				}}
+			>
+				{`Czy na pewno chcesz usunąć „${toRemove?.courseName ?? ''}” z listy oczekujących?`}
+			</ConfirmDialog>
 		</Box>
 	);
 };

@@ -18,27 +18,12 @@ If `packages/ui` is missing, copy from stayfrosty or: `git submodule update --in
 cp .env.example .env.local
 pnpm install
 pnpm --dir functions install
-pnpm dev:next
+pnpm dev
 ```
 
 Dev server: [http://localhost:3417](http://localhost:3417)
 
-Emulators (Firestore + Functions):
-
-```bash
-pnpm emulators
-# or full: pnpm dev
-```
-
-Emulator ports (avoid clash with stayfrosty 96xx): UI `9700`, hub `9701`, Firestore `9710`, Functions `9711`.
-
-Bootstrap first admin (when `admins` is empty):
-
-```bash
-curl -X POST http://127.0.0.1:9711/szkolenia-glocksklep/europe-west1/api/api/bootstrap \
-  -H 'Content-Type: application/json' \
-  -d '{"adminEmail":"admin@example.com","adminPassword":"changeme123"}'
-```
+Localhost uses the live Firebase project (Auth, Firestore, Cloud Functions) — no emulators.
 
 ## Auth Console checklist
 

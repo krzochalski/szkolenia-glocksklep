@@ -1,11 +1,9 @@
 'use client';
 
-import { Paths } from '@constants/paths';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Grid, Link, Typography } from '@ui';
-import NextLink from 'next/link';
+import { Grid, Typography } from '@ui';
 import { useMemo } from 'react';
 import { CourseCard } from './CourseCard';
 
@@ -33,25 +31,6 @@ export const SzkoleniaListView = () => {
 
 	return (
 		<>
-			<Box>
-				<Link
-					component={NextLink}
-					href={Paths.home}
-					sx={{
-						fontSize: '0.75rem',
-						fontWeight: 700,
-						fontFamily: '"Space Mono", monospace',
-						letterSpacing: '0.15em',
-						textTransform: 'uppercase',
-						color: 'text.secondary',
-						textDecoration: 'none',
-						'&:hover': { color: 'primary.main' },
-					}}
-				>
-					← Główna
-				</Link>
-			</Box>
-
 			<Typography
 				variant='h1'
 				sx={{

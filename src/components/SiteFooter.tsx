@@ -34,9 +34,6 @@ export const SiteFooter = () => (
 				<Link component={NextLink} href={Paths.faq} underline='hover' color='text.secondary'>
 					FAQ
 				</Link>
-				<Link component={NextLink} href={Paths.kontakt} underline='hover' color='text.secondary'>
-					Kontakt
-				</Link>
 			</Stack>
 		</Stack>
 	</Box>

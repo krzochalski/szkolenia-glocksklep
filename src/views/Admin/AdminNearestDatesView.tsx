@@ -31,14 +31,22 @@ const NearestInner = () => {
 	});
 	const [toDelete, setToDelete] = useState<DateTarget | null>(null);
 	const [toCancel, setToCancel] = useState<DateTarget | null>(null);
+	const [toClone, setToClone] = useState<DateTarget | null>(null);
+	const [toUncancel, setToUncancel] = useState<DateTarget | null>(null);
 
 	const invalidate = async () => {
 		await queryClient.invalidateQueries({ queryKey: ['courses'] });
 	};
 
 	const clone = useMutation({
-		mutationFn: ({ course, date }: DateTarget) => cloneCourseDate(course, date),
-		onSuccess: invalidate,
+		mutationFn: () => {
+			if (!toClone) throw new Error('Brak terminu');
+			return cloneCourseDate(toClone.course, toClone.date);
+		},
+		onSuccess: async () => {
+			setToClone(null);
+			await invalidate();
+		},
 	});
 
 	const cancel = useMutation({
@@ -53,9 +61,14 @@ const NearestInner = () => {
 	});
 
 	const uncancel = useMutation({
-		mutationFn: ({ course, date }: DateTarget) =>
-			setCourseDateCanceled(course.id, date.id, false),
-		onSuccess: invalidate,
+		mutationFn: () => {
+			if (!toUncancel) throw new Error('Brak terminu');
+			return setCourseDateCanceled(toUncancel.course.id, toUncancel.date.id, false);
+		},
+		onSuccess: async () => {
+			setToUncancel(null);
+			await invalidate();
+		},
 	});
 
 	const remove = useMutation({
@@ -110,9 +123,9 @@ const NearestInner = () => {
 									dateId: date.id,
 								})}
 								pending={pending}
-								onClone={() => clone.mutate({ course, date })}
+								onClone={() => setToClone({ course, date })}
 								onCancel={() => setToCancel({ course, date })}
-								onUncancel={() => uncancel.mutate({ course, date })}
+								onUncancel={() => setToUncancel({ course, date })}
 								onDelete={() => setToDelete({ course, date })}
 							/>
 						</Stack>
@@ -122,6 +135,37 @@ const NearestInner = () => {
 					<Typography color='text.secondary'>Brak nadchodzących terminów.</Typography>
 				) : null}
 			</Stack>
+
+			<ConfirmDialog
+				open={Boolean(toClone)}
+				title='Potwierdź klonowanie terminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Klonuj'
+				confirmColor='primary'
+				loading={clone.isPending}
+				onCancel={() => setToClone(null)}
+				onConfirm={() => clone.mutate()}
+			>
+				<Typography>
+					Czy na pewno chcesz sklonować termin <strong>{toClone?.date.date}</strong> (
+					{toClone?.course.name})?
+				</Typography>
+			</ConfirmDialog>
+
+			<ConfirmDialog
+				open={Boolean(toUncancel)}
+				title='Potwierdź przywrócenie terminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Przywróć'
+				confirmColor='primary'
+				loading={uncancel.isPending}
+				onCancel={() => setToUncancel(null)}
+				onConfirm={() => uncancel.mutate()}
+			>
+				<Typography>
+					Czy na pewno chcesz przywrócić termin <strong>{toUncancel?.date.date}</strong>?
+				</Typography>
+			</ConfirmDialog>
 
 			<ConfirmDialog
 				open={Boolean(toCancel)}

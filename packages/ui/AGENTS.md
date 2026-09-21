@@ -109,6 +109,7 @@ Search the app for these shapes. Prefer a composite over a one-off `sx` copy.
 | Netto / brutto segment control | `PriceToggle` — keep money math in the app |
 | `Box component='button'` option tile with hard shadow | `SelectableCard` |
 | Dialog paper with ink border + offset shadow | `HardShadowDialog` + `hardShadowDialog*Sx` |
+| Confirm / cancel before a consequential action | `ConfirmDialog` |
 | Thumb gallery | `ImageGallery` (`string[]` srcs) |
 | Fixed bottom mobile CTA | `MobileStickyActionBar` + `mobileStickyContentPb` |
 | Radio/checkbox rows with ink border | `RadioGroup` / `FormGroup` + `formOptionGroupSx` |

@@ -7,6 +7,7 @@ import { brand } from '../theme';
 import {
 	type SiteNavItem,
 	type SiteNavLinkComponent,
+	SiteNavItemContent,
 	siteNavItemKey,
 	siteNavLinkProps,
 } from './siteNav';
@@ -187,7 +188,7 @@ export const SiteNavDrawer = ({
 								},
 							}}
 						>
-							{link.label}
+							<SiteNavItemContent {...link} />
 						</Box>
 					))}
 				</Box>

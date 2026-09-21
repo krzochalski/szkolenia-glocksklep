@@ -6,6 +6,7 @@ import { AppBar, Badge, Box, IconButton, Toolbar, Typography } from '../primitiv
 import {
 	type SiteNavItem,
 	type SiteNavLinkComponent,
+	SiteNavItemContent,
 	siteNavItemKey,
 	siteNavLinkProps,
 } from './siteNav';
@@ -191,7 +192,7 @@ export const SiteHeader = ({
 							{...siteNavLinkProps(link)}
 							sx={linkSx(link.active)}
 						>
-							{link.label}
+							<SiteNavItemContent {...link} />
 						</Box>
 					))}
 					{renderCart()}

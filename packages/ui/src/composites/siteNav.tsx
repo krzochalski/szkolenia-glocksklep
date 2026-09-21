@@ -1,4 +1,6 @@
 import type { ElementType, ReactNode } from 'react';
+import { OpenInNewIcon } from '../icons';
+import { Box } from '../primitives';
 
 /** One destination in `SiteHeader` or `SiteNavDrawer`. Same shape for both. */
 export type SiteNavItem = {
@@ -7,7 +9,7 @@ export type SiteNavItem = {
 	readonly href: string;
 	readonly label: ReactNode;
 	readonly active?: boolean;
-	/** Sets `target="_blank"` and `rel="noreferrer"`. */
+	/** Opens in a new tab and shows an external-link icon. */
 	readonly external?: boolean;
 };
 
@@ -28,3 +30,26 @@ export const siteNavLinkProps = (item: SiteNavItem) => ({
 	rel: item.external ? 'noreferrer' : undefined,
 	'aria-current': item.active ? ('page' as const) : undefined,
 });
+
+/** Label plus optional external-link affordance. */
+export const SiteNavItemContent = ({ label, external }: SiteNavItem) => (
+	<>
+		{label}
+		{external ? (
+			<Box
+				component='span'
+				aria-hidden
+				sx={{
+					display: 'inline-flex',
+					alignItems: 'center',
+					ml: 0.75,
+					opacity: 0.75,
+					verticalAlign: 'middle',
+					lineHeight: 0,
+				}}
+			>
+				<OpenInNewIcon sx={{ fontSize: '0.9em' }} />
+			</Box>
+		) : null}
+	</>
+);

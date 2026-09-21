@@ -32,14 +32,5 @@
 				]
 			}
 		}
-	},
-	"emulators": {
-		"auth": { "port": 9709 },
-		"functions": { "port": 9711 },
-		"firestore": { "port": 9710 },
-		"ui": { "enabled": true, "port": 9700 },
-		"hub": { "port": 9701 },
-		"logging": { "port": 9702 },
-		"singleProjectMode": true
 	}
 }

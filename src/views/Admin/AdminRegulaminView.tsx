@@ -6,7 +6,7 @@ import {
 	saveRegulamin,
 	seedRegulaminIfMissing,
 } from '@services/regulamin';
-import { Box, Button, CircularProgress, Stack, TextField, Typography } from '@ui';
+import { Box, Button, CircularProgress, ConfirmDialog, Stack, TextField, Typography } from '@ui';
 import { OpenInNewIcon } from '@ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -36,6 +36,8 @@ const RegulaminInner = () => {
 	const [savedContent, setSavedContent] = useState('');
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
+	const [saveOpen, setSaveOpen] = useState(false);
+	const [resetOpen, setResetOpen] = useState(false);
 
 	useEffect(() => {
 		if (data) {
@@ -88,29 +90,58 @@ const RegulaminInner = () => {
 				<Button
 					variant='contained'
 					disabled={saving || !isDirty}
-					onClick={async () => {
-						setSaving(true);
-						setMessage(null);
-						try {
-							await saveRegulamin(content);
-							setSavedContent(content);
-							setMessage('Zapisano.');
-							await queryClient.invalidateQueries({ queryKey: ['regulamin'] });
-						} finally {
-							setSaving(false);
-						}
-					}}
+					onClick={() => setSaveOpen(true)}
 				>
 					Zapisz
 				</Button>
 				<Button
 					variant='outlined'
-					onClick={() => setContent(DEFAULT_MARKDOWN)}
+					onClick={() => setResetOpen(true)}
 					disabled={saving}
 				>
 					Przywróć domyślny
 				</Button>
 			</Stack>
+
+			<ConfirmDialog
+				open={saveOpen}
+				title='Potwierdź zapis regulaminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Zapisz'
+				confirmColor='primary'
+				loading={saving}
+				onCancel={() => setSaveOpen(false)}
+				onConfirm={() => {
+					setSaving(true);
+					setMessage(null);
+					void saveRegulamin(content)
+						.then(async () => {
+							setSavedContent(content);
+							setMessage('Zapisano.');
+							setSaveOpen(false);
+							await queryClient.invalidateQueries({ queryKey: ['regulamin'] });
+						})
+						.finally(() => setSaving(false));
+				}}
+			>
+				Czy na pewno chcesz opublikować nową treść regulaminu?
+			</ConfirmDialog>
+
+			<ConfirmDialog
+				open={resetOpen}
+				title='Potwierdź przywrócenie domyślnego'
+				cancelLabel='Anuluj'
+				confirmLabel='Przywróć'
+				confirmColor='warning'
+				onCancel={() => setResetOpen(false)}
+				onConfirm={() => {
+					setContent(DEFAULT_MARKDOWN);
+					setResetOpen(false);
+				}}
+			>
+				Czy na pewno chcesz zastąpić bieżącą treść domyślnym szablonem? Zmiany nie zostaną
+				zapisane, dopóki nie klikniesz „Zapisz”.
+			</ConfirmDialog>
 		</Box>
 	);
 };

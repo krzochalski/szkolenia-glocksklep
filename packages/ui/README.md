@@ -251,7 +251,7 @@ Omit `cartHref` when the app has no cart. Omit `onOpenMenu` when there is no dra
 | `href` | — | Passed to `linkComponent`. |
 | `label` | — | String or node. |
 | `active` | `false` | Orange underline in the header, ink bar in the drawer. Sets `aria-current="page"`. |
-| `external` | `false` | `target="_blank"` and `rel="noreferrer"`. |
+| `external` | `false` | `target="_blank"`, `rel="noreferrer"`, and an external-link icon. |
 | `id` | `href` | React key when two items share an `href`. |
 
 #### `SiteHeader`
@@ -325,6 +325,36 @@ import {
 		</Button>
 	</DialogActions>
 </HardShadowDialog>
+```
+
+#### ConfirmDialog
+
+Branded confirm / cancel for consequential user actions (enroll, delete, logout, …). Built on `HardShadowDialog`. Prefer this over a raw dialog or `window.confirm`.
+
+| Prop | Notes |
+|------|--------|
+| `open` | Controlled. |
+| `title` | Dialog title. |
+| `children` | Message body. Strings wrap in `Typography`. |
+| `cancelLabel` / `confirmLabel` | Button copy (app owns locale). |
+| `confirmColor` | Defaults to `error`. Use `primary` / `warning` when the action is not destructive. |
+| `loading` | Disables both buttons, blocks dismiss, shows a spinner on confirm. |
+| `onCancel` / `onConfirm` | Handlers. |
+
+```tsx
+import { ConfirmDialog, Typography } from '@stayfrosty/ui';
+
+<ConfirmDialog
+	open={open}
+	title='Potwierdź wypisanie'
+	cancelLabel='Anuluj'
+	confirmLabel='Wypisz się'
+	loading={isPending}
+	onCancel={() => setOpen(false)}
+	onConfirm={() => unenroll()}
+>
+	Czy na pewno chcesz wypisać się z tego terminu?
+</ConfirmDialog>
 ```
 
 `formOptionGroupSx` styles `RadioGroup` / `FormGroup` option rows (ink border, primary when checked).

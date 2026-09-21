@@ -21,6 +21,12 @@ describe('SiteHeader', () => {
 		expect(screen.getByText('GLOCKACCI')).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'Główna' })).toHaveAttribute('href', '/');
 		expect(screen.getByRole('link', { name: 'Szkolenia' })).toHaveAttribute('href', '/szkolenia');
+		const about = screen.getByRole('link', { name: 'O nas' });
+		expect(about).toHaveAttribute('href', 'https://glocksklep.pl/o-mnie');
+		expect(about).toHaveAttribute('target', '_blank');
+		expect(about).toHaveAttribute('rel', 'noreferrer');
+		expect(about.querySelector('svg')).toBeTruthy();
+		expect(screen.queryByRole('link', { name: 'Kontakt' })).toBeNull();
 		expect(screen.getAllByRole('link', { name: 'Profil' }).length).toBeGreaterThan(0);
 	});
 

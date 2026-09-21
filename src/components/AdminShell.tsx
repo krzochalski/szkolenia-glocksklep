@@ -2,10 +2,10 @@
 
 import { Paths } from '@constants/paths';
 import { signOut } from '@services/auth';
-import { Box, Button, Link, Stack, Typography } from '@ui';
+import { Box, Button, ConfirmDialog, Link, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 
 const NAV = [
 	{ label: 'Najbliższe terminy', href: Paths.adminNearestDates },
@@ -26,6 +26,8 @@ type AdminShellProps = {
 
 export const AdminShell = ({ children }: AdminShellProps) => {
 	const pathname = usePathname();
+	const [logoutOpen, setLogoutOpen] = useState(false);
+	const [loggingOut, setLoggingOut] = useState(false);
 
 	return (
 		<Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -74,19 +76,30 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 				<Button component={NextLink} href={Paths.home} size='small' variant='outlined'>
 					Strona główna
 				</Button>
-				<Button
-					size='small'
-					variant='text'
-					onClick={() => {
-						void signOut();
-					}}
-				>
+				<Button size='small' variant='text' onClick={() => setLogoutOpen(true)}>
 					Wyloguj
 				</Button>
 			</Box>
 			<Box component='main' sx={{ flex: 1, p: { xs: 2, md: 3 }, overflow: 'auto' }}>
 				{children}
 			</Box>
+			<ConfirmDialog
+				open={logoutOpen}
+				title='Potwierdź wylogowanie'
+				cancelLabel='Anuluj'
+				confirmLabel='Wyloguj'
+				confirmColor='primary'
+				loading={loggingOut}
+				onCancel={() => setLogoutOpen(false)}
+				onConfirm={() => {
+					setLoggingOut(true);
+					void signOut()
+						.then(() => setLogoutOpen(false))
+						.finally(() => setLoggingOut(false));
+				}}
+			>
+				Czy na pewno chcesz się wylogować?
+			</ConfirmDialog>
 		</Box>
 	);
 };

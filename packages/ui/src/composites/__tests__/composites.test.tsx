@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import {
 	CatalogCard,
+	ConfirmDialog,
 	FaqSection,
 	PageColumn,
 	PriceToggle,
@@ -70,6 +71,7 @@ describe('SiteHeader', () => {
 		expect(screen.getByRole('link', { name: 'Główna' })).toHaveAttribute('aria-current', 'page');
 		expect(screen.getByRole('link', { name: 'Spusty' })).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'External' })).toHaveAttribute('target', '_blank');
+		expect(screen.getByRole('link', { name: 'External' }).querySelector('svg')).toBeTruthy();
 		expect(screen.getAllByRole('link', { name: 'Koszyk' })).toHaveLength(2);
 	});
 
@@ -126,5 +128,42 @@ describe('FaqSection', () => {
 		wrap(<FaqSection items={[{ title: 'Q1', content: 'A1' }]} title='FAQ' />);
 		expect(screen.getByText('FAQ')).toBeInTheDocument();
 		expect(screen.getByText('Q1')).toBeInTheDocument();
+	});
+});
+
+describe('ConfirmDialog', () => {
+	it('renders title, message, and action buttons', () => {
+		wrap(
+			<ConfirmDialog
+				open
+				title='Potwierdź'
+				cancelLabel='Anuluj'
+				confirmLabel='Usuń'
+				onCancel={() => undefined}
+				onConfirm={() => undefined}
+			>
+				Na pewno?
+			</ConfirmDialog>
+		);
+		expect(screen.getByRole('dialog', { name: 'Potwierdź' })).toBeInTheDocument();
+		expect(screen.getByText('Na pewno?')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Anuluj' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Usuń' })).toBeInTheDocument();
+	});
+
+	it('hides while closed', () => {
+		wrap(
+			<ConfirmDialog
+				open={false}
+				title='Potwierdź'
+				cancelLabel='Anuluj'
+				confirmLabel='Usuń'
+				onCancel={() => undefined}
+				onConfirm={() => undefined}
+			>
+				Na pewno?
+			</ConfirmDialog>
+		);
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 	});
 });

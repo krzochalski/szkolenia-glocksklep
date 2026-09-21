@@ -35,6 +35,5 @@ export const Paths = {
 	proforma: '/profil/proforma/$slug/$dateId',
 	kontoUtworzone: '/konto-utworzone',
 	oNas: '/o-nas',
-	kontakt: '/kontakt',
 	regulamin: '/regulamin',
 };

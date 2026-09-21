@@ -8,9 +8,7 @@ const appBuildId =
 	`local-${Date.now().toString(36)}`;
 
 const functionsApiDestination =
-	process.env.NODE_ENV === 'development'
-		? 'http://127.0.0.1:9711/szkolenia-glocksklep/europe-west1/api/api/:path*'
-		: 'https://europe-west1-szkolenia-glocksklep.cloudfunctions.net/api/api/:path*';
+	'https://europe-west1-szkolenia-glocksklep.cloudfunctions.net/api/api/:path*';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

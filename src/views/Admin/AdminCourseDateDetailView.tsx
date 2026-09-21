@@ -48,8 +48,13 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		queryFn: () => getCourse(courseId),
 	});
 	const [cancelOpen, setCancelOpen] = useState(false);
+	const [restoreOpen, setRestoreOpen] = useState(false);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [paidTarget, setPaidTarget] = useState<Participant | null>(null);
+	const [cashTarget, setCashTarget] = useState<{
+		participant: Participant;
+		paysByCash: boolean;
+	} | null>(null);
 	const [removeTarget, setRemoveTarget] = useState<Participant | null>(null);
 
 	const date = course?.dates?.find((d) => d.id === dateId);
@@ -70,13 +75,17 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	const toggleCash = useMutation({
 		mutationFn: ({ id, paysByCash }: { id: string; paysByCash: boolean }) =>
 			setParticipantPaysByCash(courseId, dateId, id, paysByCash),
-		onSuccess: invalidate,
+		onSuccess: async () => {
+			setCashTarget(null);
+			await invalidate();
+		},
 	});
 
 	const toggleCanceled = useMutation({
 		mutationFn: (canceled: boolean) => setCourseDateCanceled(courseId, dateId, canceled),
 		onSuccess: async () => {
 			setCancelOpen(false);
+			setRestoreOpen(false);
 			await invalidate();
 		},
 	});
@@ -128,7 +137,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						variant='outlined'
 						color='success'
 						disabled={toggleCanceled.isPending}
-						onClick={() => toggleCanceled.mutate(false)}
+						onClick={() => setRestoreOpen(true)}
 					>
 						Przywróć termin
 					</Button>
@@ -185,7 +194,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 								<Switch
 									checked={Boolean(p.paysByCash)}
 									onChange={(_, checked) =>
-										toggleCash.mutate({ id: p.id, paysByCash: checked })
+										setCashTarget({ participant: p, paysByCash: checked })
 									}
 								/>
 							}
@@ -229,6 +238,21 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 			</ConfirmDialog>
 
 			<ConfirmDialog
+				open={restoreOpen}
+				title='Potwierdź przywrócenie terminu'
+				cancelLabel='Anuluj'
+				confirmLabel='Przywróć'
+				confirmColor='primary'
+				loading={toggleCanceled.isPending}
+				onCancel={() => setRestoreOpen(false)}
+				onConfirm={() => toggleCanceled.mutate(false)}
+			>
+				<Typography>
+					Czy na pewno chcesz przywrócić termin <strong>{date.date}</strong>?
+				</Typography>
+			</ConfirmDialog>
+
+			<ConfirmDialog
 				open={deleteOpen}
 				title='Potwierdź usunięcie terminu'
 				cancelLabel='Anuluj'
@@ -263,6 +287,30 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					{paidTarget?.paid
 						? `Czy na pewno chcesz oznaczyć płatność uczestnika ${paidTarget.name} jako nieopłaconą?`
 						: `Czy na pewno chcesz potwierdzić płatność uczestnika ${paidTarget?.name}?`}
+				</Typography>
+			</ConfirmDialog>
+
+			<ConfirmDialog
+				open={Boolean(cashTarget)}
+				title='Potwierdź zmianę formy płatności'
+				cancelLabel='Anuluj'
+				confirmLabel='Potwierdź'
+				confirmColor='primary'
+				loading={toggleCash.isPending}
+				onCancel={() => setCashTarget(null)}
+				onConfirm={() => {
+					if (cashTarget) {
+						toggleCash.mutate({
+							id: cashTarget.participant.id,
+							paysByCash: cashTarget.paysByCash,
+						});
+					}
+				}}
+			>
+				<Typography>
+					{cashTarget?.paysByCash
+						? `Czy na pewno chcesz oznaczyć płatność uczestnika ${cashTarget.participant.name} jako gotówkową?`
+						: `Czy na pewno chcesz wyłączyć płatność gotówką dla uczestnika ${cashTarget?.participant.name}?`}
 				</Typography>
 			</ConfirmDialog>
 
