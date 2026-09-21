@@ -4,10 +4,16 @@ export type DevelopmentPathStep = {
 	label?: string;
 };
 
+/** One vertical stage in a track; can hold several courses side by side. */
+export type DevelopmentPathLevel = {
+	id: string;
+	items: DevelopmentPathStep[];
+};
+
 export type DevelopmentPathTrack = {
 	id: string;
 	title: string;
-	steps: DevelopmentPathStep[];
+	levels: DevelopmentPathLevel[];
 };
 
 export type DevelopmentPathDocument = {

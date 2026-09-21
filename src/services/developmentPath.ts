@@ -1,5 +1,6 @@
 import type {
 	DevelopmentPathDocument,
+	DevelopmentPathLevel,
 	DevelopmentPathStep,
 	DevelopmentPathTrack,
 } from '@/types/developmentPath';
@@ -10,6 +11,10 @@ import { db } from './firestore';
 const COLLECTION = 'developmentPath';
 const DOC_ID = 'content';
 
+const step = (id: string, courseSlug: string): DevelopmentPathStep => ({ id, courseSlug });
+
+const level = (id: string, items: DevelopmentPathStep[]): DevelopmentPathLevel => ({ id, items });
+
 export const DEFAULT_DEVELOPMENT_PATH: DevelopmentPathDocument = {
 	intro:
 		'Zalecana kolejność szkoleń — od podstaw pistoletu do ruchu i soft skills zawodów.',
@@ -17,19 +22,19 @@ export const DEFAULT_DEVELOPMENT_PATH: DevelopmentPathDocument = {
 		{
 			id: 'technical',
 			title: 'Umiejętności techniczne',
-			steps: [
-				{ id: 'tech-pbc', courseSlug: 'pistol-basic-course' },
-				{ id: 'tech-tf', courseSlug: 'target-focus' },
-				{ id: 'tech-mf', courseSlug: 'movement-fundamentals' },
-				{ id: 'tech-mfe', courseSlug: 'movement-fundamentals-extended' },
+			levels: [
+				level('tech-l1', [step('tech-pbc', 'pistol-basic-course')]),
+				level('tech-l2', [step('tech-tf', 'target-focus')]),
+				level('tech-l3', [step('tech-mf', 'movement-fundamentals')]),
+				level('tech-l4', [step('tech-mfe', 'movement-fundamentals-extended')]),
 			],
 		},
 		{
 			id: 'soft-skills',
 			title: 'Soft skills',
-			steps: [
-				{ id: 'soft-idpa', courseSlug: 'idpapiro-tips-and-tricks' },
-				{ id: 'soft-ipsc', courseSlug: 'intro-to-ipsc' },
+			levels: [
+				level('soft-l1', [step('soft-idpa', 'idpapiro-tips-and-tricks')]),
+				level('soft-l2', [step('soft-ipsc', 'intro-to-ipsc')]),
 			],
 		},
 	],
@@ -37,12 +42,31 @@ export const DEFAULT_DEVELOPMENT_PATH: DevelopmentPathDocument = {
 
 const normalizeStep = (raw: unknown): DevelopmentPathStep | null => {
 	if (!raw || typeof raw !== 'object') return null;
-	const step = raw as Record<string, unknown>;
-	const courseSlug = typeof step.courseSlug === 'string' ? step.courseSlug.trim() : '';
+	const s = raw as Record<string, unknown>;
+	const courseSlug = typeof s.courseSlug === 'string' ? s.courseSlug.trim() : '';
 	if (!courseSlug) return null;
-	const id = typeof step.id === 'string' && step.id.trim() ? step.id.trim() : uuid();
-	const label = typeof step.label === 'string' ? step.label.trim() : '';
+	const id = typeof s.id === 'string' && s.id.trim() ? s.id.trim() : uuid();
+	const label = typeof s.label === 'string' ? s.label.trim() : '';
 	return label ? { id, courseSlug, label } : { id, courseSlug };
+};
+
+/** Accepts a level object, or a legacy flat step (courseSlug) wrapped as a one-item level. */
+const normalizeLevel = (raw: unknown): DevelopmentPathLevel | null => {
+	if (!raw || typeof raw !== 'object') return null;
+	const entry = raw as Record<string, unknown>;
+
+	if (Array.isArray(entry.items)) {
+		const items = entry.items
+			.map(normalizeStep)
+			.filter((s): s is DevelopmentPathStep => s !== null);
+		if (items.length === 0) return null;
+		const id = typeof entry.id === 'string' && entry.id.trim() ? entry.id.trim() : uuid();
+		return { id, items };
+	}
+
+	const single = normalizeStep(raw);
+	if (!single) return null;
+	return { id: uuid(), items: [single] };
 };
 
 const normalizeTrack = (raw: unknown): DevelopmentPathTrack | null => {
@@ -51,11 +75,17 @@ const normalizeTrack = (raw: unknown): DevelopmentPathTrack | null => {
 	const id = typeof t.id === 'string' ? t.id : '';
 	const title = typeof t.title === 'string' ? t.title : '';
 	if (!id || !title) return null;
-	const stepsRaw = Array.isArray(t.steps) ? t.steps : [];
-	const steps = stepsRaw
-		.map(normalizeStep)
-		.filter((s): s is DevelopmentPathStep => s !== null);
-	return { id, title, steps };
+
+	const levelsSource = Array.isArray(t.levels)
+		? t.levels
+		: Array.isArray(t.steps)
+			? t.steps
+			: [];
+	const levels = levelsSource
+		.map(normalizeLevel)
+		.filter((l): l is DevelopmentPathLevel => l !== null);
+
+	return { id, title, levels };
 };
 
 const normalizeDocument = (data: Record<string, unknown> | undefined): DevelopmentPathDocument => {

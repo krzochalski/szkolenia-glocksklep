@@ -16,9 +16,10 @@ vi.mock('@services/auth', () => ({
 const wrap = (ui: ReactElement) => render(<UiProvider>{ui}</UiProvider>);
 
 describe('SiteHeader', () => {
-	it('renders the Glockacci wordmark and Stayfrosty nav links', () => {
+	it('renders the GlockSklep wordmark, SZKOLENIA sublabel, and Stayfrosty nav links', () => {
 		wrap(<SiteHeader />);
-		expect(screen.getByText('GLOCKACCI')).toBeInTheDocument();
+		expect(screen.getByText('GlockSklep')).toBeInTheDocument();
+		expect(screen.getByText('SZKOLENIA')).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'Główna' })).toHaveAttribute('href', '/');
 		expect(screen.getByRole('link', { name: 'Szkolenia' })).toHaveAttribute('href', '/szkolenia');
 		expect(screen.getByRole('link', { name: 'Ścieżka rozwoju' })).toHaveAttribute(
