@@ -9,9 +9,9 @@ This repo’s look is **`@stayfrosty/ui`** (`packages/ui`, submodule of `glocksk
 | Humans (install, tokens, components) | [packages/ui/README.md](./packages/ui/README.md) |
 | Agents (migrate old MUI / Emotion UI) | [packages/ui/AGENTS.md](./packages/ui/AGENTS.md) |
 | Cursor rule (copy into other apps) | [packages/ui/cursor-rule.mdc](./packages/ui/cursor-rule.mdc) |
-| Cursor skill | `.cursor/skills/stayfrosty-ui` |
+| Cursor skill (copy into other apps) | [packages/ui/skills/stayfrosty-ui/SKILL.md](./packages/ui/skills/stayfrosty-ui/SKILL.md) |
 
-When writing or migrating screens, read those files first.
+When writing or migrating screens, read those files first. Skill: `.cursor/skills/stayfrosty-ui`.
 
 ## Architecture
 

@@ -15,6 +15,7 @@ export type StaticSeoPage =
 	| 'nearest'
 	| 'courses'
 	| 'faq'
+	| 'sciezkaRozwoju'
 	| 'about'
 	| 'regulamin'
 	| 'login'
@@ -55,6 +56,12 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 		title: 'FAQ | Szkolenia Glocksklep',
 		description: 'Najczęstsze pytania o szkolenia, zapisy, płatności i wymagania uczestników.',
 		path: '/faq',
+	},
+	sciezkaRozwoju: {
+		title: 'Ścieżka rozwoju | Szkolenia Glocksklep',
+		description:
+			'Zalecana kolejność szkoleń strzeleckich Glocksklep — od podstaw do ruchu i soft skills.',
+		path: '/sciezka-rozwoju',
 	},
 	about: {
 		title: 'O nas | Szkolenia Glocksklep',
@@ -108,6 +115,7 @@ export const SITEMAP_STATIC_PATHS: readonly string[] = [
 	'/',
 	'/najblizsze-szkolenia',
 	'/szkolenia',
+	'/sciezka-rozwoju',
 	'/faq',
 	'/o-nas',
 	'/regulamin',

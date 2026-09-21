@@ -64,6 +64,12 @@ export {
 	updateCourseDates,
 } from './courses';
 export {
+	DEFAULT_DEVELOPMENT_PATH,
+	getDevelopmentPath,
+	saveDevelopmentPath,
+	seedDevelopmentPathIfMissing,
+} from './developmentPath';
+export {
 	createFaqItem,
 	deleteFaqItem,
 	getFaqItems,

@@ -10,6 +10,7 @@ export type NavItem = {
 export const navigationItems: readonly NavItem[] = [
 	{ label: 'Główna', path: Paths.home },
 	{ label: 'Szkolenia', path: Paths.courses },
+	{ label: 'Ścieżka rozwoju', path: Paths.sciezkaRozwoju },
 	{ label: 'Najbliższe', path: Paths.najblizszeSzkolenia },
 	{ label: 'FAQ', path: Paths.faq },
 	{ label: 'O nas', path: Links.about, external: true },

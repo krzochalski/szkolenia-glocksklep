@@ -12,14 +12,15 @@ Next.js + Firebase App Hosting app for firearms training scheduling at **https:/
 ## Setup
 
 ```bash
-git clone --recurse-submodules <repo>
-
-If `packages/ui` is missing, copy from stayfrosty or: `git submodule update --init --recursive`.
+git clone --recurse-submodules <repo-url>
+cd szkolenia-glocksklep
 cp .env.example .env.local
 pnpm install
 pnpm --dir functions install
 pnpm dev
 ```
+
+`packages/ui` is a submodule (`glocksklep-design-system`). After a plain clone: `git submodule update --init`.
 
 Dev server: [http://localhost:3417](http://localhost:3417)
 

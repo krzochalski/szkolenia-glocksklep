@@ -16,6 +16,7 @@ const NAV = [
 	{ label: 'Dane rozliczeniowe', href: Paths.adminBillingData },
 	{ label: 'FAQ', href: Paths.adminFaq },
 	{ label: 'Regulamin', href: Paths.adminRegulamin },
+	{ label: 'Ścieżka rozwoju', href: Paths.adminSciezkaRozwoju },
 	{ label: 'Obiekty', href: Paths.adminPlaces },
 	{ label: 'Tagi', href: Paths.adminTags },
 ] as const;
