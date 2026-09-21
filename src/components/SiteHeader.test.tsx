@@ -27,9 +27,7 @@ describe('SiteHeader', () => {
 	it('marks the current section as active', () => {
 		setMockPathname('/szkolenia/pistol-basic-course');
 		wrap(<SiteHeader />);
-		expect(screen.getByRole('link', { name: 'Szkolenia' })).toHaveStyle({
-			textTransform: 'uppercase',
-		});
+		expect(screen.getByRole('link', { name: 'Szkolenia' })).toHaveAttribute('aria-current', 'page');
 	});
 
 	it('opens the mobile drawer', () => {

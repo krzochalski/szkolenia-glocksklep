@@ -24,24 +24,20 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 
 	if (isLoading) {
 		return (
-			<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+			<Box sx={{ display: 'flex', justifyContent: 'center' }}>
 				<CircularProgress />
 			</Box>
 		);
 	}
 
 	if (!course) {
-		return (
-			<Box sx={{ p: 4 }}>
-				<Typography>Nie znaleziono szkolenia.</Typography>
-			</Box>
-		);
+		return <Typography>Nie znaleziono szkolenia.</Typography>;
 	}
 
 	const upcoming = getFutureCourseDates([course]);
 
 	return (
-		<Box sx={{ px: { xs: 2, md: 4 }, py: 4, maxWidth: 800, mx: 'auto' }}>
+		<Box sx={{ maxWidth: 800 }}>
 			<Typography variant='h4' component='h1' gutterBottom>
 				{course.name}
 			</Typography>

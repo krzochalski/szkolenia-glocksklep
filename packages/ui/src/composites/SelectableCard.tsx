@@ -1,5 +1,5 @@
-import { Box } from '../primitives';
 import type { ReactNode } from 'react';
+import { Box } from '../primitives';
 import { HardShadow } from './HardShadow';
 
 type SelectableCardProps = {
@@ -22,8 +22,10 @@ export const SelectableCard = ({
 		type='button'
 		onClick={onClick}
 		sx={{
-			display: 'block',
+			display: 'flex',
+			flexDirection: 'column',
 			width: '100%',
+			height: '100%',
 			p: 0,
 			m: 0,
 			border: 'none',
@@ -56,6 +58,9 @@ export const SelectableCard = ({
 				display: 'flex',
 				flexDirection: 'column',
 				alignItems: 'stretch',
+				flex: 1,
+				height: '100%',
+				minHeight: 0,
 				p: 0,
 				bgcolor: 'background.paper',
 				transition: 'transform 120ms ease, box-shadow 120ms ease',
@@ -69,14 +74,24 @@ export const SelectableCard = ({
 					aspectRatio: '16 / 10',
 					overflow: 'hidden',
 					position: 'relative',
+					flexShrink: 0,
 				}}
 			>
 				{image}
 			</Box>
-			<Box sx={{ p: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+			<Box
+				sx={{
+					p: { xs: 2, md: 2.5 },
+					display: 'flex',
+					flexDirection: 'column',
+					gap: 1,
+					flex: 1,
+					minHeight: 0,
+				}}
+			>
 				{title}
 				{description}
-				{meta}
+				{meta != null ? <Box sx={{ mt: 'auto' }}>{meta}</Box> : null}
 			</Box>
 		</HardShadow>
 	</Box>

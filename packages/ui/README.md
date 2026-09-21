@@ -151,14 +151,154 @@ Pass **slots** (`ReactNode`) for images and actions so the app can use Next `Lin
 | Component | Props | When to use |
 |-----------|-------|-------------|
 | `HeroCard` | `image`, `children`, `sx?` | Page intro: framed image + copy. |
-| `CatalogCard` | `eyebrow?`, `soldOutLabel?`, `promo?`, `promoLabel?`, `image`, `title`, `description?`, `price?`, `priceToggle?`, `action?` | Product, part, or project tile. Omit price row if unused. |
+| `CatalogCard` | `eyebrow?`, `soldOutLabel?`, `promo?`, `promoLabel?`, `image`, `title`, `description?`, `price?`, `priceToggle?`, `action?` | Product, part, or project tile. Omit `eyebrow` to hide the header bar. `soldOutLabel` greys the card, strikes it, and stamps the label on the image. |
 | `FeatureTile` | `icon`, `iconBg?`, `title`, `description`, `variant?: 'row' \| 'card'` | Icon + title + mono description. `card` wraps `HardShadow`. |
 | `FaqSection` | `items: { title, content }[]`, `title?`, `headingVariant?: 'h1' \| 'h3'` | Accordion FAQ. |
 | `EmptyState` | `title`, `action?` | Loading / not-found page body (no app chrome). |
+| `PageColumn` | see [Page column](#page-column) | Page body. `xl` width, `py: 4`, flex column, `gap: 4`. |
 | `ImageGallery` | `images`, `alt`, `objectFit?`, `mixBlendMultiply?`, `aspectRatio?` | Main image + thumbs. Uses `<img>`, not Next Image. |
 | `MobileStickyActionBar` | `summary?`, `action` | Fixed mobile CTA. Pair with `mobileStickyContentPb` on page padding. |
 | `SelectableCard` | `onClick`, `image`, `title`, `description?`, `meta?` | Clickable option tile (configurator). |
 | `PriceToggle` | `mode: 'netto' \| 'brutto'`, `onChange` | Net / gross control. Format money in the app. |
+| `SiteHeader` | see [Site header](#site-header) | Sticky bar. Brand, links, optional cart and actions. No routes inside. |
+| `SiteNavDrawer` | see [Site header](#site-header) | Mobile overlay. Same `links` as the header. |
+
+### Page column
+
+Page body for any app on this theme. Children stack in a column. Vertical padding and the gap between children are both theme spacing `4` (32px). Width defaults to MUI `xl` (1536px) and stays centered, same as `Container`.
+
+Import from `@stayfrosty/ui` (this shop aliases that package as `@ui`).
+
+```tsx
+import { PageColumn, mobileStickyContentPb } from '@stayfrosty/ui';
+
+<PageColumn component='main'>
+	<h1>Title</h1>
+	<section>...</section>
+</PageColumn>
+```
+
+`sx` is merged after the built-in styles, so a later value wins. Pass only the extra bits:
+
+```tsx
+<PageColumn sx={{ pb: mobileStickyContentPb }}>{/* fixed mobile bar */}</PageColumn>
+<PageColumn maxWidth='md'>{/* narrower column; false is full bleed */}</PageColumn>
+```
+
+Pair a fixed mobile call-to-action with `MobileStickyActionBar` and `mobileStickyContentPb` on `sx.pb`.
+
+#### Built-in styles
+
+| Style | Value |
+|-------|-------|
+| `maxWidth` | `'xl'` |
+| `py` | `4` |
+| `display` | `'flex'` |
+| `flexDirection` | `'column'` |
+| `gap` | `4` |
+
+#### Props
+
+Every MUI `Container` prop is accepted.
+
+| Prop | Default | Notes |
+|------|---------|-------|
+| `maxWidth` | `'xl'` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| false` |
+| `sx` | — | Merged after the built-in styles. Typical extras: `pb`, `overflow`. |
+| `component` | `'div'` | Set `'main'` when this column is the page landmark. |
+| `children` | — | Stacked sections. |
+
+### Site header
+
+Presentational chrome for any app on this theme. Routing, active state, open/close, and cart count stay in the app. Both components take the same `SiteNavItem` list and an optional `linkComponent` (`'a'` by default, or `next/link`).
+
+```tsx
+import { SiteHeader, SiteNavDrawer } from '@stayfrosty/ui';
+
+<SiteHeader
+	brand='ACME'
+	brandHref='/'
+	linkComponent={Link}
+	navLabel='Primary'
+	links={[
+		{ href: '/', label: 'Home', active: true },
+		{ href: '/docs', label: 'Docs' },
+		{ id: 'github', href: 'https://github.com', label: 'GitHub', external: true },
+	]}
+	actions={<button type='button'>Account</button>}
+	mobileActions={<button type='button'>Account</button>}
+	onOpenMenu={() => setOpen(true)}
+	menuOpen={open}
+/>
+
+<SiteNavDrawer
+	open={open}
+	onClose={() => setOpen(false)}
+	linkComponent={Link}
+	links={links}
+	footer={<a href='/login'>Sign in</a>}
+/>
+```
+
+Omit `cartHref` when the app has no cart. Omit `onOpenMenu` when there is no drawer. Omit `brandHref` when `brand` is already a link or a logo with its own handler.
+
+`actions` renders only in the desktop row. `mobileActions` renders only in the small-screen cluster. Pass both when the control should exist at every width — one React node cannot be mounted twice.
+
+#### `SiteNavItem`
+
+| Field | Default | Notes |
+|-------|---------|---|
+| `href` | — | Passed to `linkComponent`. |
+| `label` | — | String or node. |
+| `active` | `false` | Orange underline in the header, ink bar in the drawer. Sets `aria-current="page"`. |
+| `external` | `false` | `target="_blank"` and `rel="noreferrer"`. |
+| `id` | `href` | React key when two items share an `href`. |
+
+#### `SiteHeader`
+
+| Prop | Default | Notes |
+|------|---------|---|
+| `brand` | — | String uses the orange Space Grotesk wordmark. Any other node renders as-is. |
+| `brandHref` | — | Wraps `brand` in `linkComponent`. |
+| `links` | — | Desktop row. Hidden below `desktopFrom`. |
+| `linkComponent` | `'a'` | Router link. Must accept `href`. |
+| `navLabel` | string `brand`, else `"Primary"` | Accessible name of the desktop `<nav>`. |
+| `cartHref` | — | Omit to hide the cart. Rendered in both clusters. |
+| `cartCount` | `0` | Badge. `0` stays hidden. |
+| `cartLabel` | `"Cart"` | Accessible name. Pass the app’s language (`"Koszyk"`). |
+| `cartIcon` | cart icon | Replaces the icon. The badge stays. |
+| `actions` | — | Desktop only, after the cart. |
+| `mobileActions` | — | Below `desktopFrom`, between cart and menu. |
+| `onOpenMenu` | — | Omit to hide the menu button. |
+| `menuOpen` | `false` | `aria-expanded`. |
+| `menuLabel` | `"Open navigation"` | |
+| `menuIcon` | hamburger | |
+| `desktopFrom` | `"md"` | `"sm"` \| `"md"` \| `"lg"`. Link row from this breakpoint up. |
+| `position` | `"sticky"` | App bar position. |
+| `hideOnPrint` | `true` | |
+| `maxWidth` | `"xl"` | Toolbar width. `false` is full bleed. |
+| `sx` | — | App bar override. |
+| `toolbarSx` | — | Inner bar override (padding, height). |
+
+#### `SiteNavDrawer`
+
+| Prop | Default | Notes |
+|------|---------|---|
+| `open` | — | `false` renders nothing. |
+| `onClose` | — | Backdrop, close button, and each link. |
+| `links` | — | Same items as the header, including ones you hid from the desktop row. |
+| `linkComponent` | `'a'` | |
+| `title` | `"MENU"` | Head label. Ignored when `header` is set. |
+| `header` | — | Replaces the title. Close button stays. |
+| `ariaLabel` | string `title`, else `"Menu"` | Dialog name. |
+| `footer` | — | Pinned to the bottom of the panel. |
+| `closeLabel` | `"Close navigation"` | |
+| `closeIcon` | close icon | |
+| `side` | `"start"` | `"end"` docks the panel on the right. |
+| `width` | `"min(320px, 100%)"` | Number is pixels. |
+| `navLabel` | — | Accessible name of the drawer `<nav>`. |
+| `sx` | — | Panel override. |
+| `backdropSx` | — | Overlay override. |
 
 ### Dialogs
 
@@ -185,26 +325,6 @@ import {
 		</Button>
 	</DialogActions>
 </HardShadowDialog>
-```
-
-`ConfirmDialog` is the branded confirm/delete dialog. Pass **all copy** from the app (no default language in the package):
-
-```tsx
-import { ConfirmDialog, Typography } from '@stayfrosty/ui';
-
-<ConfirmDialog
-	open={open}
-	title='Potwierdź usunięcie'
-	cancelLabel='Anuluj'
-	confirmLabel='Usuń'
-	loading={deleting}
-	onCancel={onClose}
-	onConfirm={onConfirm}
->
-	<Typography>
-		Czy na pewno chcesz usunąć <strong>{name}</strong>? Tej operacji nie można cofnąć.
-	</Typography>
-</ConfirmDialog>
 ```
 
 `formOptionGroupSx` styles `RadioGroup` / `FormGroup` option rows (ink border, primary when checked).

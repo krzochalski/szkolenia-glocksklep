@@ -307,6 +307,104 @@ const theme = createTheme({
 				},
 			},
 		},
+		MuiDialog: {
+			styleOverrides: {
+				paper: {
+					'@media (max-width: 599.95px)': {
+						margin: 12,
+						maxHeight: 'calc(100% - 24px)',
+					},
+				},
+				paperFullWidth: {
+					'@media (max-width: 599.95px)': {
+						width: 'calc(100% - 24px)',
+					},
+				},
+			},
+		},
+		MuiDialogTitle: {
+			styleOverrides: {
+				root: {
+					'@media (max-width: 599.95px)': {
+						paddingLeft: 16,
+						paddingRight: 16,
+					},
+				},
+			},
+		},
+		MuiDialogContent: {
+			styleOverrides: {
+				root: {
+					'@media (max-width: 599.95px)': {
+						paddingLeft: 16,
+						paddingRight: 16,
+					},
+				},
+			},
+		},
+		MuiDialogActions: {
+			styleOverrides: {
+				root: {
+					'@media (max-width: 599.95px)': {
+						paddingLeft: 16,
+						paddingRight: 16,
+						paddingBottom: 16,
+					},
+				},
+			},
+		},
+		MuiPopover: {
+			styleOverrides: {
+				paper: {
+					maxHeight: 'calc(100dvh - 16px)',
+					maxWidth: 'calc(100vw - 16px)',
+				},
+			},
+		},
+		MuiMenu: {
+			styleOverrides: {
+				paper: {
+					maxHeight: 'calc(100dvh - 24px)',
+					maxWidth: 'calc(100vw - 16px)',
+				},
+			},
+		},
+		MuiOutlinedInput: {
+			styleOverrides: {
+				root: {
+					minHeight: 48,
+					boxSizing: 'border-box',
+				},
+				input: {
+					paddingTop: 12,
+					paddingBottom: 12,
+				},
+			},
+		},
+		MuiSelect: {
+			defaultProps: {
+				MenuProps: {
+					anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+					transformOrigin: { vertical: 'top', horizontal: 'left' },
+					marginThreshold: 8,
+				},
+			},
+			styleOverrides: {
+				select: {
+					minHeight: 48,
+					boxSizing: 'border-box',
+					display: 'flex',
+					alignItems: 'center',
+				},
+			},
+		},
+		MuiMenuItem: {
+			styleOverrides: {
+				root: {
+					whiteSpace: 'normal',
+				},
+			},
+		},
 	},
 });
 

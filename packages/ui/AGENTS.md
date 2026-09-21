@@ -105,13 +105,15 @@ Search the app for these shapes. Prefer a composite over a one-off `sx` copy.
 | Icon box + uppercase title + short desc | `FeatureTile` (`row` or `card`) |
 | FAQ Q/A list or custom accordion | `FaqSection` (`items: { title, content }[]`) |
 | Centered “Ładowanie…” / “nie znaleziony” | `EmptyState` (app still wraps `PageWrapper`) |
+| `Container maxWidth='xl'` + `py: 4` + flex column + `gap: 4` | `PageColumn` — usage in [README](./README.md#page-column). Pass extra `sx` only (`pb`, `component="main"`). |
 | Netto / brutto segment control | `PriceToggle` — keep money math in the app |
 | `Box component='button'` option tile with hard shadow | `SelectableCard` |
 | Dialog paper with ink border + offset shadow | `HardShadowDialog` + `hardShadowDialog*Sx` |
-| Confirm / delete / yes-no dialog | `ConfirmDialog` — pass all copy from the app |
 | Thumb gallery | `ImageGallery` (`string[]` srcs) |
 | Fixed bottom mobile CTA | `MobileStickyActionBar` + `mobileStickyContentPb` |
 | Radio/checkbox rows with ink border | `RadioGroup` / `FormGroup` + `formOptionGroupSx` |
+| Sticky wordmark bar + mono links | `SiteHeader` — full prop list in [README](./README.md#site-header). App passes links, `linkComponent`, cart, actions. |
+| Full-screen mobile nav overlay | `SiteNavDrawer` — same `links`. App owns open/close. |
 
 **Adapters stay in the app.** Example: `ProductCard` reads `Product`, renders `CatalogCard` + `PriceToggle` + `Button component={Link}`.
 
@@ -119,7 +121,7 @@ Leave default MUI `Card` / `Paper` only if the look already matches the theme. I
 
 ### 5. What not to move into this package
 
-- App shell: nav, footer, drawer that knows routes or Redux
+- App shell that knows routes or Redux (nav adapters, footer copy). Presentational chrome is `SiteHeader` / `SiteNavDrawer`; the app passes links.
 - `next/image` / generated `srcSet` helpers
 - Forms bound to Zod + shop/admin schemas
 - JSON-LD, cookie copy, analytics

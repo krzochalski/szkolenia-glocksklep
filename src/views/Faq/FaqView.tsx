@@ -12,14 +12,14 @@ export const FaqView = () => {
 
 	if (isLoading) {
 		return (
-			<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+			<Box sx={{ display: 'flex', justifyContent: 'center' }}>
 				<CircularProgress />
 			</Box>
 		);
 	}
 
 	return (
-		<Box sx={{ px: { xs: 2, md: 4 }, py: 4, maxWidth: 800, mx: 'auto' }}>
+		<Box sx={{ maxWidth: 800 }}>
 			<Typography variant='h4' component='h1' gutterBottom>
 				FAQ
 			</Typography>

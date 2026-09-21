@@ -22,6 +22,7 @@ Canonical docs (read before editing UI):
 2. Style with `sx` + theme tokens. Repeated brand look → composites, not a one-off copy.
 3. Wrap the tree (and UI tests) with `UiProvider`. Next: `AppRouterCacheProvider` outside `UiProvider`.
 4. Keep routing, data, Next Image, and domain types in the app. Pass slots (`image`, `action`) into composites.
+5. Page body with `maxWidth="xl"`, `py: 4`, and a column `gap: 4` is `PageColumn`. Put extra spacing in `sx`. API: package `README.md` section “Page column”.
 
 ## Do not
 

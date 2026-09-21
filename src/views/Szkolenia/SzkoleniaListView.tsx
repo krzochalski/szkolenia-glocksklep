@@ -4,7 +4,7 @@ import { Paths } from '@constants/paths';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Container, Grid, Link, Typography } from '@ui';
+import { Box, Grid, Link, Typography } from '@ui';
 import NextLink from 'next/link';
 import { useMemo } from 'react';
 import { CourseCard } from './CourseCard';
@@ -32,7 +32,7 @@ export const SzkoleniaListView = () => {
 	}, [descriptions]);
 
 	return (
-		<Container maxWidth='xl' sx={{ py: 4, gap: 4, display: 'flex', flexDirection: 'column' }}>
+		<>
 			<Box>
 				<Link
 					component={NextLink}
@@ -98,6 +98,6 @@ export const SzkoleniaListView = () => {
 					</Grid>
 				))}
 			</Grid>
-		</Container>
+		</>
 	);
 };

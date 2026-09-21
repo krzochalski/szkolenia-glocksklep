@@ -3,7 +3,7 @@
 import { Box, Link, Typography } from '@ui';
 
 export const KontaktView = () => (
-	<Box sx={{ px: { xs: 2, md: 4 }, py: 4, maxWidth: 640, mx: 'auto' }}>
+	<Box sx={{ maxWidth: 640 }}>
 		<Typography variant='h4' component='h1' gutterBottom>
 			Kontakt
 		</Typography>
