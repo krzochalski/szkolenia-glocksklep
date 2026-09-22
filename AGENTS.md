@@ -2,7 +2,7 @@
 
 ## UI / design system
 
-This repo’s look is **`@stayfrosty/ui`** (`packages/ui`, submodule of `glocksklep-design-system`). In this app import `@ui` and `@ui/icons`. App `src/` never imports `@mui/material`, `@mui/icons-material`, `@emotion/styled`, or `@emotion/react`. Clone with `--recurse-submodules`.
+This repo’s look is **`@stayfrosty/ui`** (`packages/ui`, submodule of `glocksklep-design-system`). In this app import `@ui` and `@ui/icons`. App `src/` never imports `@mui/material`, `@mui/icons-material`, `@emotion/styled`, or `@emotion/react`. Prefer `git clone --recurse-submodules`; otherwise `pnpm install` runs `scripts/ensure-ui-submodule.mjs` via `preinstall`.
 
 | Audience | File |
 |----------|------|

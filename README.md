@@ -18,20 +18,17 @@ Next.js + Firebase App Hosting app for firearms training scheduling at **https:/
 - **Git** with submodule support
 - Access to Firebase project `szkolenia-glocksklep` (Auth / Firestore). No service-account file is required for normal local `pnpm dev`.
 
-### 1. Clone (with UI submodule)
+### 1. Clone and install
 
-`packages/ui` is a submodule (`glocksklep-design-system`). Always clone with submodules:
+`packages/ui` is a git submodule (`glocksklep-design-system`). Preferred:
 
 ```bash
 git clone --recurse-submodules <repo-url>
 cd szkolenia-glocksklep
+pnpm install
 ```
 
-If you already cloned without submodules:
-
-```bash
-git submodule update --init
-```
+A plain clone is fine too: `pnpm install` runs `preinstall` → `scripts/ensure-ui-submodule.mjs`, which runs `git submodule update --init --recursive` if `packages/ui` is missing. Manual fallback: `git submodule update --init`.
 
 ### 2. Environment (`.env.local`)
 

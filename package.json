@@ -8,6 +8,7 @@
 		"node": "22"
 	},
 	"scripts": {
+		"preinstall": "node scripts/ensure-ui-submodule.mjs",
 		"dev": "biome lint . && next dev -p 3417",
 		"build": "biome lint . && next build",
 		"lint": "biome lint .",
