@@ -151,7 +151,7 @@ Pass **slots** (`ReactNode`) for images and actions so the app can use Next `Lin
 | Component | Props | When to use |
 |-----------|-------|-------------|
 | `HeroCard` | `image`, `children`, `sx?` | Page intro: framed image + copy. |
-| `CatalogCard` | `eyebrow?`, `soldOutLabel?`, `promo?`, `promoLabel?`, `image`, `title`, `description?`, `price?`, `priceToggle?`, `action?` | Product, part, or project tile. Omit `eyebrow` to hide the header bar. `soldOutLabel` greys the card, strikes it, and stamps the label on the image. |
+| `CatalogCard` | `eyebrow?`, `soldOutLabel?`, `promo?`, `promoLabel?`, `image`, `title`, `description?`, `price?`, `priceToggle?`, `action?`, `layout?: 'tile' \| 'list'` | Product, part, or project tile. Default `tile` is the square card. `list` is a dense horizontal row (thumb + copy + price/CTA). Omit `eyebrow` to hide the header bar. `soldOutLabel` greys the card, strikes it, and stamps the label on the image. |
 | `FeatureTile` | `icon`, `iconBg?`, `title`, `description`, `variant?: 'row' \| 'card'` | Icon + title + mono description. `card` wraps `HardShadow`. |
 | `FaqSection` | `items: { title, content }[]`, `title?`, `headingVariant?: 'h1' \| 'h3'` | Accordion FAQ. |
 | `EmptyState` | `title`, `action?` | Loading / not-found page body (no app chrome). |

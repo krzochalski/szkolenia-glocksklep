@@ -43,6 +43,23 @@ describe('CatalogCard', () => {
 		expect(screen.getByText('WYPRZEDANE')).toBeInTheDocument();
 		expect(screen.getByText('Drop-in')).toBeInTheDocument();
 	});
+
+	it('renders a dense horizontal list row', () => {
+		wrap(
+			<CatalogCard
+				layout='list'
+				eyebrow='GEN 5'
+				image={<img alt='x' src='/x.webp' />}
+				title='Drop-in'
+				price='100.00PLN'
+				action={<button type='button'>SZCZEGÓŁY</button>}
+			/>
+		);
+		expect(screen.getByText('GEN 5')).toBeInTheDocument();
+		expect(screen.getByText('Drop-in')).toBeInTheDocument();
+		expect(screen.getByText('100.00PLN')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'SZCZEGÓŁY' })).toBeInTheDocument();
+	});
 });
 
 describe('PriceToggle', () => {

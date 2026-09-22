@@ -19,11 +19,10 @@ const course: Course = {
 };
 
 describe('CourseCard', () => {
-	it('renders catalog tile with level, program chips, price and details CTA', () => {
+	it('renders list row with level, program chips, price and details CTA', () => {
 		wrap(<CourseCard course={course} />);
 		expect(screen.getByText('PODSTAWOWY')).toBeInTheDocument();
 		expect(screen.getByText('Glockatto — podstawy')).toBeInTheDocument();
-		expect(screen.getByText('Program')).toBeInTheDocument();
 		expect(screen.getByText('8 H')).toBeInTheDocument();
 		expect(screen.getByText('Glock')).toBeInTheDocument();
 		expect(screen.getByText('850.00PLN')).toBeInTheDocument();

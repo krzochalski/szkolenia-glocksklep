@@ -101,7 +101,7 @@ Search the app for these shapes. Prefer a composite over a one-off `sx` copy.
 | Same, ink background, light text | `TerminalBlock` |
 | Uppercase Space Mono caption | `MonoText` |
 | Hero: image frame + heading column | `HeroCard` with `image={<img … />}` or app `OptimizedImage` |
-| Listing tile: header bar, square image, title, price, CTA | `CatalogCard` — app maps domain → props |
+| Listing tile: header bar, square image, title, price, CTA | `CatalogCard` — app maps domain → props. Dense horizontal rows: `layout="list"`. |
 | Icon box + uppercase title + short desc | `FeatureTile` (`row` or `card`) |
 | FAQ Q/A list or custom accordion | `FaqSection` (`items: { title, content }[]`) |
 | Centered “Ładowanie…” / “nie znaleziony” | `EmptyState` (app still wraps `PageWrapper`) |

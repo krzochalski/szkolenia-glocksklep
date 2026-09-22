@@ -2,7 +2,7 @@
 
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
-import { Box, Button, CatalogCard, Chip, MonoText, type PriceMode, PriceToggle } from '@ui';
+import { Box, Button, CatalogCard, Chip, type PriceMode, PriceToggle } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
@@ -54,6 +54,7 @@ export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
 
 	return (
 		<CatalogCard
+			layout='list'
 			eyebrow={level}
 			image={
 				showImage ? (
@@ -67,23 +68,16 @@ export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
 						sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
 					/>
 				) : (
-					<GpsFixedOutlined sx={{ fontSize: '4rem', color: 'text.secondary' }} />
+					<GpsFixedOutlined sx={{ fontSize: { xs: '1.75rem', sm: '2.5rem' }, color: 'text.secondary' }} />
 				)
 			}
 			title={course.name}
 			description={
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25, mt: 0.5 }}>
-					<MonoText
-						sx={{ fontSize: '0.6875rem', color: 'text.secondary', letterSpacing: '0.12em' }}
-					>
-						Program
-					</MonoText>
-					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-						<Chip label={`${course.hours} H`} size='small' variant='outlined' sx={chipSx} />
-						{tags.map((tag) => (
-							<Chip key={tag} label={tag} size='small' variant='outlined' sx={chipSx} />
-						))}
-					</Box>
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 0.25 }}>
+					<Chip label={`${course.hours} H`} size='small' variant='outlined' sx={chipSx} />
+					{tags.map((tag) => (
+						<Chip key={tag} label={tag} size='small' variant='outlined' sx={chipSx} />
+					))}
 				</Box>
 			}
 			price={formatCoursePrice(course.price, priceMode)}

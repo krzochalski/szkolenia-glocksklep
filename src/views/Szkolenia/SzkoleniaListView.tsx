@@ -1,9 +1,10 @@
 'use client';
 
+import { COURSE_LEVEL_ORDER } from '@constants/courses';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
-import { Grid, Typography } from '@ui';
+import { Box, Typography } from '@ui';
 import { useMemo } from 'react';
 import { CourseCard } from './CourseCard';
 
@@ -28,6 +29,18 @@ export const SzkoleniaListView = () => {
 		}
 		return map;
 	}, [descriptions]);
+
+	const sortedCourses = useMemo(
+		() =>
+			[...courses].sort((a, b) => {
+				const byLevel =
+					(COURSE_LEVEL_ORDER[a.level] ?? Number.POSITIVE_INFINITY) -
+					(COURSE_LEVEL_ORDER[b.level] ?? Number.POSITIVE_INFINITY);
+				if (byLevel !== 0) return byLevel;
+				return a.name.localeCompare(b.name, 'pl');
+			}),
+		[courses]
+	);
 
 	return (
 		<>
@@ -70,13 +83,15 @@ export const SzkoleniaListView = () => {
 				</Typography>
 			)}
 
-			<Grid container spacing={4}>
-				{courses.map((course) => (
-					<Grid key={course.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-						<CourseCard course={course} imageSrc={imageBySlug.get(course.slug)} />
-					</Grid>
+			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+				{sortedCourses.map((course) => (
+					<CourseCard
+						key={course.id}
+						course={course}
+						imageSrc={imageBySlug.get(course.slug)}
+					/>
 				))}
-			</Grid>
+			</Box>
 		</>
 	);
 };
