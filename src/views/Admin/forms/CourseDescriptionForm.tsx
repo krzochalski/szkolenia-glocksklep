@@ -1,13 +1,15 @@
 'use client';
 
+import { Box, Button, Divider, Paper, TextField, Typography } from '@ui';
+import { useState } from 'react';
 import type {
 	CourseDescription,
 	CourseDescriptionSection,
 	CourseDescriptionSectionKey,
 	CourseModuleData,
 } from '@/types/courseDescription';
-import { Box, Button, Divider, Paper, TextField, Typography } from '@ui';
-import { useState } from 'react';
+import { resolveCourseHero, resolveCourseThumbnail } from '@/utils/courseImages';
+import { toOptimizedImagePath } from '@/utils/optimizedImagePath';
 import {
 	ListSectionEditor,
 	ModulesEditor,
@@ -32,7 +34,8 @@ export const CourseDescriptionForm = ({
 	const [headline0, setHeadline0] = useState(defaultValues?.headline?.[0] ?? '');
 	const [headline1, setHeadline1] = useState(defaultValues?.headline?.[1] ?? '');
 	const [description, setDescription] = useState(defaultValues?.description ?? '');
-	const [background, setBackground] = useState(defaultValues?.background ?? '');
+	const [thumbnail, setThumbnail] = useState(resolveCourseThumbnail(defaultValues ?? {}) ?? '');
+	const [hero, setHero] = useState(resolveCourseHero(defaultValues ?? {}) ?? '');
 	const [modules, setModules] = useState<CourseModuleData[]>(defaultValues?.modules ?? []);
 	const [forWhom, setForWhom] = useState<CourseDescriptionSection>(
 		defaultValues?.forWhom ?? emptySection()
@@ -60,12 +63,15 @@ export const CourseDescriptionForm = ({
 	const handleSubmit = async () => {
 		setSubmitting(true);
 		try {
+			const thumbnailPath = thumbnail.trim() ? toOptimizedImagePath(thumbnail) : '';
+			const heroPath = hero.trim() ? toOptimizedImagePath(hero) : '';
 			const data: Omit<CourseDescription, 'id'> = {
 				slug,
 				eyebrow,
 				headline: [headline0, headline1],
 				description,
-				...(background ? { background } : {}),
+				...(thumbnailPath ? { thumbnail: thumbnailPath } : {}),
+				...(heroPath ? { hero: heroPath } : {}),
 				...(modules.length > 0 ? { modules } : {}),
 				...(forWhom.items.length > 0 ? { forWhom } : {}),
 				...(notExpect.items.length > 0 ? { notExpect } : {}),
@@ -107,12 +113,22 @@ export const CourseDescriptionForm = ({
 					multiline
 					minRows={3}
 				/>
-				<TextField
-					label='Ścieżka tła (opcjonalna)'
-					value={background}
-					onChange={(e) => setBackground(e.target.value)}
-					placeholder='/hero/...'
-				/>
+				<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+					<TextField
+						label='Miniatura listy (opcjonalna)'
+						value={thumbnail}
+						onChange={(e) => setThumbnail(e.target.value)}
+						placeholder='/hero/….webp'
+						helperText='Ikona na liście szkoleń'
+					/>
+					<TextField
+						label='Hero strony (opcjonalne)'
+						value={hero}
+						onChange={(e) => setHero(e.target.value)}
+						placeholder='/hero/….webp'
+						helperText='Tło nagłówka na stronie szkolenia'
+					/>
+				</Box>
 			</Box>
 
 			<Divider />

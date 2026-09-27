@@ -1,11 +1,11 @@
 export { isUserAdmin } from './admins';
 export {
-	EMAIL_LINK_STORAGE_KEY,
 	applyEmailActionCode,
 	auth,
 	completeEmailLinkSignIn,
 	completeGoogleRedirectSignIn,
 	confirmPasswordResetWithCode,
+	EMAIL_LINK_STORAGE_KEY,
 	ensureUserProfile,
 	getCurrentUser,
 	inspectActionCode,
@@ -30,6 +30,12 @@ export {
 	updateBillingData,
 } from './billingData';
 export {
+	adminDeleteContactRequest,
+	adminGetContactRequests,
+	adminUpdateContactRequestStatus,
+	submitContactRequest,
+} from './contactRequests';
+export {
 	deleteCourseDescription,
 	getCourseDescription,
 	getCourseDescriptionBySlug,
@@ -38,16 +44,6 @@ export {
 	saveCourseDescription,
 	updateCourseDescriptionFields,
 } from './courseDescriptions';
-export {
-	addToWaitingList,
-	adminGetWaitingListEntries,
-	adminRemoveFromWaitingList,
-	getUserWaitingListEntries,
-	getWaitingListEntry,
-	getWaitingListEntryId,
-	isOnWaitingList,
-	removeFromWaitingList,
-} from './courseWaitingList';
 export {
 	adminEnrollParticipant,
 	createCourse,
@@ -64,11 +60,30 @@ export {
 	updateCourseDates,
 } from './courses';
 export {
+	addGuestToWaitingList,
+	addToWaitingList,
+	adminGetWaitingListEntries,
+	adminRemoveFromWaitingList,
+	getGuestWaitingListEntryId,
+	getUserWaitingListEntries,
+	getWaitingListEntry,
+	getWaitingListEntryId,
+	isOnWaitingList,
+	normalizeWaitingListEmail,
+	removeFromWaitingList,
+} from './courseWaitingList';
+export {
 	DEFAULT_DEVELOPMENT_PATH,
 	getDevelopmentPath,
 	saveDevelopmentPath,
 	seedDevelopmentPathIfMissing,
 } from './developmentPath';
+export {
+	DEFAULT_ENROLLMENT_CONFIRMATION,
+	getEnrollmentConfirmationTemplate,
+	saveEnrollmentConfirmationTemplate,
+	seedEnrollmentConfirmationTemplateIfMissing,
+} from './emailTemplates';
 export {
 	createFaqItem,
 	deleteFaqItem,
@@ -77,6 +92,12 @@ export {
 } from './faq';
 export { firebaseApp } from './firebase';
 export { db } from './firestore';
+export {
+	DEFAULT_HOMEPAGE,
+	getHomepage,
+	saveHomepage,
+	seedHomepageIfMissing,
+} from './homepage';
 export {
 	createInstructor,
 	deleteInstructor,

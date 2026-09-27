@@ -12,10 +12,13 @@ const NAV = [
 	{ label: 'Szkolenia', href: Paths.adminCourses },
 	{ label: 'Uczestnicy', href: Paths.adminParticipants },
 	{ label: 'Lista oczekujących', href: Paths.adminWaitingList },
+	{ label: 'Zgłoszenia kontaktu', href: Paths.adminContactRequests },
 	{ label: 'Opisy szkoleń', href: Paths.adminCourseDescriptions },
 	{ label: 'Dane rozliczeniowe', href: Paths.adminBillingData },
 	{ label: 'FAQ', href: Paths.adminFaq },
 	{ label: 'Regulamin', href: Paths.adminRegulamin },
+	{ label: 'Strona główna', href: Paths.adminHomepage },
+	{ label: 'E-mail po zapisie', href: Paths.adminEnrollmentEmail },
 	{ label: 'Ścieżka rozwoju', href: Paths.adminSciezkaRozwoju },
 	{ label: 'Obiekty', href: Paths.adminPlaces },
 	{ label: 'Tagi', href: Paths.adminTags },
@@ -51,8 +54,7 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 				</Typography>
 				<Stack component='nav' spacing={0.5} sx={{ flex: 1 }}>
 					{NAV.map((item) => {
-						const active =
-							pathname === item.href || pathname.startsWith(`${item.href}/`);
+						const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 						return (
 							<Link
 								key={item.href}

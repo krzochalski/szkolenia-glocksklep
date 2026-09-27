@@ -3,6 +3,7 @@
 import { COURSE_LEVEL_ORDER } from '@constants/courses';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
+import { resolveCourseThumbnail } from '@/utils/courseImages';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Typography } from '@ui';
 import { useMemo } from 'react';
@@ -25,7 +26,8 @@ export const SzkoleniaListView = () => {
 	const imageBySlug = useMemo(() => {
 		const map = new Map<string, string>();
 		for (const description of descriptions) {
-			if (description.background) map.set(description.slug, description.background);
+			const thumb = resolveCourseThumbnail(description);
+			if (thumb) map.set(description.slug, thumb);
 		}
 		return map;
 	}, [descriptions]);

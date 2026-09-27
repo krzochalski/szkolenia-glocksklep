@@ -96,6 +96,22 @@ pnpm bootstrap:admin
 pnpm deploy:auth
 ```
 
+## Transactional email (SMTP via Cloud Functions)
+
+Waiting-list and enrollment confirmations are sent by Cloud Functions with **nodemailer** (same pattern as Stayfrosty) — not the Trigger Email extension.
+
+Copy [`functions/.env.example`](./functions/.env.example) → `functions/.env` and set a [Google App Password](https://myaccount.google.com/apppasswords) for `zamowienia@glocksklep.pl`:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=zamowienia@glocksklep.pl
+SMTP_PASS=xxxx-xxxx-xxxx-xxxx
+MAIL_FROM=zamowienia@glocksklep.pl
+```
+
+Without `SMTP_PASS`, enroll / waitlist still work; confirmation emails are skipped (logged).
+
 ## Deploy
 
 1. Create App Hosting backend id `szkolenia` in project `szkolenia-glocksklep`

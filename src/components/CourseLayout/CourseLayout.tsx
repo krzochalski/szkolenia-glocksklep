@@ -5,6 +5,7 @@ import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.ty
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
+import { OptimizedImage } from '@components';
 import { Paths } from '@constants/paths';
 import { Box, Button, Divider, HardShadow, Typography } from '@ui';
 import { ArrowBack, Block, CheckCircle } from '@ui/icons';
@@ -15,10 +16,10 @@ export type { CourseModule, CourseSchemaData } from './CourseLayout.types';
 
 type CourseLayoutProps = {
 	readonly data: CourseSchemaData;
-	readonly background?: string;
+	readonly hero?: string;
 };
 
-export const CourseLayout = ({ data, background }: CourseLayoutProps) => {
+export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 	const {
 		eyebrow,
 		headline,
@@ -38,7 +39,7 @@ export const CourseLayout = ({ data, background }: CourseLayoutProps) => {
 	const [imageFailed, setImageFailed] = useState(false);
 	const hasForWhomSection = Boolean(forWhom?.length || notExpect?.length);
 	const hasBringSection = Boolean(bring?.length || dontBring?.length);
-	const showBackground = Boolean(background) && !imageFailed;
+	const showHero = Boolean(hero) && !imageFailed;
 
 	return (
 		<Box>
@@ -55,13 +56,11 @@ export const CourseLayout = ({ data, background }: CourseLayoutProps) => {
 					justifyContent: 'flex-end',
 				}}
 			>
-				{showBackground ? (
-					<Box
-						component='img'
-						src={background}
+				{showHero && hero ? (
+					<OptimizedImage
+						src={hero}
 						alt=''
 						loading='lazy'
-						decoding='async'
 						onError={() => setImageFailed(true)}
 						sx={{
 							position: 'absolute',

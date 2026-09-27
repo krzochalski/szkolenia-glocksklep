@@ -16,7 +16,7 @@ export const ONasView = () => {
 				O nas
 			</Typography>
 			<Typography color='text.secondary' sx={{ mb: 3 }}>
-				Szkolenia Glocksklep — praktyczne szkolenia strzeleckie prowadzone przez doświadczonych
+				GLOCKSKLEP Szkolenia — praktyczne szkolenia strzeleckie prowadzone przez doświadczonych
 				instruktorów.
 			</Typography>
 

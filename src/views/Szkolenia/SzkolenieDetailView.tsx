@@ -5,6 +5,7 @@ import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { getCourseBySlug } from '@services/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
+import { resolveCourseHero } from '@/utils/courseImages';
 import { Box, CircularProgress, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 
@@ -34,7 +35,10 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 
 	if (description) {
 		return (
-			<CourseLayout data={mapDescriptionToSchema(description)} background={description.background} />
+			<CourseLayout
+				data={mapDescriptionToSchema(description)}
+				hero={resolveCourseHero(description)}
+			/>
 		);
 	}
 

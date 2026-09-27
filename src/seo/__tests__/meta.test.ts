@@ -3,7 +3,7 @@ import { absoluteUrl, canonicalPath, pageTitle, truncatePlainText } from '../met
 
 describe('seo/meta', () => {
 	it('builds page titles', () => {
-		expect(pageTitle('FAQ')).toContain('Szkolenia Glocksklep');
+		expect(pageTitle('FAQ')).toContain('GLOCKSKLEP Szkolenia');
 	});
 
 	it('canonicalizes paths', () => {

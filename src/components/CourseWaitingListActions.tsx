@@ -3,16 +3,23 @@
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import {
+	addGuestToWaitingList,
 	addToWaitingList,
 	getUserWaitingListEntries,
 	removeFromWaitingList,
 } from '@services/courseWaitingList';
 import { getUserProfile } from '@services/users';
 import type { Course } from '@/types/course';
-import { Button, ConfirmDialog, Stack, Typography } from '@ui';
+import {
+	type GuestWaitingListFormValues,
+	guestWaitingListSchema,
+} from '@/utils/schemas';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, ConfirmDialog, Link, Stack, TextField, Typography } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 
 type Props = {
 	readonly course: Course;
@@ -21,6 +28,99 @@ type Props = {
 };
 
 type ConfirmAction = 'join' | 'leave';
+
+const GuestWaitingListForm = ({
+	course,
+	onError,
+	onSuccess,
+}: Props) => {
+	const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
+
+	const {
+		control,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useForm<GuestWaitingListFormValues>({
+		resolver: zodResolver(guestWaitingListSchema),
+		defaultValues: { email: '' },
+	});
+
+	const onSubmit = async (values: GuestWaitingListFormValues) => {
+		try {
+			await addGuestToWaitingList({
+				courseId: course.id,
+				courseName: course.name,
+				courseSlug: course.slug,
+				email: values.email,
+			});
+			setSubmittedEmail(values.email.trim());
+			onSuccess?.();
+		} catch (err) {
+			onError?.(
+				err instanceof Error ? err.message : 'Nie udało się zapisać na listę oczekujących.'
+			);
+		}
+	};
+
+	if (submittedEmail) {
+		return (
+			<Stack spacing={1.5}>
+				<Typography color='success.main' sx={{ fontWeight: 600 }}>
+					Dziękujemy — powiadomimy Cię na {submittedEmail}, gdy pojawi się nowy termin.
+				</Typography>
+				<Typography variant='body2' color='text.secondary'>
+					Załóż konto, żeby łatwiej zarządzać zapisami i kontaktem przy kolejnych
+					szkoleniach.{' '}
+					<Link component={NextLink} href={Paths.register} underline='hover'>
+						Utwórz konto
+					</Link>
+				</Typography>
+			</Stack>
+		);
+	}
+
+	return (
+		<Stack
+			component='form'
+			spacing={1.5}
+			onSubmit={handleSubmit(onSubmit)}
+			noValidate
+			sx={{ maxWidth: 420 }}
+		>
+			<Controller
+				name='email'
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label='E-mail'
+						type='email'
+						fullWidth
+						required
+						autoComplete='email'
+						disabled={isSubmitting}
+						error={Boolean(errors.email)}
+						helperText={errors.email?.message}
+					/>
+				)}
+			/>
+			<Button type='submit' variant='outlined' disabled={isSubmitting}>
+				Zapisz na listę oczekujących
+			</Button>
+			<Typography variant='body2' color='text.secondary'>
+				Polecamy{' '}
+				<Link component={NextLink} href={Paths.register} underline='hover'>
+					założenie konta
+				</Link>{' '}
+				— łatwiejszy kontakt i zarządzanie zapisami. Masz już konto?{' '}
+				<Link component={NextLink} href={Paths.login} underline='hover'>
+					Zaloguj się
+				</Link>
+				.
+			</Typography>
+		</Stack>
+	);
+};
 
 /** Join / leave course-level waitlist when there are no open seats (or no dates). */
 export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) => {
@@ -106,11 +206,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 		) : null;
 
 	if (!user) {
-		return (
-			<Button component={NextLink} href={Paths.login} variant='outlined'>
-				Zaloguj się, by dołączyć do listy
-			</Button>
-		);
+		return <GuestWaitingListForm course={course} onError={onError} onSuccess={onSuccess} />;
 	}
 
 	if (onWaitingList) {

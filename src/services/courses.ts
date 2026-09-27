@@ -1,6 +1,3 @@
-import type { Course, Participant } from '@/types/course';
-import { stripUndefined } from '@/utils/common';
-import type { CourseFormValues } from '@/utils/schemas';
 import {
 	addDoc,
 	collection,
@@ -14,6 +11,9 @@ import {
 	where,
 } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
+import type { Course, Participant } from '@/types/course';
+import { stripUndefined } from '@/utils/common';
+import type { CourseFormValues } from '@/utils/schemas';
 import { auth } from './auth';
 import { db } from './firestore';
 
@@ -90,6 +90,7 @@ export const enrollInCourse = async (
 				: 'Nie udało się zapisać na szkolenie.'
 		);
 	}
+	/* Confirmation email: Cloud Function /api/enroll */
 };
 
 export const unenrollFromCourse = async (
@@ -216,4 +217,25 @@ export const adminEnrollParticipant = async (
 		};
 	});
 	await updateDoc(doc(db, 'courses', courseId), { dates: stripUndefined(dates) });
+
+	const user = auth.currentUser;
+	if (user && participant.email) {
+		try {
+			const token = await user.getIdToken();
+			await fetch('/api/notify-enrollment', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					courseId,
+					dateId,
+					participant: { name: participant.name, email: participant.email },
+				}),
+			});
+		} catch {
+			/* Enrollment already succeeded. */
+		}
+	}
 };

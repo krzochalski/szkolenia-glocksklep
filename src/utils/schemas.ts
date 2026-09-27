@@ -87,3 +87,26 @@ export const courseSchema = z.object({
 });
 
 export type CourseFormValues = z.infer<typeof courseSchema>;
+
+export const contactRequestSchema = z.object({
+	email: z.string().min(1, 'E-mail jest wymagany').email('Nieprawidłowy e-mail'),
+	phone: z
+		.string()
+		.trim()
+		.max(40, 'Numer telefonu jest zbyt długi')
+		.optional()
+		.or(z.literal('')),
+	message: z
+		.string()
+		.trim()
+		.min(5, 'Wiadomość musi mieć min. 5 znaków')
+		.max(1000, 'Wiadomość może mieć max. 1000 znaków'),
+});
+
+export type ContactRequestFormValues = z.infer<typeof contactRequestSchema>;
+
+export const guestWaitingListSchema = z.object({
+	email: z.string().min(1, 'E-mail jest wymagany').email('Nieprawidłowy e-mail'),
+});
+
+export type GuestWaitingListFormValues = z.infer<typeof guestWaitingListSchema>;

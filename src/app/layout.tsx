@@ -1,6 +1,7 @@
 import {
 	DEFAULT_DESCRIPTION,
 	DEFAULT_TITLE,
+	SITE_NAME,
 	SITE_ORIGIN,
 } from '@constants/seo';
 import { staticPageMetadata } from '@seo/pageMetadata';
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 	metadataBase: new URL(SITE_ORIGIN),
 	title: {
 		default: DEFAULT_TITLE,
-		template: `%s | Szkolenia Glocksklep`,
+		template: `%s | ${SITE_NAME}`,
 	},
 	description: DEFAULT_DESCRIPTION,
 	icons: {

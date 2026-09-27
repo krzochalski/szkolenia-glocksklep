@@ -2,6 +2,7 @@
 
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
+import { OptimizedImage } from '@components';
 import { Box, Button, CatalogCard, Chip, type PriceMode, PriceToggle } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
@@ -14,6 +15,8 @@ type CourseCardProps = {
 	readonly course: Course;
 	readonly imageSrc?: string;
 };
+
+const LIST_THUMB_SIZES = '(max-width: 600px) 72px, 96px';
 
 const detailsButtonSx = {
 	bgcolor: 'primary.main',
@@ -57,13 +60,12 @@ export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
 			layout='list'
 			eyebrow={level}
 			image={
-				showImage ? (
-					<Box
-						component='img'
+				showImage && imageSrc ? (
+					<OptimizedImage
 						src={imageSrc}
 						alt={course.name}
 						loading='lazy'
-						decoding='async'
+						sizes={LIST_THUMB_SIZES}
 						onError={() => setImageFailed(true)}
 						sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
 					/>

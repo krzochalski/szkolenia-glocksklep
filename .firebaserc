@@ -1,5 +1,7 @@
 {
-  "projects": {
-    "default": "szkolenia-glocksklep"
-  }
+	"projects": {
+		"default": "szkolenia-glocksklep"
+	},
+	"targets": {},
+	"etags": {}
 }

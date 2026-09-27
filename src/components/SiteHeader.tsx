@@ -34,8 +34,8 @@ export const SiteHeader = () => {
 	return (
 		<>
 			<UiSiteHeader
-				brand='GlockSklep'
-				brandSublabel='SZKOLENIA'
+				brand='GLOCKSKLEP'
+				brandSublabel='Szkolenia'
 				brandHref={Paths.home}
 				linkComponent={NextLink}
 				navLabel='Główna nawigacja'

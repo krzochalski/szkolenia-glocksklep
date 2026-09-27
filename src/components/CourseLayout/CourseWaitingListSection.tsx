@@ -55,7 +55,11 @@ export const CourseWaitingListSection = ({
 				</Alert>
 			) : null}
 
-			<CourseWaitingListActions course={course} onError={setError} />
+			<CourseWaitingListActions
+				course={course}
+				onError={setError}
+				onSuccess={() => setError(null)}
+			/>
 		</Box>
 	);
 };

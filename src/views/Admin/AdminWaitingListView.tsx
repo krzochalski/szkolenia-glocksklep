@@ -44,7 +44,8 @@ const WaitingInner = () => {
 					<Paper key={entry.id} variant='outlined' sx={{ p: 2 }}>
 						<Typography sx={{ fontWeight: 600 }}>{entry.courseName}</Typography>
 						<Typography variant='body2' color='text.secondary'>
-							{entry.userName} · {entry.email}
+							{entry.guest ? 'Gość' : entry.userName} · {entry.email}
+							{entry.guest ? ' · bez konta' : ''}
 						</Typography>
 						<Button
 							sx={{ mt: 1 }}

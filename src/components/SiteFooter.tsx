@@ -25,7 +25,7 @@ export const SiteFooter = () => (
 				}}
 			>
 				<Typography variant='body2' color='text.secondary'>
-					© {new Date().getFullYear()} Szkolenia Glocksklep
+					© {new Date().getFullYear()} GLOCKSKLEP Szkolenia
 				</Typography>
 				<Stack direction='row' spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
 					<Link component={NextLink} href={Paths.regulamin} underline='hover' color='text.secondary'>

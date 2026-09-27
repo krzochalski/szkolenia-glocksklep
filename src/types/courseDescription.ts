@@ -30,7 +30,13 @@ export interface CourseDescription {
 	headline: [string, string];
 	/** Lead paragraph below the headline */
 	description: string;
-	/** Background image path */
+	/** List-card thumbnail path under `public/` (e.g. `/hero/….webp`) */
+	thumbnail?: string;
+	/** Detail-page hero image path under `public/` */
+	hero?: string;
+	/**
+	 * @deprecated Prefer `thumbnail` / `hero`. Kept for existing Firestore docs.
+	 */
 	background?: string;
 	/** Program modules grid */
 	modules?: CourseModuleData[];
