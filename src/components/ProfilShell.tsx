@@ -3,7 +3,7 @@
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { signOut } from '@services/auth';
-import { Box, Button, ConfirmDialog, Link, Stack, Typography } from '@ui';
+import { Box, Button, ConfirmDialog, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { type ReactNode, useState } from 'react';
@@ -38,7 +38,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	}
 
 	return (
-		<Box sx={{ display: 'flex', gap: { md: 3 }, alignItems: 'flex-start' }}>
+		<Box sx={{ display: 'flex', gap: { md: 3 }, flex: 1, minHeight: 0 }}>
 			<Box
 				component='aside'
 				sx={{
@@ -50,6 +50,8 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 					display: { xs: 'none', md: 'flex' },
 					flexDirection: 'column',
 					gap: 1,
+					bgcolor: 'background.paper',
+					alignSelf: 'stretch',
 				}}
 			>
 				<Typography variant='subtitle1' sx={{ fontWeight: 700 }}>
@@ -58,33 +60,25 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 				<Typography variant='caption' color='text.secondary' sx={{ mb: 2 }}>
 					{user.email}
 				</Typography>
-				<Stack component='nav' spacing={0.5} sx={{ flex: 1 }}>
+				<Stack component='nav' spacing={1} sx={{ flex: 1 }}>
 					{NAV.map((item) => {
 						const active = item.exact
 							? pathname === item.href
 							: pathname === item.href || pathname.startsWith(`${item.href}/`);
 						return (
-							<Link
+							<Button
 								key={item.href}
 								component={NextLink}
 								href={item.href}
-								underline='none'
-								sx={{
-									px: 1.5,
-									py: 1,
-									borderRadius: 1,
-									fontSize: '0.875rem',
-									fontWeight: active ? 700 : 500,
-									color: active ? 'primary.main' : 'text.secondary',
-									bgcolor: active ? 'action.hover' : 'transparent',
-								}}
+								variant={active ? 'contained' : 'outlined'}
+								fullWidth
 							>
 								{item.label}
-							</Link>
+							</Button>
 						);
 					})}
 				</Stack>
-				<Button variant='contained' onClick={() => setLogoutOpen(true)}>
+				<Button variant='contained' fullWidth onClick={() => setLogoutOpen(true)}>
 					Wyloguj
 				</Button>
 			</Box>
