@@ -2,7 +2,7 @@ export const SITE_ORIGIN = 'https://szkolenia.glocksklep.pl';
 export const SITE_NAME = 'GLOCKSKLEP Szkolenia';
 export const SITE_LANG = 'pl';
 export const OG_LOCALE = 'pl_PL';
-export const DEFAULT_OG_IMAGE_PATH = '/hero/ipsc_class.webp';
+export const DEFAULT_OG_IMAGE_PATH = '/og/home.jpg';
 export const META_DESCRIPTION_MAX = 160;
 export const META_TITLE_MAX = 120;
 
