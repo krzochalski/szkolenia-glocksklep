@@ -3,7 +3,6 @@
 import { createTag, updateTag } from '@services/tags';
 import type { Tag } from '@/types/course';
 import {
-	Alert,
 	Button,
 	CircularProgress,
 	DialogActions,
@@ -13,6 +12,7 @@ import {
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
+	MotionAlert,
 	TextField,
 } from '@ui';
 import { useEffect, useState } from 'react';
@@ -67,7 +67,9 @@ export const TagFormDialog = ({ open, tag, onClose, onSaved }: TagFormDialogProp
 					fullWidth
 					helperText={name.trim() ? `Slug: ${toSlug(name)}` : undefined}
 				/>
-				{error ? <Alert severity='error'>{error}</Alert> : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>
 				<Button onClick={onClose} disabled={saving}>

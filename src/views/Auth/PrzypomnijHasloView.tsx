@@ -2,7 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import { sendPasswordReset } from '@services/auth';
-import { Box, Button, Link, Stack, TextField, Typography } from '@ui';
+import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
 import NextLink from 'next/link';
 import { useState } from 'react';
 
@@ -47,11 +47,9 @@ export const PrzypomnijHasloView = () => {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 					/>
-					{error ? (
-						<Typography color='error' variant='body2'>
-							{error}
-						</Typography>
-					) : null}
+					<MotionAlert show={Boolean(error)} severity='error'>
+						{error}
+					</MotionAlert>
 					<Button type='submit' variant='contained' disabled={loading}>
 						Wyślij link
 					</Button>

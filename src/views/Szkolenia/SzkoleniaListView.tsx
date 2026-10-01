@@ -6,7 +6,7 @@ import { resolveCourseThumbnailFrom } from '@/utils/courseImages';
 import { isCourseInactive } from '@/utils/courseDates';
 import { compareCoursesByOrder } from '@/utils/courseOrder';
 import { useQuery } from '@tanstack/react-query';
-import { Box, Typography } from '@ui';
+import { ContentSwap, Stagger, StaggerItem, Typography } from '@ui';
 import { useMemo } from 'react';
 import { CourseCard } from './CourseCard';
 
@@ -63,30 +63,43 @@ export const SzkoleniaListView = () => {
 				Wybierz program i sprawdź dostępne terminy.
 			</Typography>
 
-			{isLoading && (
-				<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>Ładowanie oferty…</Typography>
-			)}
-			{isError && (
-				<Typography color='error' sx={{ fontFamily: '"Space Mono", monospace' }}>
-					Nie udało się załadować katalogu szkoleń.
-				</Typography>
-			)}
-
-			{!isLoading && !isError && sortedCourses.length === 0 && (
-				<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>
-					Brak szkoleń w ofercie.
-				</Typography>
-			)}
-
-			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-				{sortedCourses.map((course) => (
-					<CourseCard
-						key={course.id}
-						course={course}
-						imageSrc={resolveCourseThumbnailFrom(course, descriptionBySlug.get(course.slug))}
-					/>
-				))}
-			</Box>
+			<ContentSwap
+				state={
+					isLoading
+						? 'loading'
+						: isError
+							? 'error'
+							: sortedCourses.length === 0
+								? 'empty'
+								: 'content'
+				}
+			>
+				{isLoading ? (
+					<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>Ładowanie oferty…</Typography>
+				) : isError ? (
+					<Typography color='error' sx={{ fontFamily: '"Space Mono", monospace' }}>
+						Nie udało się załadować katalogu szkoleń.
+					</Typography>
+				) : sortedCourses.length === 0 ? (
+					<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>
+						Brak szkoleń w ofercie.
+					</Typography>
+				) : (
+					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+						{sortedCourses.map((course) => (
+							<StaggerItem key={course.id}>
+								<CourseCard
+									course={course}
+									imageSrc={resolveCourseThumbnailFrom(
+										course,
+										descriptionBySlug.get(course.slug)
+									)}
+								/>
+							</StaggerItem>
+						))}
+					</Stagger>
+				)}
+			</ContentSwap>
 		</>
 	);
 };

@@ -3,7 +3,6 @@
 import { createPlace, updatePlace } from '@services/places';
 import type { Place } from '@/types/course';
 import {
-	Alert,
 	Button,
 	CircularProgress,
 	DialogActions,
@@ -13,6 +12,7 @@ import {
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
+	MotionAlert,
 	TextField,
 	Typography,
 } from '@ui';
@@ -98,7 +98,9 @@ export const PlaceFormDialog = ({ open, place, onClose, onSaved }: PlaceFormDial
 					fullWidth
 					placeholder='https://maps.google.com/...'
 				/>
-				{error ? <Alert severity='error'>{error}</Alert> : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>
 				<Button onClick={onClose} disabled={saving}>

@@ -2,7 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import { confirmPasswordResetWithCode, verifyPasswordResetOobCode } from '@services/auth';
-import { Box, Button, Stack, TextField, Typography } from '@ui';
+import { Box, Button, MotionAlert, Stack, TextField, Typography } from '@ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -58,7 +58,9 @@ export const ResetHaslaView = () => {
 			{verifying ? (
 				<Typography color='text.secondary'>Sprawdzanie linku…</Typography>
 			) : error && !email ? (
-				<Typography color='error'>{error}</Typography>
+				<MotionAlert show severity='error'>
+					{error}
+				</MotionAlert>
 			) : (
 				<Stack
 					component='form'
@@ -104,11 +106,9 @@ export const ResetHaslaView = () => {
 						value={confirm}
 						onChange={(e) => setConfirm(e.target.value)}
 					/>
-					{error ? (
-						<Typography color='error' variant='body2'>
-							{error}
-						</Typography>
-					) : null}
+					<MotionAlert show={Boolean(error)} severity='error'>
+						{error}
+					</MotionAlert>
 					<Button type='submit' variant='contained' disabled={loading}>
 						Zapisz hasło
 					</Button>

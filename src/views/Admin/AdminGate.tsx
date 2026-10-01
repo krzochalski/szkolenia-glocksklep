@@ -1,7 +1,7 @@
 'use client';
 
 import { useAdminGuard } from '@hooks';
-import { Box, CircularProgress } from '@ui';
+import { Box, CircularProgress, ContentSwap } from '@ui';
 import { NotFoundView } from '@views/NotFound/NotFoundView';
 import type { ReactNode } from 'react';
 
@@ -12,17 +12,19 @@ type Props = {
 export const AdminGate = ({ children }: Props) => {
 	const { isAdmin, loading } = useAdminGuard();
 
-	if (loading) {
-		return (
-			<Box sx={{ display: 'flex', justifyContent: 'center', p: 4, minHeight: '100vh' }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
+	const gateState = loading ? 'loading' : !isAdmin ? 'notfound' : 'admin';
 
-	if (!isAdmin) {
-		return <NotFoundView />;
-	}
-
-	return <>{children}</>;
+	return (
+		<ContentSwap state={gateState}>
+			{loading ? (
+				<Box sx={{ display: 'flex', justifyContent: 'center', p: 4, minHeight: '100vh' }}>
+					<CircularProgress />
+				</Box>
+			) : !isAdmin ? (
+				<NotFoundView />
+			) : (
+				children
+			)}
+		</ContentSwap>
+	);
 };

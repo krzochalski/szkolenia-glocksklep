@@ -34,6 +34,7 @@ import {
 	Chip,
 	CircularProgress,
 	ConfirmDialog,
+	ContentSwap,
 	IconButton,
 	Stack,
 	Table,
@@ -257,9 +258,11 @@ const AdminCoursesInner = () => {
 		});
 	};
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack
 				direction='row'
@@ -326,5 +329,7 @@ const AdminCoursesInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

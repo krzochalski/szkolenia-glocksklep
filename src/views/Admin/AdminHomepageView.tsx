@@ -14,10 +14,14 @@ import {
 	Button,
 	CircularProgress,
 	ConfirmDialog,
+	ContentSwap,
 	IconButton,
 	MenuItem,
+	MotionAlert,
 	Paper,
 	Stack,
+	Stagger,
+	StaggerItem,
 	TextField,
 	Typography,
 } from '@ui';
@@ -72,8 +76,6 @@ const HomepageInner = () => {
 			setSavedSnapshot(serialize(next));
 		}
 	}, [data]);
-
-	if (isLoading) return <CircularProgress />;
 
 	const isDirty = serialize(form) !== savedSnapshot;
 
@@ -139,6 +141,10 @@ const HomepageInner = () => {
 	});
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box sx={{ maxWidth: 800 }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
@@ -215,9 +221,10 @@ const HomepageInner = () => {
 			<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
 				Jak pracujemy
 			</Typography>
-			<Stack spacing={2} sx={{ mb: 2 }}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
 				{form.waysOfWorking.map((way, index) => (
-					<Paper key={way.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={way.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack spacing={1.5}>
 							<Stack direction='row' spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
 								<IconButton
@@ -256,8 +263,9 @@ const HomepageInner = () => {
 							/>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 			<Button variant='outlined' startIcon={<AddIcon />} onClick={addWay} sx={{ mb: 3 }}>
 				Dodaj punkt
 			</Button>
@@ -309,11 +317,9 @@ const HomepageInner = () => {
 				/>
 			</Stack>
 
-			{message ? (
-				<Typography color='success.main' variant='body2' sx={{ mb: 1 }}>
-					{message}
-				</Typography>
-			) : null}
+			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
+				{message}
+			</MotionAlert>
 			<Stack direction='row' spacing={1}>
 				<Button variant='contained' disabled={saving || !isDirty} onClick={() => setSaveOpen(true)}>
 					Zapisz
@@ -370,5 +376,7 @@ const HomepageInner = () => {
 				klikniesz „Zapisz”.
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

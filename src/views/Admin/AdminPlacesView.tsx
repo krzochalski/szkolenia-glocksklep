@@ -2,7 +2,18 @@
 
 import { deletePlace, getPlaces } from '@services/places';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useState } from 'react';
 import type { Place } from '@/types/course';
 import { PlaceFormDialog } from './forms/PlaceFormDialog';
@@ -27,9 +38,11 @@ const PlacesInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
 				<Typography variant='h5'>Obiekty</Typography>
@@ -53,9 +66,10 @@ const PlacesInner = () => {
 				}}
 			/>
 
-			<Stack spacing={1}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{places.map((place) => (
-					<Paper key={place.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={place.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Typography sx={{ fontWeight: 600 }}>{place.name}</Typography>
 						<Typography variant='body2' color='text.secondary'>
 							/{place.slug}
@@ -76,8 +90,9 @@ const PlacesInner = () => {
 							</Button>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toDelete)}
@@ -96,5 +111,7 @@ const PlacesInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

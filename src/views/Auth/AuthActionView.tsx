@@ -6,7 +6,7 @@ import {
 	inspectActionCode,
 	verifyPasswordResetOobCode,
 } from '@services/auth';
-import { Box, CircularProgress, Typography } from '@ui';
+import { Box, CircularProgress, MotionAlert, Typography } from '@ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -71,7 +71,9 @@ export const AuthActionView = () => {
 	return (
 		<Box sx={{ px: 2, py: 6, maxWidth: 480, mx: 'auto', textAlign: 'center' }}>
 			{error ? (
-				<Typography color='error'>{error}</Typography>
+				<MotionAlert show severity='error'>
+					{error}
+				</MotionAlert>
 			) : (
 				<>
 					<CircularProgress sx={{ mb: 2 }} />

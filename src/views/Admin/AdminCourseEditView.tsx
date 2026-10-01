@@ -4,7 +4,7 @@ import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
 import { fillPath } from '@/utils/paths';
 import type { CourseFormValues } from '@/utils/schemas';
-import { Box, Button, CircularProgress, Typography } from '@ui';
+import { Box, Button, CircularProgress, ContentSwap, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
@@ -22,23 +22,28 @@ const EditInner = ({ courseId }: Props) => {
 		queryFn: () => getCourse(courseId),
 	});
 
-	if (isLoading) return <CircularProgress />;
-	if (!course) return <Typography>Nie znaleziono kursu.</Typography>;
-
-	const initial: Partial<CourseFormValues> = {
-		name: course.name,
-		slug: course.slug,
-		description: course.description,
-		price: course.price,
-		hours: course.hours,
-		level: course.level,
-		tags: course.tags ?? [],
-		thumbnail: course.thumbnail ?? '',
-		hero: course.hero ?? '',
-		inactive: course.inactive === true,
-	};
+	const initial: Partial<CourseFormValues> | null = course
+		? {
+				name: course.name,
+				slug: course.slug,
+				description: course.description,
+				price: course.price,
+				hours: course.hours,
+				level: course.level,
+				tags: course.tags ?? [],
+				thumbnail: course.thumbnail ?? '',
+				hero: course.hero ?? '',
+				inactive: course.inactive === true,
+			}
+		: null;
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : !course ? 'empty' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : !course || !initial ? (
+				<Typography>Nie znaleziono kursu.</Typography>
+			) : (
 		<Box sx={{ maxWidth: 960 }}>
 			<Button
 				component={NextLink}
@@ -58,5 +63,7 @@ const EditInner = ({ courseId }: Props) => {
 				}}
 			/>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

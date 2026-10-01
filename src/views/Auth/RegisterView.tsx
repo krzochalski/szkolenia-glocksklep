@@ -10,6 +10,7 @@ import {
 	Checkbox,
 	FormControlLabel,
 	Link,
+	MotionAlert,
 	Stack,
 	TextField,
 	Typography,
@@ -110,11 +111,9 @@ export const RegisterView = () => {
 						{errors.terms.message}
 					</Typography>
 				) : null}
-				{error ? (
-					<Typography color='error' variant='body2'>
-						{error}
-					</Typography>
-				) : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 				<Button type='submit' variant='contained' fullWidth disabled={isSubmitting}>
 					Utwórz konto
 				</Button>

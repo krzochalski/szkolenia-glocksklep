@@ -3,7 +3,7 @@
 import { CourseWaitingListActions } from '@/components/CourseWaitingListActions';
 import { useAuthUser } from '@hooks';
 import type { Course, CourseClass } from '@/types/course';
-import { Alert, Box, Typography } from '@ui';
+import { Box, MotionAlert, Typography } from '@ui';
 import { useState } from 'react';
 
 type CourseWaitingListSectionProps = {
@@ -49,11 +49,9 @@ export const CourseWaitingListSection = ({
 				</Typography>
 			</Box>
 
-			{error ? (
-				<Alert severity='error' sx={{ borderRadius: 0, mb: 2 }}>
-					{error}
-				</Alert>
-			) : null}
+			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 2 }}>
+				{error}
+			</MotionAlert>
 
 			<CourseWaitingListActions
 				course={course}

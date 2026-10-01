@@ -9,7 +9,7 @@ import {
 } from '@services/auth';
 import { type LoginFormValues, loginSchema } from '@/utils/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Link, Stack, TextField, Typography } from '@ui';
+import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
 import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -100,11 +100,9 @@ export const LoginView = () => {
 						Zapomniałeś hasła?
 					</Link>
 				</Box>
-				{error ? (
-					<Typography color='error' variant='body2'>
-						{error}
-					</Typography>
-				) : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 				<Button type='submit' variant='contained' fullWidth disabled={isSubmitting}>
 					Zaloguj się
 				</Button>

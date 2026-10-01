@@ -8,7 +8,17 @@ import {
 	seedEnrollmentConfirmationTemplateIfMissing,
 } from '@services/emailTemplates';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, CircularProgress, ConfirmDialog, Stack, TextField, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	MotionAlert,
+	Stack,
+	TextField,
+	Typography,
+} from '@ui';
 import { OpenInNewIcon } from '@ui/icons';
 import { useEffect, useState } from 'react';
 import type { EnrollmentConfirmationWritable } from '@/types/emailTemplate';
@@ -49,8 +59,6 @@ const EnrollmentEmailInner = () => {
 		}
 	}, [data]);
 
-	if (isLoading) return <CircularProgress />;
-
 	const isDirty = serialize(form) !== savedSnapshot;
 
 	const patch = (partial: Partial<EnrollmentConfirmationWritable>) => {
@@ -58,7 +66,11 @@ const EnrollmentEmailInner = () => {
 	};
 
 	return (
-		<Box sx={{ maxWidth: 720 }}>
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
+				<Box sx={{ maxWidth: 720 }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
 				spacing={1}
@@ -120,11 +132,9 @@ const EnrollmentEmailInner = () => {
 				/>
 			</Stack>
 
-			{message ? (
-				<Typography color='success.main' variant='body2' sx={{ mb: 1 }}>
-					{message}
-				</Typography>
-			) : null}
+			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
+				{message}
+			</MotionAlert>
 			<Stack direction='row' spacing={1}>
 				<Button variant='contained' disabled={saving || !isDirty} onClick={() => setSaveOpen(true)}>
 					Zapisz
@@ -182,5 +192,7 @@ const EnrollmentEmailInner = () => {
 				klikniesz „Zapisz”.
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

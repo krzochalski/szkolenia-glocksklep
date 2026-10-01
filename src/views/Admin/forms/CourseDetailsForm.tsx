@@ -5,11 +5,11 @@ import type { Tag } from '@/types/course';
 import { type CourseFormValues, courseSchema } from '@/utils/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-	Alert,
 	Autocomplete,
 	Box,
 	Button,
 	Divider,
+	MotionAlert,
 	Paper,
 	TextField,
 	Typography,
@@ -111,8 +111,12 @@ export const CourseDetailsForm = ({
 						</Box>
 					</Box>
 
-					{error ? <Alert severity='error'>{error}</Alert> : null}
-					{success ? <Alert severity='success'>Zapisano pomyślnie.</Alert> : null}
+					<MotionAlert show={Boolean(error)} severity='error'>
+						{error}
+					</MotionAlert>
+					<MotionAlert show={success} severity='success'>
+						Zapisano pomyślnie.
+					</MotionAlert>
 
 					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 						<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>

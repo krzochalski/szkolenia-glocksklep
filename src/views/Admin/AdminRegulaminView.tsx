@@ -6,7 +6,17 @@ import {
 	saveRegulamin,
 	seedRegulaminIfMissing,
 } from '@services/regulamin';
-import { Box, Button, CircularProgress, ConfirmDialog, Stack, TextField, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	MotionAlert,
+	Stack,
+	TextField,
+	Typography,
+} from '@ui';
 import { OpenInNewIcon } from '@ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -41,12 +51,14 @@ const RegulaminInner = () => {
 		}
 	}, [data]);
 
-	if (isLoading) return <CircularProgress />;
-
 	const isDirty = content !== savedContent;
 
 	return (
-		<Box sx={{ maxWidth: 960 }}>
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
+				<Box sx={{ maxWidth: 960 }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
 				sx={{ mb: 2, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}
@@ -76,11 +88,9 @@ const RegulaminInner = () => {
 				onChange={(e) => setContent(e.target.value)}
 				sx={{ mb: 2, '& textarea': { fontFamily: 'var(--font-mono, monospace)' } }}
 			/>
-			{message ? (
-				<Typography color='success.main' variant='body2' sx={{ mb: 1 }}>
-					{message}
-				</Typography>
-			) : null}
+			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
+				{message}
+			</MotionAlert>
 			<Stack direction='row' spacing={1}>
 				<Button
 					variant='contained'
@@ -137,6 +147,8 @@ const RegulaminInner = () => {
 				Czy na pewno chcesz zastąpić bieżącą treść domyślnym szablonem? Zmiany nie zostaną
 				zapisane, dopóki nie klikniesz „Zapisz”.
 			</ConfirmDialog>
-		</Box>
+				</Box>
+			)}
+		</ContentSwap>
 	);
 };

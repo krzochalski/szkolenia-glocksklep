@@ -5,7 +5,17 @@ import { getCourses, setCourseDateCanceled } from '@services/courses';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft, isFutureDate } from '@/utils/courseDates';
 import { fillPath } from '@/utils/paths';
-import { Box, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AdminDateRowActions } from './AdminDateRowActions';
@@ -77,8 +87,6 @@ const NearestInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	const upcoming = courses
 		.flatMap((course) =>
 			(course.dates ?? [])
@@ -90,13 +98,18 @@ const NearestInner = () => {
 		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Typography variant='h5' gutterBottom>
 				Najbliższe terminy
 			</Typography>
-			<Stack spacing={1.5}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 				{upcoming.map(({ course, date }) => (
-					<Paper key={`${course.id}-${date.id}`} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={`${course.id}-${date.id}`}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack
 							direction={{ xs: 'column', sm: 'row' }}
 							spacing={1}
@@ -125,11 +138,12 @@ const NearestInner = () => {
 							/>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
 				{upcoming.length === 0 ? (
 					<Typography color='text.secondary'>Brak nadchodzących terminów.</Typography>
 				) : null}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toClone)}
@@ -201,5 +215,7 @@ const NearestInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

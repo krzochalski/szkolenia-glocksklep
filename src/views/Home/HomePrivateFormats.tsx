@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert, Box, Button, FeatureTile, HardShadow, Stack, Typography } from '@ui';
+import { Box, Button, FeatureTile, HardShadow, MotionAlert, Stack, Typography } from '@ui';
 import { Groups, PersonOutlined } from '@ui/icons';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -60,11 +60,14 @@ export const HomePrivateFormats = ({ content }: HomePrivateFormatsProps) => {
 				osób.
 			</Typography>
 
-			{successFlash ? (
-				<Alert severity='success' sx={{ mb: 3 }} onClose={() => setSuccessFlash(false)}>
-					Dziękujemy — zgłoszenie zostało wysłane. Odezwiemy się wkrótce.
-				</Alert>
-			) : null}
+			<MotionAlert
+				show={successFlash}
+				severity='success'
+				sx={{ mb: 3 }}
+				onClose={() => setSuccessFlash(false)}
+			>
+				Dziękujemy — zgłoszenie zostało wysłane. Odezwiemy się wkrótce.
+			</MotionAlert>
 
 			<Stack spacing={3}>
 				<FormatCard

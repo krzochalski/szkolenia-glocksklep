@@ -4,7 +4,6 @@ import { createBillingData, updateBillingData } from '@services/billingData';
 import type { BillingData } from '@/types/billingData';
 import type { Instructor } from '@/types/course';
 import {
-	Alert,
 	Box,
 	Button,
 	CircularProgress,
@@ -17,6 +16,7 @@ import {
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
 	MenuItem,
+	MotionAlert,
 	TextField,
 	Typography,
 } from '@ui';
@@ -228,7 +228,9 @@ export const BillingDataFormDialog = ({
 					<TextField label='Stawka VAT (%)' type='number' value={form.vatRate} onChange={set('vatRate')} />
 				</Box>
 
-				{error ? <Alert severity='error'>{error}</Alert> : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>
 				<Button onClick={onClose} disabled={saving}>

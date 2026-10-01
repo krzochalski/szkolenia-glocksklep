@@ -3,7 +3,18 @@
 import { getCourses } from '@services/courses';
 import { getDevelopmentPath } from '@services/developmentPath';
 import type { Course } from '@/types/course';
-import { Box, CircularProgress, Grid, MonoText, PathConnector, Stack, Typography } from '@ui';
+import {
+	Box,
+	CircularProgress,
+	ContentSwap,
+	Grid,
+	MonoText,
+	PathConnector,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { PathStep } from './PathStep';
@@ -53,6 +64,16 @@ export const SciezkaRozwojuView = () => {
 
 	const isLoading = pathLoading || coursesLoading;
 
+	const pathState = isLoading
+		? 'loading'
+		: pathError
+			? 'error'
+			: !pathDoc
+				? 'empty'
+				: pathDoc.paths.length === 0
+					? 'empty'
+					: 'content';
+
 	return (
 		<>
 			<Box>
@@ -85,15 +106,14 @@ export const SciezkaRozwojuView = () => {
 				) : null}
 			</Box>
 
-			{isLoading ? <CircularProgress size={28} /> : null}
-			{pathError ? (
-				<Typography color='error' sx={{ fontFamily: '"Space Mono", monospace' }}>
-					Nie udało się załadować ścieżki rozwoju.
-				</Typography>
-			) : null}
-
-			{!isLoading && !pathError && pathDoc ? (
-				pathDoc.paths.length === 0 ? (
+			<ContentSwap state={pathState}>
+				{isLoading ? (
+					<CircularProgress size={28} />
+				) : pathError ? (
+					<Typography color='error' sx={{ fontFamily: '"Space Mono", monospace' }}>
+						Nie udało się załadować ścieżki rozwoju.
+					</Typography>
+				) : !pathDoc || pathDoc.paths.length === 0 ? (
 					<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>
 						Ścieżka rozwoju zostanie wkrótce uzupełniona.
 					</Typography>
@@ -138,7 +158,7 @@ export const SciezkaRozwojuView = () => {
 									<Stack spacing={0} sx={{ alignItems: 'stretch' }}>
 										{track.levels.map((lvl, levelIdx) => (
 											<Box key={lvl.id}>
-												<Box
+												<Stagger
 													sx={{
 														display: 'grid',
 														gridTemplateColumns:
@@ -157,16 +177,17 @@ export const SciezkaRozwojuView = () => {
 														const label =
 															item.label?.trim() || course?.name || item.courseSlug;
 														return (
-															<PathStep
-																key={item.id}
-																index={item.index}
-																label={label}
-																courseSlug={item.courseSlug}
-																course={course}
-															/>
+															<StaggerItem key={item.id}>
+																<PathStep
+																	index={item.index}
+																	label={label}
+																	courseSlug={item.courseSlug}
+																	course={course}
+																/>
+															</StaggerItem>
 														);
 													})}
-												</Box>
+												</Stagger>
 												{levelIdx < track.levels.length - 1 ? <PathConnector /> : null}
 											</Box>
 										))}
@@ -186,8 +207,8 @@ export const SciezkaRozwojuView = () => {
 							</Grid>
 						))}
 					</Grid>
-				)
-			) : null}
+				)}
+			</ContentSwap>
 		</>
 	);
 };

@@ -13,8 +13,11 @@ import {
 	Button,
 	CircularProgress,
 	ConfirmDialog,
+	ContentSwap,
 	Paper,
 	Stack,
+	Stagger,
+	StaggerItem,
 	Typography,
 } from '@ui';
 import { useState } from 'react';
@@ -47,9 +50,11 @@ const ContactRequestsInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Typography variant='h5' gutterBottom>
 				Zgłoszenia kontaktu
@@ -57,9 +62,10 @@ const ContactRequestsInner = () => {
 			<Typography color='text.secondary' sx={{ mb: 2 }}>
 				Zgłoszenia z formularza „Zostaw kontakt” na stronie głównej.
 			</Typography>
-			<Stack spacing={1}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{entries.map((entry) => (
-					<Paper key={entry.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={entry.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack
 							direction={{ xs: 'column', sm: 'row' }}
 							spacing={1}
@@ -115,11 +121,12 @@ const ContactRequestsInner = () => {
 							</Stack>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
 				{entries.length === 0 ? (
 					<Typography color='text.secondary'>Brak zgłoszeń.</Typography>
 				) : null}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toDelete)}
@@ -138,5 +145,7 @@ const ContactRequestsInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

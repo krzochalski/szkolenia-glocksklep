@@ -7,7 +7,16 @@ import {
 	updateFaqItem,
 } from '@services/faq';
 import type { FaqItem } from '@/types/faq';
-import { Box, Button, Checkbox, CircularProgress, ConfirmDialog, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	Checkbox,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Stack,
+	Typography,
+} from '@ui';
 import { Delete } from '@ui/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -116,12 +125,14 @@ const FaqInner = () => {
 		await invalidate();
 	};
 
-	if (isLoading) return <CircularProgress />;
-
 	const maxOrderForCreate = (category: string) =>
 		(groupedItems[category] ?? []).reduce((max, item) => Math.max(max, item.order), 0);
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack
 				direction='row'
@@ -227,5 +238,7 @@ const FaqInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

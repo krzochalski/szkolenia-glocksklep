@@ -19,10 +19,14 @@ import {
 	Button,
 	CircularProgress,
 	ConfirmDialog,
+	ContentSwap,
 	IconButton,
 	MenuItem,
+	MotionAlert,
 	Paper,
 	Stack,
+	Stagger,
+	StaggerItem,
 	TextField,
 	Typography,
 } from '@ui';
@@ -84,8 +88,6 @@ const SciezkaInner = () => {
 				.map((c) => ({ value: c.slug, label: c.name })),
 		[courses]
 	);
-
-	if (isLoading) return <CircularProgress />;
 
 	const isDirty = serialize({ intro, paths }) !== savedSnapshot;
 
@@ -211,6 +213,10 @@ const SciezkaInner = () => {
 	};
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box sx={{ maxWidth: 960 }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
@@ -244,9 +250,10 @@ const SciezkaInner = () => {
 				sx={{ mb: 3 }}
 			/>
 
-			<Stack spacing={3}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 				{paths.map((path, pathIdx) => (
-					<Paper key={path.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={path.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack
 							direction={{ xs: 'column', sm: 'row' }}
 							sx={{ mb: 2, gap: 1, alignItems: { sm: 'flex-start' } }}
@@ -484,18 +491,17 @@ const SciezkaInner = () => {
 							</Button>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 
 			<Button variant='outlined' startIcon={<AddIcon />} onClick={addPath} sx={{ mt: 2, mb: 3 }}>
 				Dodaj ścieżkę
 			</Button>
 
-			{message ? (
-				<Typography color='success.main' variant='body2' sx={{ mb: 1 }}>
-					{message}
-				</Typography>
-			) : null}
+			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
+				{message}
+			</MotionAlert>
 			<Stack direction='row' spacing={1}>
 				<Button
 					variant='contained'
@@ -563,5 +569,7 @@ const SciezkaInner = () => {
 				zapisane, dopóki nie klikniesz „Zapisz”.
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

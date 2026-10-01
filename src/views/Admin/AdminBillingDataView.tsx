@@ -3,7 +3,18 @@
 import { deleteBillingData, getAllBillingData } from '@services/billingData';
 import { getInstructors } from '@services/instructors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useState } from 'react';
 import type { BillingData } from '@/types/billingData';
 import { BillingDataFormDialog } from './forms/BillingDataFormDialog';
@@ -32,9 +43,11 @@ const BillingInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
 				<Typography variant='h5'>Dane rozliczeniowe</Typography>
@@ -59,11 +72,12 @@ const BillingInner = () => {
 				}}
 			/>
 
-			<Stack spacing={1}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{items.map((item) => {
 					const instructor = instructors.find((i) => i.id === item.instructorId);
 					return (
-						<Paper key={item.id} variant='outlined' sx={{ p: 2 }}>
+						<StaggerItem key={item.id}>
+						<Paper variant='outlined' sx={{ p: 2 }}>
 							<Typography sx={{ fontWeight: 600 }}>{item.name}</Typography>
 							<Typography variant='body2' color='text.secondary'>
 								{instructor?.name ?? item.instructorId} · NIP {item.nip} · {item.bankAccount}
@@ -84,9 +98,10 @@ const BillingInner = () => {
 								</Button>
 							</Stack>
 						</Paper>
+						</StaggerItem>
 					);
 				})}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toDelete)}
@@ -105,5 +120,7 @@ const BillingInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

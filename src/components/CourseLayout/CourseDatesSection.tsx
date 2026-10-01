@@ -6,7 +6,15 @@ import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { useAuthUser } from '@hooks';
 import { getCourseBySlug } from '@services/courses';
 import { getSlotsLeft, isCourseClassCanceled, isCourseInactive, isFutureDate } from '@/utils/courseDates';
-import { Alert, Box, CircularProgress, Typography } from '@ui';
+import {
+	Box,
+	CircularProgress,
+	ContentSwap,
+	MotionAlert,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pl';
@@ -49,6 +57,14 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 		return acc;
 	}, {});
 
+	const datesState = isLoading
+		? 'loading'
+		: !course
+			? 'nocourse'
+			: futureDates.length === 0
+				? 'empty'
+				: 'content';
+
 	return (
 		<Box sx={{ mb: 6 }}>
 			<SectionLabel>Terminy</SectionLabel>
@@ -56,114 +72,113 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 				Dostępne terminy
 			</Typography>
 
-			{error ? (
-				<Alert severity='error' sx={{ borderRadius: 0, mb: 3 }}>
-					{error}
-				</Alert>
-			) : null}
+			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 3 }}>
+				{error}
+			</MotionAlert>
 
-			{isLoading ? (
-				<Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-					<CircularProgress color='primary' size={24} />
-				</Box>
-			) : !course ? (
-				<Typography
-					sx={{
-						color: 'text.secondary',
-						fontFamily: '"Space Mono", monospace',
-						fontSize: '0.75rem',
-						textTransform: 'uppercase',
-						letterSpacing: '0.1em',
-					}}
-				>
-					Chwilowo brak ustalonych terminów.
-				</Typography>
-			) : futureDates.length === 0 ? (
-				<Typography
-					sx={{
-						color: 'text.secondary',
-						fontFamily: '"Space Mono", monospace',
-						fontSize: '0.75rem',
-						textTransform: 'uppercase',
-						letterSpacing: '0.1em',
-					}}
-				>
-					Brak nadchodzących terminów.
-				</Typography>
-			) : (
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-					{Object.entries(datesByMonth).map(([monthKey, dates]) => (
-						<Box key={monthKey}>
-							<Typography
-								sx={{
-									fontFamily: '"Space Mono", monospace',
-									fontSize: '0.625rem',
-									fontWeight: 700,
-									letterSpacing: '0.2em',
-									textTransform: 'uppercase',
-									color: 'primary.main',
-									mb: 2,
-									pl: 0.5,
-								}}
-							>
-								{dayjs(`${monthKey}-01`).format('MMMM YYYY')}
-							</Typography>
-							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-								{dates.map((date) => {
-									const slots = getSlotsLeft(date);
-									const canceled = isCourseClassCanceled(date);
-									return (
-										<Box
-											key={date.id}
-											sx={{
-												display: 'flex',
-												flexDirection: { xs: 'column', sm: 'row' },
-												alignItems: { xs: 'stretch', sm: 'center' },
-												justifyContent: 'space-between',
-												gap: 2,
-												p: 2.5,
-												border: '2px solid',
-												borderColor: 'ink.main',
-												bgcolor: canceled ? 'surface.muted' : 'background.paper',
-											}}
-										>
-											<Box>
-												<Typography sx={{ fontWeight: 700 }}>
-													{dayjs(date.date).format('D MMMM YYYY')} · {date.timeStart}
-												</Typography>
-												<Typography variant='body2' color='text.secondary'>
-													{date.place?.name ?? '—'}
-													{date.instructor?.name
-														? ` · instruktor: ${date.instructor.name}`
-														: ''}
-													{canceled
-														? ' · odwołane'
-														: ` · wolne: ${slots}`}
-												</Typography>
-											</Box>
-											{canceled ? (
-												<Typography
-													variant='body2'
-													color='error.main'
-													sx={{ fontWeight: 600, alignSelf: { sm: 'center' } }}
+			<ContentSwap state={datesState}>
+				{isLoading ? (
+					<Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+						<CircularProgress color='primary' size={24} />
+					</Box>
+				) : !course ? (
+					<Typography
+						sx={{
+							color: 'text.secondary',
+							fontFamily: '"Space Mono", monospace',
+							fontSize: '0.75rem',
+							textTransform: 'uppercase',
+							letterSpacing: '0.1em',
+						}}
+					>
+						Chwilowo brak ustalonych terminów.
+					</Typography>
+				) : futureDates.length === 0 ? (
+					<Typography
+						sx={{
+							color: 'text.secondary',
+							fontFamily: '"Space Mono", monospace',
+							fontSize: '0.75rem',
+							textTransform: 'uppercase',
+							letterSpacing: '0.1em',
+						}}
+					>
+						Brak nadchodzących terminów.
+					</Typography>
+				) : (
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+						{Object.entries(datesByMonth).map(([monthKey, dates]) => (
+							<Box key={monthKey}>
+								<Typography
+									sx={{
+										fontFamily: '"Space Mono", monospace',
+										fontSize: '0.625rem',
+										fontWeight: 700,
+										letterSpacing: '0.2em',
+										textTransform: 'uppercase',
+										color: 'primary.main',
+										mb: 2,
+										pl: 0.5,
+									}}
+								>
+									{dayjs(`${monthKey}-01`).format('MMMM YYYY')}
+								</Typography>
+								<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+									{dates.map((date) => {
+										const slots = getSlotsLeft(date);
+										const canceled = isCourseClassCanceled(date);
+										return (
+											<StaggerItem key={date.id}>
+												<Box
+													sx={{
+														display: 'flex',
+														flexDirection: { xs: 'column', sm: 'row' },
+														alignItems: { xs: 'stretch', sm: 'center' },
+														justifyContent: 'space-between',
+														gap: 2,
+														p: 2.5,
+														border: '2px solid',
+														borderColor: 'ink.main',
+														bgcolor: canceled ? 'surface.muted' : 'background.paper',
+													}}
 												>
-													Odwołane
-												</Typography>
-											) : (
-												<CourseDateActions
-													course={course}
-													date={date}
-													onError={setError}
-												/>
-											)}
-										</Box>
-									);
-								})}
+													<Box>
+														<Typography sx={{ fontWeight: 700 }}>
+															{dayjs(date.date).format('D MMMM YYYY')} · {date.timeStart}
+														</Typography>
+														<Typography variant='body2' color='text.secondary'>
+															{date.place?.name ?? '—'}
+															{date.instructor?.name
+																? ` · instruktor: ${date.instructor.name}`
+																: ''}
+															{canceled ? ' · odwołane' : ` · wolne: ${slots}`}
+														</Typography>
+													</Box>
+													{canceled ? (
+														<Typography
+															variant='body2'
+															color='error.main'
+															sx={{ fontWeight: 600, alignSelf: { sm: 'center' } }}
+														>
+															Odwołane
+														</Typography>
+													) : (
+														<CourseDateActions
+															course={course}
+															date={date}
+															onError={setError}
+														/>
+													)}
+												</Box>
+											</StaggerItem>
+										);
+									})}
+								</Stagger>
 							</Box>
-						</Box>
-					))}
-				</Box>
-			)}
+						))}
+					</Box>
+				)}
+			</ContentSwap>
 
 			{course ? (
 				<CourseWaitingListSection course={course} futureDates={futureDates} />

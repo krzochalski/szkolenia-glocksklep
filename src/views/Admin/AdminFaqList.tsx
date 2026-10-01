@@ -1,7 +1,7 @@
 'use client';
 
 import type { FaqItem } from '@/types/faq';
-import { Box, Checkbox, IconButton, Paper, Tooltip, Typography } from '@ui';
+import { Box, Checkbox, IconButton, Paper, Stagger, StaggerItem, Tooltip, Typography } from '@ui';
 import { ArrowDownward, ArrowUpward, Delete, Edit } from '@ui/icons';
 import { FAQ_CATEGORY_OPTIONS } from './forms/AdminFaqDialog';
 
@@ -43,9 +43,10 @@ export const AdminFaqList = ({
 						{cat.label} ({catItems.length})
 					</Typography>
 
+					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 					{catItems.map((item, idx) => (
+						<StaggerItem key={item.id}>
 						<Paper
-							key={item.id}
 							variant='outlined'
 							sx={{ p: 2, display: 'flex', alignItems: 'flex-start', gap: 2 }}
 						>
@@ -105,7 +106,9 @@ export const AdminFaqList = ({
 								</Tooltip>
 							</Box>
 						</Paper>
+						</StaggerItem>
 					))}
+					</Stagger>
 				</Box>
 			);
 		})}

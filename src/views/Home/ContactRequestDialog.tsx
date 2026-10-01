@@ -18,6 +18,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	HardShadowDialog,
+	MotionAlert,
 	Stack,
 	TextField,
 	Typography,
@@ -155,11 +156,9 @@ export const ContactRequestDialog = ({
 							/>
 						)}
 					/>
-					{error ? (
-						<Typography color='error' variant='body2'>
-							{error}
-						</Typography>
-					) : null}
+					<MotionAlert show={Boolean(error)} severity='error'>
+						{error}
+					</MotionAlert>
 				</Stack>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>

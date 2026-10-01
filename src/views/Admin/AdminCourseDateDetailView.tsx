@@ -15,8 +15,11 @@ import {
 	Button,
 	CircularProgress,
 	ConfirmDialog,
+	ContentSwap,
 	FormControlLabel,
 	Stack,
+	Stagger,
+	StaggerItem,
 	Switch,
 	Typography,
 } from '@ui';
@@ -104,10 +107,13 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-	if (!course || !date) return <Typography>Nie znaleziono terminu.</Typography>;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : !course || !date ? 'empty' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : !course || !date ? (
+				<Typography>Nie znaleziono terminu.</Typography>
+			) : (
 		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 			<Button
 				component={NextLink}
@@ -159,10 +165,10 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 			<Typography variant='h6'>
 				Uczestnicy ({date.participants?.length ?? 0}/{date.slotsMax})
 			</Typography>
-			<Stack spacing={1.5}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 				{(date.participants ?? []).map((p) => (
+					<StaggerItem key={p.id}>
 					<Stack
-						key={p.id}
 						direction={{ xs: 'column', sm: 'row' }}
 						spacing={1}
 						sx={{
@@ -205,11 +211,12 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							Wypisz
 						</Button>
 					</Stack>
+					</StaggerItem>
 				))}
 				{(date.participants?.length ?? 0) === 0 ? (
 					<Typography color='text.secondary'>Brak uczestników.</Typography>
 				) : null}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={cancelOpen}
@@ -326,5 +333,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

@@ -6,7 +6,7 @@ import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import { fillPath } from '@/utils/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@ui';
+import { Box, Button, CircularProgress, ContentSwap, MotionAlert, Paper, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
@@ -73,10 +73,12 @@ const NewDateInner = ({ courseId }: Props) => {
 		[instructors]
 	);
 
-	if (courseLoading) return <CircularProgress />;
-
 	return (
-		<Box sx={{ maxWidth: 960 }}>
+		<ContentSwap state={courseLoading ? 'loading' : 'content'}>
+			{courseLoading ? (
+				<CircularProgress />
+			) : (
+				<Box sx={{ maxWidth: 960 }}>
 			<Button
 				component={NextLink}
 				href={fillPath(Paths.adminCourseAllDates, { courseId })}
@@ -157,7 +159,9 @@ const NewDateInner = ({ courseId }: Props) => {
 							<FormSelect name='_instructorId' label='Instruktor' options={instructorOptions} />
 							<FormSelect name='_placeId' label='Miejsce' options={placeOptions} />
 						</Box>
-						{error ? <Alert severity='error'>{error}</Alert> : null}
+						<MotionAlert show={Boolean(error)} severity='error'>
+							{error}
+						</MotionAlert>
 						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 							<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
 								DODAJ TERMIN
@@ -166,6 +170,8 @@ const NewDateInner = ({ courseId }: Props) => {
 					</Box>
 				</FormProvider>
 			</Paper>
-		</Box>
+				</Box>
+			)}
+		</ContentSwap>
 	);
 };

@@ -5,7 +5,18 @@ import { getCourse, setCourseDateCanceled } from '@services/courses';
 import type { CourseClass } from '@/types/course';
 import { isFutureDate } from '@/utils/courseDates';
 import { fillPath } from '@/utils/paths';
-import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
@@ -78,16 +89,19 @@ const DatesInner = ({ courseId }: Props) => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-	if (!course) return <Typography>Nie znaleziono kursu.</Typography>;
-
-	const dates = course.dates ?? [];
+	const dates = course?.dates ?? [];
 	const futureDates = dates.filter((d) => isFutureDate(d.date));
 	const pastDates = dates.filter((d) => !isFutureDate(d.date));
 	const pending =
 		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
 
 	return (
+		<ContentSwap state={isLoading ? 'loading' : !course ? 'empty' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : !course ? (
+				<Typography>Nie znaleziono kursu.</Typography>
+			) : (
 		<Box>
 			<Stack
 				direction='row'
@@ -209,6 +223,8 @@ const DatesInner = ({ courseId }: Props) => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };
 
@@ -239,9 +255,10 @@ const DateGroup = ({
 			<Typography variant='caption' sx={{ fontWeight: 700, letterSpacing: '0.08em' }}>
 				{title}
 			</Typography>
-			<Stack spacing={1.5} sx={{ mt: 1 }}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
 				{dates.map((date) => (
-					<Paper key={date.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={date.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack
 							direction={{ xs: 'column', sm: 'row' }}
 							spacing={1}
@@ -267,8 +284,9 @@ const DateGroup = ({
 							/>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 		</Box>
 	);
 };

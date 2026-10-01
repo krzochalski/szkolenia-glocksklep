@@ -2,7 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import { completeEmailLinkSignIn, EMAIL_LINK_STORAGE_KEY } from '@services/auth';
-import { Box, Button, Stack, TextField, Typography } from '@ui';
+import { Box, Button, MotionAlert, Stack, TextField, Typography } from '@ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -53,11 +53,9 @@ export const EmailLinkView = () => {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 				/>
-				{error ? (
-					<Typography color='error' variant='body2'>
-						{error}
-					</Typography>
-				) : null}
+				<MotionAlert show={Boolean(error)} severity='error'>
+					{error}
+				</MotionAlert>
 				<Button variant='contained' disabled={loading || !email} onClick={() => void complete()}>
 					Zaloguj
 				</Button>

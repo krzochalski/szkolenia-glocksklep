@@ -1,7 +1,15 @@
 'use client';
 
 import { getInstructors } from '@services/instructors';
-import { Box, CircularProgress, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	CircularProgress,
+	ContentSwap,
+	Paper,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useQuery } from '@tanstack/react-query';
 
 export const ONasView = () => {
@@ -9,6 +17,8 @@ export const ONasView = () => {
 		queryKey: ['instructors'],
 		queryFn: getInstructors,
 	});
+
+	const listState = isLoading ? 'loading' : instructors.length === 0 ? 'empty' : 'content';
 
 	return (
 		<Box sx={{ maxWidth: 800 }}>
@@ -23,23 +33,30 @@ export const ONasView = () => {
 			<Typography variant='h6' gutterBottom>
 				Instruktorzy
 			</Typography>
-			{isLoading ? (
-				<CircularProgress size={28} />
-			) : (
-				<Stack spacing={2}>
-					{instructors.map((instructor) => (
-						<Paper key={instructor.id} variant='outlined' sx={{ p: 2 }}>
-							<Typography sx={{ fontWeight: 700 }}>{instructor.name}</Typography>
-							<Typography variant='body2' color='text.secondary' sx={{ whiteSpace: 'pre-wrap' }}>
-								{instructor.bio}
-							</Typography>
-						</Paper>
-					))}
-					{instructors.length === 0 ? (
-						<Typography color='text.secondary'>Informacje wkrótce.</Typography>
-					) : null}
-				</Stack>
-			)}
+			<ContentSwap state={listState}>
+				{isLoading ? (
+					<CircularProgress size={28} />
+				) : instructors.length === 0 ? (
+					<Typography color='text.secondary'>Informacje wkrótce.</Typography>
+				) : (
+					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+						{instructors.map((instructor) => (
+							<StaggerItem key={instructor.id}>
+								<Paper variant='outlined' sx={{ p: 2 }}>
+									<Typography sx={{ fontWeight: 700 }}>{instructor.name}</Typography>
+									<Typography
+										variant='body2'
+										color='text.secondary'
+										sx={{ whiteSpace: 'pre-wrap' }}
+									>
+										{instructor.bio}
+									</Typography>
+								</Paper>
+							</StaggerItem>
+						))}
+					</Stagger>
+				)}
+			</ContentSwap>
 		</Box>
 	);
 };

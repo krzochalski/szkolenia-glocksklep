@@ -2,7 +2,18 @@
 
 import { adminDeleteUser, adminGetUsers } from '@services/users';
 import type { UserProfile } from '@services/users';
-import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AdminEnrollDialog } from './forms/AdminEnrollDialog';
@@ -26,9 +37,11 @@ const UsersInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack
 				direction='row'
@@ -48,9 +61,10 @@ const UsersInner = () => {
 				}}
 			/>
 
-			<Stack spacing={1}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{users.map((user) => (
-					<Paper key={user.uid} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={user.uid}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
 							<Box>
 								<Typography sx={{ fontWeight: 600 }}>{user.displayName || '—'}</Typography>
@@ -69,8 +83,9 @@ const UsersInner = () => {
 							</Button>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toDelete)}
@@ -89,5 +104,7 @@ const UsersInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

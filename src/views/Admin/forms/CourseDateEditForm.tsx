@@ -5,7 +5,7 @@ import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import type { CourseClass, Instructor, Place } from '@/types/course';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, Box, Button, Paper, Typography } from '@ui';
+import { Box, Button, MotionAlert, Paper, Typography } from '@ui';
 import { useEffect, useState } from 'react';
 import { type Control, FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { cleanDateForFirestore } from './cleanDateForFirestore';
@@ -165,8 +165,12 @@ export const CourseDateEditForm = ({
 						<FormSelect name='_instructorId' label='Instruktor' options={instructorOptions} />
 						<FormSelect name='_placeId' label='Miejsce' options={placeOptions} />
 					</Box>
-					{error ? <Alert severity='error'>{error}</Alert> : null}
-					{success ? <Alert severity='success'>Zapisano pomyślnie.</Alert> : null}
+					<MotionAlert show={Boolean(error)} severity='error'>
+						{error}
+					</MotionAlert>
+					<MotionAlert show={success} severity='success'>
+						Zapisano pomyślnie.
+					</MotionAlert>
 					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
 						<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
 							ZAPISZ TERMIN

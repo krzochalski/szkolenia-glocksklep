@@ -2,7 +2,18 @@
 
 import { deleteTag, getTags } from '@services/tags';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	CircularProgress,
+	ConfirmDialog,
+	ContentSwap,
+	Paper,
+	Stack,
+	Stagger,
+	StaggerItem,
+	Typography,
+} from '@ui';
 import { useState } from 'react';
 import type { Tag } from '@/types/course';
 import { TagFormDialog } from './forms/TagFormDialog';
@@ -27,9 +38,11 @@ const TagsInner = () => {
 		},
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box>
 			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
 				<Typography variant='h5'>Tagi</Typography>
@@ -53,9 +66,10 @@ const TagsInner = () => {
 				}}
 			/>
 
-			<Stack spacing={1}>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{tags.map((tag) => (
-					<Paper key={tag.id} variant='outlined' sx={{ p: 2 }}>
+					<StaggerItem key={tag.id}>
+					<Paper variant='outlined' sx={{ p: 2 }}>
 						<Typography sx={{ fontWeight: 600 }}>{tag.name}</Typography>
 						<Typography variant='body2' color='text.secondary'>
 							/{tag.slug}
@@ -76,8 +90,9 @@ const TagsInner = () => {
 							</Button>
 						</Stack>
 					</Paper>
+					</StaggerItem>
 				))}
-			</Stack>
+			</Stagger>
 
 			<ConfirmDialog
 				open={Boolean(toDelete)}
@@ -96,5 +111,7 @@ const TagsInner = () => {
 				</Typography>
 			</ConfirmDialog>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

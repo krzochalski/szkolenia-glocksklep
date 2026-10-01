@@ -18,15 +18,17 @@ Canonical docs (read before editing UI):
 
 ## Do
 
-1. Import primitives and composites from `@ui`. Icons from `@ui/icons`. (Package name remains `@stayfrosty/ui`; Stayfrosty maps it to `@ui`.)
+1. Import primitives and composites from `@ui`. Icons from `@ui/icons`. Favicons: sync `assets/brand-icons` → `public/`, then `faviconIcons` from `@ui/favicon` (or `@stayfrosty/ui/favicon`). (Package name remains `@stayfrosty/ui`; Stayfrosty maps it to `@ui`.)
 2. Style with `sx` + theme tokens. Repeated brand look → composites, not a one-off copy.
 3. Wrap the tree (and UI tests) with `UiProvider`. Next: `AppRouterCacheProvider` outside `UiProvider`.
 4. Keep routing, data, Next Image, and domain types in the app. Pass slots (`image`, `action`) into composites.
 5. Page body with `maxWidth="xl"`, `py: 4`, and a column `gap: 4` is `PageColumn`. Put extra spacing in `sx`. API: package `README.md` section “Page column”.
+6. Motion: install `motion` peer; use `@ui` helpers (`FadeIn`, `ContentSwap`, `Stagger`, `MotionAlert`, …). See README “Motion”.
 
 ## Do not
 
 - Import `@mui/material`, `@mui/icons-material`, `@emotion/styled`, or `@emotion/react` in app source.
+- Import `motion` / `motion/react` directly for typical enter/exit — use `@ui` motion helpers (escape hatches are re-exported from `@ui` when needed).
 - Use `styled()`, `makeStyles`, or new `.styled.ts` files.
 - Put Next, Redux, Firebase, or shop models inside `@stayfrosty/ui`.
 - Add this package as an isolated pnpm workspace member when `sharedWorkspaceLockfile: false` (duplicate React).

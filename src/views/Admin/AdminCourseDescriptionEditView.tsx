@@ -4,7 +4,7 @@ import {
 	getCourseDescriptionBySlug,
 	saveCourseDescription,
 } from '@services/courseDescriptions';
-import { Box, CircularProgress, Typography } from '@ui';
+import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CourseDescriptionForm } from './forms/CourseDescriptionForm';
 
@@ -21,9 +21,11 @@ const EditInner = ({ slug }: Props) => {
 		queryFn: () => getCourseDescriptionBySlug(slug),
 	});
 
-	if (isLoading) return <CircularProgress />;
-
 	return (
+		<ContentSwap state={isLoading ? 'loading' : 'content'}>
+			{isLoading ? (
+				<CircularProgress />
+			) : (
 		<Box sx={{ maxWidth: 960 }}>
 			<Typography variant='h5' gutterBottom>
 				Opis: /{slug}
@@ -39,5 +41,7 @@ const EditInner = ({ slug }: Props) => {
 				}}
 			/>
 		</Box>
+			)}
+		</ContentSwap>
 	);
 };

@@ -8,6 +8,7 @@ import {
 	Box,
 	Button,
 	CircularProgress,
+	ContentSwap,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
@@ -17,6 +18,7 @@ import {
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
 	MenuItem,
+	MotionAlert,
 	Switch,
 	TextField,
 	Typography,
@@ -105,11 +107,12 @@ export const AdminEnrollDialog = ({ open, onClose, onEnrolled }: Props) => {
 				Zapisz uczestnika
 			</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
-				{loadingData ? (
-					<Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-						<CircularProgress size={24} />
-					</Box>
-				) : (
+				<ContentSwap state={loadingData ? 'loading' : 'content'}>
+					{loadingData ? (
+						<Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+							<CircularProgress size={24} />
+						</Box>
+					) : (
 					<>
 						<Typography variant='body2' color='text.secondary'>
 							Ręczne zapisanie uczestnika na szkolenie.
@@ -189,13 +192,12 @@ export const AdminEnrollDialog = ({ open, onClose, onEnrolled }: Props) => {
 								Ten uczestnik jest już zapisany na ten termin.
 							</Typography>
 						) : null}
-						{error ? (
-							<Typography variant='body2' color='error'>
-								{error}
-							</Typography>
-						) : null}
+						<MotionAlert show={Boolean(error)} severity='error'>
+							{error}
+						</MotionAlert>
 					</>
-				)}
+					)}
+				</ContentSwap>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>
 				<Button onClick={handleClose} disabled={submitting}>
