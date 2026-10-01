@@ -12,7 +12,6 @@ import { Delete } from '@ui/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { AdminFaqList } from './AdminFaqList';
-import { AdminGate } from './AdminGate';
 import {
 	AdminFaqDialog,
 	emptyFaqForm,
@@ -20,11 +19,7 @@ import {
 	FAQ_CATEGORY_OPTIONS,
 } from './forms/AdminFaqDialog';
 
-export const AdminFaqView = () => (
-	<AdminGate>
-		<FaqInner />
-	</AdminGate>
-);
+export const AdminFaqView = () => <FaqInner />;
 
 const toForm = (item: FaqItem): FaqFormData => ({
 	question: item.question,

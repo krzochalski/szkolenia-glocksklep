@@ -10,18 +10,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { AdminDateRowActions } from './AdminDateRowActions';
-import { AdminGate } from './AdminGate';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
 type Props = {
 	readonly courseId: string;
 };
 
-export const AdminCourseDatesView = ({ courseId }: Props) => (
-	<AdminGate>
-		<DatesInner courseId={courseId} />
-	</AdminGate>
-);
+export const AdminCourseDatesView = ({ courseId }: Props) => <DatesInner courseId={courseId} />;
 
 const DatesInner = ({ courseId }: Props) => {
 	const queryClient = useQueryClient();

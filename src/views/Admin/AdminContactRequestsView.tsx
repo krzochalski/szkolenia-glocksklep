@@ -18,13 +18,8 @@ import {
 	Typography,
 } from '@ui';
 import { useState } from 'react';
-import { AdminGate } from './AdminGate';
 
-export const AdminContactRequestsView = () => (
-	<AdminGate>
-		<ContactRequestsInner />
-	</AdminGate>
-);
+export const AdminContactRequestsView = () => <ContactRequestsInner />;
 
 const ContactRequestsInner = () => {
 	const queryClient = useQueryClient();

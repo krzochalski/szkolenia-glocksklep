@@ -6,18 +6,13 @@ import {
 } from '@services/courseDescriptions';
 import { Box, CircularProgress, Typography } from '@ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AdminGate } from './AdminGate';
 import { CourseDescriptionForm } from './forms/CourseDescriptionForm';
 
 type Props = {
 	readonly slug: string;
 };
 
-export const AdminCourseDescriptionEditView = ({ slug }: Props) => (
-	<AdminGate>
-		<EditInner slug={slug} />
-	</AdminGate>
-);
+export const AdminCourseDescriptionEditView = ({ slug }: Props) => <EditInner slug={slug} />;
 
 const EditInner = ({ slug }: Props) => {
 	const queryClient = useQueryClient();

@@ -4,10 +4,11 @@ import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/C
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { getCourseBySlug } from '@services/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
+import { isCourseInactive } from '@/utils/courseDates';
+import { resolveCourseHeroFrom } from '@/utils/courseImages';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
-import { resolveCourseHero } from '@/utils/courseImages';
-import { Box, CircularProgress, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
+import { Box, CircularProgress, Typography } from '@ui';
 
 type Props = {
 	readonly slug: string;
@@ -33,11 +34,22 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 		);
 	}
 
+	if (course && isCourseInactive(course)) {
+		return (
+			<Box sx={{ textAlign: 'center', py: 10 }}>
+				<Typography variant='h4'>Szkolenie nie jest obecnie dostępne</Typography>
+				<Typography color='text.secondary' sx={{ mt: 1 }}>
+					Rejestracja na to szkolenie jest wyłączona.
+				</Typography>
+			</Box>
+		);
+	}
+
 	if (description) {
 		return (
 			<CourseLayout
 				data={mapDescriptionToSchema(description)}
-				hero={resolveCourseHero(description)}
+				hero={resolveCourseHeroFrom(course, description)}
 			/>
 		);
 	}
@@ -58,5 +70,5 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 		slug: course.slug,
 	};
 
-	return <CourseLayout data={data} />;
+	return <CourseLayout data={data} hero={resolveCourseHeroFrom(course, null)} />;
 };

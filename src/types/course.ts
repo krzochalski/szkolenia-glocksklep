@@ -29,6 +29,17 @@ export interface Course {
 	tags: string[];
 	/* Level of proficiency for this date */
 	level: 'basic' | 'intermediate' | 'advanced';
+	/** List-card thumbnail under `public/thumbnails/` (e.g. `/thumbnails/….webp`) */
+	thumbnail?: string;
+	/** Detail-page hero under `public/hero/` (e.g. `/hero/….webp`) */
+	hero?: string;
+	/**
+	 * When true, course stays in admin but is hidden from public catalog
+	 * and clients cannot enroll.
+	 */
+	inactive?: boolean;
+	/** Display order in admin and public catalog (ascending). */
+	order?: number;
 	dates?: CourseClass[];
 }
 

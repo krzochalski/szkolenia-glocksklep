@@ -5,14 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
 import { useState } from 'react';
 import type { Place } from '@/types/course';
-import { AdminGate } from './AdminGate';
 import { PlaceFormDialog } from './forms/PlaceFormDialog';
 
-export const AdminPlacesView = () => (
-	<AdminGate>
-		<PlacesInner />
-	</AdminGate>
-);
+export const AdminPlacesView = () => <PlacesInner />;
 
 const PlacesInner = () => {
 	const queryClient = useQueryClient();

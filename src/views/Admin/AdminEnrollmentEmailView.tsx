@@ -13,15 +13,10 @@ import { OpenInNewIcon } from '@ui/icons';
 import { useEffect, useState } from 'react';
 import type { EnrollmentConfirmationWritable } from '@/types/emailTemplate';
 import { ENROLLMENT_EMAIL_PLACEHOLDERS } from '@/types/emailTemplate';
-import { AdminGate } from './AdminGate';
 
 const serialize = (doc: EnrollmentConfirmationWritable) => JSON.stringify(doc);
 
-export const AdminEnrollmentEmailView = () => (
-	<AdminGate>
-		<EnrollmentEmailInner />
-	</AdminGate>
-);
+export const AdminEnrollmentEmailView = () => <EnrollmentEmailInner />;
 
 const EnrollmentEmailInner = () => {
 	const queryClient = useQueryClient();

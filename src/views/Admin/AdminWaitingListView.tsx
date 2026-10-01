@@ -8,13 +8,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
 import { useState } from 'react';
 import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
-import { AdminGate } from './AdminGate';
 
-export const AdminWaitingListView = () => (
-	<AdminGate>
-		<WaitingInner />
-	</AdminGate>
-);
+export const AdminWaitingListView = () => <WaitingInner />;
 
 const WaitingInner = () => {
 	const queryClient = useQueryClient();

@@ -14,7 +14,6 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { type Control, FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
-import { AdminGate } from './AdminGate';
 import { cleanDateForFirestore } from './forms/cleanDateForFirestore';
 import { type DateEntryValues, dateEntrySchema } from './forms/dateEntrySchema';
 import { FormDatePicker } from './forms/FormDatePicker';
@@ -38,11 +37,7 @@ const BruttoInfo = ({ control }: { control: Control<DateEntryValues> }) => {
 	);
 };
 
-export const AdminCourseDateNewView = ({ courseId }: Props) => (
-	<AdminGate>
-		<NewDateInner courseId={courseId} />
-	</AdminGate>
-);
+export const AdminCourseDateNewView = ({ courseId }: Props) => <NewDateInner courseId={courseId} />;
 
 const NewDateInner = ({ courseId }: Props) => {
 	const router = useRouter();

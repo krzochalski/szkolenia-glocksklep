@@ -6,13 +6,8 @@ import { fillPath } from '@/utils/paths';
 import { Box, CircularProgress, Link, Paper, Stack, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
-import { AdminGate } from './AdminGate';
 
-export const AdminCourseDescriptionsView = () => (
-	<AdminGate>
-		<DescInner />
-	</AdminGate>
-);
+export const AdminCourseDescriptionsView = () => <DescInner />;
 
 const DescInner = () => {
 	const { data: items = [], isLoading } = useQuery({

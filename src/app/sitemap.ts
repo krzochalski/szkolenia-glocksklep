@@ -9,9 +9,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	try {
 		const courses = await getCourses();
-		const courseEntries: MetadataRoute.Sitemap = courses.map((c) => ({
-			url: `${SITE_ORIGIN}/szkolenia/${c.slug}`,
-		}));
+		const courseEntries: MetadataRoute.Sitemap = courses
+			.filter((c) => !c.inactive)
+			.map((c) => ({
+				url: `${SITE_ORIGIN}/szkolenia/${c.slug}`,
+			}));
 		return [...staticEntries, ...courseEntries];
 	} catch {
 		return staticEntries;

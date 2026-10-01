@@ -17,6 +17,8 @@ import {
 import { useEffect, useState } from 'react';
 import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { AutoSlugField, LEVEL_OPTIONS } from './AutoSlugField';
+import { CourseImageFields } from './CourseImageFields';
+import { CourseInactiveField } from './CourseInactiveField';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
 import { SectionTitle } from './SectionTitle';
@@ -93,6 +95,8 @@ export const CourseDetailsForm = ({
 								)}
 							/>
 						</Box>
+						<CourseImageFields />
+						<CourseInactiveField />
 					</Box>
 
 					<Divider />

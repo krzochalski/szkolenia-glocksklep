@@ -25,7 +25,6 @@ import { AddIcon, ArrowDownward, ArrowUpward, Delete, OpenInNewIcon } from '@ui/
 import { useEffect, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { HomepageWayOfWorking, HomepageWritable } from '@/types/homepage';
-import { AdminGate } from './AdminGate';
 
 const serialize = (doc: HomepageWritable) => JSON.stringify(doc);
 
@@ -35,11 +34,7 @@ const emptyWay = (): HomepageWayOfWorking => ({
 	description: '',
 });
 
-export const AdminHomepageView = () => (
-	<AdminGate>
-		<HomepageInner />
-	</AdminGate>
-);
+export const AdminHomepageView = () => <HomepageInner />;
 
 const HomepageInner = () => {
 	const queryClient = useQueryClient();

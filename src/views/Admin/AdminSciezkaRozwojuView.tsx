@@ -30,7 +30,6 @@ import { AddIcon, ArrowDownward, ArrowUpward, Delete, OpenInNewIcon } from '@ui/
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { AdminGate } from './AdminGate';
 
 const serialize = (doc: Pick<DevelopmentPathDocument, 'intro' | 'paths'>) =>
 	JSON.stringify({ intro: doc.intro, paths: doc.paths });
@@ -42,11 +41,7 @@ const cleanStep = (s: DevelopmentPathStep): DevelopmentPathStep => {
 		: { id: s.id, courseSlug: s.courseSlug };
 };
 
-export const AdminSciezkaRozwojuView = () => (
-	<AdminGate>
-		<SciezkaInner />
-	</AdminGate>
-);
+export const AdminSciezkaRozwojuView = () => <SciezkaInner />;
 
 const SciezkaInner = () => {
 	const queryClient = useQueryClient();

@@ -9,7 +9,6 @@ import { Box, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AdminDateRowActions } from './AdminDateRowActions';
-import { AdminGate } from './AdminGate';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
 type DateTarget = {
@@ -17,11 +16,7 @@ type DateTarget = {
 	date: CourseClass;
 };
 
-export const AdminNearestDatesView = () => (
-	<AdminGate>
-		<NearestInner />
-	</AdminGate>
-);
+export const AdminNearestDatesView = () => <NearestInner />;
 
 const NearestInner = () => {
 	const queryClient = useQueryClient();

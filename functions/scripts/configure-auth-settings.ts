@@ -1,6 +1,10 @@
 /**
- * Configure Identity Toolkit: authorized domains + email link sign-in.
+ * Configure Identity Toolkit: authorized domains + email link sign-in + action URL.
  * Uses ADC via firebase-admin (no token printed to stdout).
+ *
+ * Note: Firebase may reject callbackUri updates with EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED.
+ * Password-reset / email-link mails are then sent via Cloud Functions with rewritten links
+ * to https://szkolenia.glocksklep.pl/auth/action.
  */
 import { applicationDefault, getApps, initializeApp } from 'firebase-admin/app';
 
@@ -40,6 +44,7 @@ const main = async () => {
 	const current = (await getRes.json()) as {
 		authorizedDomains?: string[];
 		signIn?: Record<string, unknown>;
+		notification?: { sendEmail?: { callbackUri?: string } };
 	};
 
 	const domains = [...new Set([...(current.authorizedDomains ?? []), ...DOMAINS])];
@@ -67,20 +72,36 @@ const main = async () => {
 
 	console.log('authorizedDomains:', domains.sort().join(', '));
 	console.log('email sign-in enabled (passwordRequired=false → email link OK)');
-	console.log(`Custom action URL target: ${ACTION_URL}`);
 
-	const legacyGet = await fetch(
-		`https://www.googleapis.com/identitytoolkit/v3/relyingparty/getProjectConfig?projectId=${PROJECT}`,
-		{ headers }
-	);
-	if (legacyGet.ok) {
-		const legacy = (await legacyGet.json()) as Record<string, unknown>;
-		console.log('Legacy project config keys:', Object.keys(legacy).join(', '));
-		if ('authorizedDomains' in legacy) {
-			console.log('Legacy authorizedDomains present');
+	const currentCallback = current.notification?.sendEmail?.callbackUri;
+	console.log('Current callbackUri:', currentCallback ?? '(none)');
+
+	if (currentCallback !== ACTION_URL) {
+		const cbRes = await fetch(
+			`${base}?updateMask=${encodeURIComponent('notification.sendEmail.callbackUri')}`,
+			{
+				method: 'PATCH',
+				headers: {
+					...headers,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					notification: { sendEmail: { callbackUri: ACTION_URL } },
+				}),
+			}
+		);
+		if (cbRes.ok) {
+			console.log('callbackUri set to:', ACTION_URL);
+		} else {
+			const body = await cbRes.text();
+			console.warn(
+				`Could not set callbackUri to ${ACTION_URL} (${cbRes.status}). ` +
+					'App uses Cloud Functions auth mail with rewritten links instead.',
+			);
+			console.warn(body);
 		}
 	} else {
-		console.log('Legacy getProjectConfig:', legacyGet.status, await legacyGet.text());
+		console.log('callbackUri already:', ACTION_URL);
 	}
 };
 

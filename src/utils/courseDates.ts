@@ -12,9 +12,14 @@ export const isFutureDate = (dateStr: string): boolean =>
 
 export const isCourseClassCanceled = (date: CourseClass): boolean => date.canceled === true;
 
+export const isCourseInactive = (course: Pick<Course, 'inactive'>): boolean =>
+	course.inactive === true;
+
+/** Public / client enroll surfaces — skips inactive courses and canceled dates. */
 export const getFutureCourseDates = (courses: Course[]): CourseDateEntry[] => {
 	const entries: CourseDateEntry[] = [];
 	for (const course of courses) {
+		if (isCourseInactive(course)) continue;
 		for (const date of course.dates ?? []) {
 			if (isFutureDate(date.date) && !isCourseClassCanceled(date)) {
 				entries.push({ course, date });

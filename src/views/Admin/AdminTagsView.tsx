@@ -5,14 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
 import { useState } from 'react';
 import type { Tag } from '@/types/course';
-import { AdminGate } from './AdminGate';
 import { TagFormDialog } from './forms/TagFormDialog';
 
-export const AdminTagsView = () => (
-	<AdminGate>
-		<TagsInner />
-	</AdminGate>
-);
+export const AdminTagsView = () => <TagsInner />;
 
 const TagsInner = () => {
 	const queryClient = useQueryClient();

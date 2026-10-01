@@ -52,6 +52,9 @@ export const courseSchema = z.object({
 		.positive('Liczba godzin musi być większa od 0'),
 	level: z.enum(['basic', 'intermediate', 'advanced'], { error: 'Wybierz poziom' }),
 	tags: z.array(z.string()).default([]),
+	thumbnail: z.string().optional().default(''),
+	hero: z.string().optional().default(''),
+	inactive: z.boolean().optional().default(false),
 	dates: z
 		.array(
 			z.object({

@@ -1,7 +1,8 @@
 'use client';
 
 import { useAdminGuard } from '@hooks';
-import { Box, CircularProgress, Typography } from '@ui';
+import { Box, CircularProgress } from '@ui';
+import { NotFoundView } from '@views/NotFound/NotFoundView';
 import type { ReactNode } from 'react';
 
 type Props = {
@@ -13,18 +14,14 @@ export const AdminGate = ({ children }: Props) => {
 
 	if (loading) {
 		return (
-			<Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+			<Box sx={{ display: 'flex', justifyContent: 'center', p: 4, minHeight: '100vh' }}>
 				<CircularProgress />
 			</Box>
 		);
 	}
 
 	if (!isAdmin) {
-		return (
-			<Box sx={{ p: 4 }}>
-				<Typography variant='h5'>Nie znaleziono</Typography>
-			</Box>
-		);
+		return <NotFoundView />;
 	}
 
 	return <>{children}</>;

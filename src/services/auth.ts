@@ -1,7 +1,3 @@
-import {
-	emailLinkActionCodeSettings,
-	passwordResetActionCodeSettings,
-} from '@/constants/authActions';
 import { stripUndefined } from '@/utils/common';
 import type { Unsubscribe, User, UserCredential } from 'firebase/auth';
 import {
@@ -17,8 +13,6 @@ import {
 	isSignInWithEmailLink,
 	onAuthStateChanged,
 	reauthenticateWithCredential,
-	sendPasswordResetEmail,
-	sendSignInLinkToEmail,
 	signInWithEmailAndPassword,
 	signInWithEmailLink,
 	signInWithPopup,
@@ -31,6 +25,22 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { firebaseApp } from './firebase';
 import { db } from './firestore';
+
+const postAuthEmail = async (path: '/api/password-reset' | '/api/email-sign-in-link', email: string) => {
+	const res = await fetch(path, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ email }),
+	});
+	if (!res.ok) {
+		const e = await res.json().catch(() => ({}));
+		throw new Error(
+			typeof e === 'object' && e !== null && 'error' in e && typeof e.error === 'string'
+				? e.error
+				: 'Nie udało się wysłać e-maila.'
+		);
+	}
+};
 
 export const auth = getAuth(firebaseApp);
 
@@ -85,12 +95,12 @@ export const registerWithEmail = async (
 		phoneNumber: phone,
 		createdAt: user.metadata.creationTime ?? new Date().toISOString(),
 	});
-	await sendPasswordResetEmail(auth, email, passwordResetActionCodeSettings());
+	await postAuthEmail('/api/password-reset', email);
 	await firebaseSignOut(auth);
 };
 
 export const sendPasswordReset = async (email: string): Promise<void> => {
-	await sendPasswordResetEmail(auth, email, passwordResetActionCodeSettings());
+	await postAuthEmail('/api/password-reset', email);
 };
 
 export const verifyPasswordResetOobCode = async (oobCode: string): Promise<string> => {
@@ -159,7 +169,7 @@ export const completeGoogleRedirectSignIn = async (): Promise<UserCredential | n
 };
 
 export const sendEmailSignInLink = async (email: string): Promise<void> => {
-	await sendSignInLinkToEmail(auth, email, emailLinkActionCodeSettings());
+	await postAuthEmail('/api/email-sign-in-link', email);
 	window.localStorage.setItem(EMAIL_LINK_STORAGE_KEY, email);
 };
 

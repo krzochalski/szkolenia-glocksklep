@@ -1,9 +1,10 @@
 'use client';
 
-import { COURSE_LEVEL_ORDER } from '@constants/courses';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
-import { resolveCourseThumbnail } from '@/utils/courseImages';
+import { resolveCourseThumbnailFrom } from '@/utils/courseImages';
+import { isCourseInactive } from '@/utils/courseDates';
+import { compareCoursesByOrder } from '@/utils/courseOrder';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Typography } from '@ui';
 import { useMemo } from 'react';
@@ -23,24 +24,16 @@ export const SzkoleniaListView = () => {
 		queryFn: getCourseDescriptions,
 	});
 
-	const imageBySlug = useMemo(() => {
-		const map = new Map<string, string>();
-		for (const description of descriptions) {
-			const thumb = resolveCourseThumbnail(description);
-			if (thumb) map.set(description.slug, thumb);
-		}
+	const descriptionBySlug = useMemo(() => {
+		const map = new Map(descriptions.map((d) => [d.slug, d]));
 		return map;
 	}, [descriptions]);
 
 	const sortedCourses = useMemo(
 		() =>
-			[...courses].sort((a, b) => {
-				const byLevel =
-					(COURSE_LEVEL_ORDER[a.level] ?? Number.POSITIVE_INFINITY) -
-					(COURSE_LEVEL_ORDER[b.level] ?? Number.POSITIVE_INFINITY);
-				if (byLevel !== 0) return byLevel;
-				return a.name.localeCompare(b.name, 'pl');
-			}),
+			[...courses]
+				.filter((course) => !isCourseInactive(course))
+				.sort(compareCoursesByOrder),
 		[courses]
 	);
 
@@ -79,7 +72,7 @@ export const SzkoleniaListView = () => {
 				</Typography>
 			)}
 
-			{!isLoading && !isError && courses.length === 0 && (
+			{!isLoading && !isError && sortedCourses.length === 0 && (
 				<Typography sx={{ fontFamily: '"Space Mono", monospace' }}>
 					Brak szkoleń w ofercie.
 				</Typography>
@@ -90,7 +83,7 @@ export const SzkoleniaListView = () => {
 					<CourseCard
 						key={course.id}
 						course={course}
-						imageSrc={imageBySlug.get(course.slug)}
+						imageSrc={resolveCourseThumbnailFrom(course, descriptionBySlug.get(course.slug))}
 					/>
 				))}
 			</Box>

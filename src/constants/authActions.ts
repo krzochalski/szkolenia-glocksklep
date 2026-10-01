@@ -12,6 +12,7 @@ export const authContinueOrigin = (): string => {
 	return process.env.NEXT_PUBLIC_SITE_ORIGIN ?? SITE_ORIGIN;
 };
 
+/** Continue URL payload for Admin SDK ActionCodeSettings (not the email link host). */
 export const passwordResetActionCodeSettings = () => ({
 	url: `${authContinueOrigin()}${Paths.login}?reset=1`,
 	handleCodeInApp: true,
@@ -22,7 +23,12 @@ export const emailLinkActionCodeSettings = () => ({
 	handleCodeInApp: true,
 });
 
-/** Custom email action handler (Firebase Console → Templates → customize action URL). */
+/**
+ * Custom email action handler path.
+ * Password-reset / email-link / verify emails should land on:
+ *   https://szkolenia.glocksklep.pl/auth/action
+ * Firebase Console callbackUri updates are often blocked; Cloud Functions rewrite links here.
+ */
 export const AUTH_ACTION_HANDLER_PATH = '/auth/action';
 
 export const authActionHandlerUrl = (): string =>

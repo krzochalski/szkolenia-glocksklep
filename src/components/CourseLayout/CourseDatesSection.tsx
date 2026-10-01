@@ -5,7 +5,7 @@ import { CourseWaitingListSection } from '@/components/CourseLayout/CourseWaitin
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { useAuthUser } from '@hooks';
 import { getCourseBySlug } from '@services/courses';
-import { getSlotsLeft, isCourseClassCanceled, isFutureDate } from '@/utils/courseDates';
+import { getSlotsLeft, isCourseClassCanceled, isCourseInactive, isFutureDate } from '@/utils/courseDates';
 import { Alert, Box, CircularProgress, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -26,6 +26,10 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 		queryKey: ['course', slug],
 		queryFn: () => getCourseBySlug(slug),
 	});
+
+	if (!isLoading && course && isCourseInactive(course)) {
+		return null;
+	}
 
 	const threeMonthsAhead = dayjs().add(3, 'month').endOf('month');
 	const futureDates = (course?.dates ?? [])

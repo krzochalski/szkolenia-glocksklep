@@ -25,7 +25,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { AdminGate } from './AdminGate';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
 import { removeCourseDate } from './forms/dateMutations';
 
@@ -34,11 +33,7 @@ type Props = {
 	readonly dateId: string;
 };
 
-export const AdminCourseDateDetailView = ({ courseId, dateId }: Props) => (
-	<AdminGate>
-		<DetailInner courseId={courseId} dateId={dateId} />
-	</AdminGate>
-);
+export const AdminCourseDateDetailView = ({ courseId, dateId }: Props) => <DetailInner courseId={courseId} dateId={dateId} />;
 
 const DetailInner = ({ courseId, dateId }: Props) => {
 	const router = useRouter();

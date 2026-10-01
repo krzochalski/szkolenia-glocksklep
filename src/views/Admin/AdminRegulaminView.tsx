@@ -10,18 +10,13 @@ import { Box, Button, CircularProgress, ConfirmDialog, Stack, TextField, Typogra
 import { OpenInNewIcon } from '@ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { AdminGate } from './AdminGate';
 
 const DEFAULT_MARKDOWN = `# Regulamin
 
 Treść regulaminu zostanie uzupełniona.
 `;
 
-export const AdminRegulaminView = () => (
-	<AdminGate>
-		<RegulaminInner />
-	</AdminGate>
-);
+export const AdminRegulaminView = () => <RegulaminInner />;
 
 const RegulaminInner = () => {
 	const queryClient = useQueryClient();

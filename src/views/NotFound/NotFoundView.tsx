@@ -1,19 +1,35 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { Box, Button, Typography } from '@ui';
+import { NotFoundPage, NotFoundPageAction, type NotFoundPageProps } from '@ui';
+import { CalendarMonth, HomeIcon } from '@ui/icons';
 import NextLink from 'next/link';
 
-export const NotFoundView = () => (
-	<Box sx={{ p: 6, textAlign: 'center' }}>
-		<Typography variant='h3' component='h1' gutterBottom>
-			Nie znaleziono
-		</Typography>
-		<Typography color='text.secondary' sx={{ mb: 3 }}>
-			Strona, której szukasz, nie istnieje.
-		</Typography>
-		<Button component={NextLink} href={Paths.home} variant='contained'>
-			Strona główna
-		</Button>
-	</Box>
+type Props = {
+	readonly sx?: NotFoundPageProps['sx'];
+};
+
+export const NotFoundView = ({ sx }: Props) => (
+	<NotFoundPage
+		sx={sx}
+		actions={
+			<>
+				<NotFoundPageAction
+					component={NextLink}
+					href={Paths.home}
+					startIcon={<HomeIcon sx={{ fontSize: '0.875rem' }} />}
+				>
+					POWRÓT DO STRONY GŁÓWNEJ
+				</NotFoundPageAction>
+				<NotFoundPageAction
+					variant='secondary'
+					component={NextLink}
+					href={Paths.najblizszeSzkolenia}
+					startIcon={<CalendarMonth sx={{ fontSize: '0.875rem' }} />}
+				>
+					NAJBLIŻSZE SZKOLENIA
+				</NotFoundPageAction>
+			</>
+		}
+	/>
 );

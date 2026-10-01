@@ -33,6 +33,15 @@ const nextConfig = {
 	turbopack: {
 		resolveAlias: turbopackAlias,
 	},
+	async redirects() {
+		return [
+			{
+				source: '/__/auth/action',
+				destination: '/auth/action',
+				permanent: false,
+			},
+		];
+	},
 	async rewrites() {
 		return [
 			{

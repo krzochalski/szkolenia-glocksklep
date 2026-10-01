@@ -52,6 +52,7 @@ export {
 	getCourse,
 	getCourseBySlug,
 	getCourses,
+	reorderCourses,
 	setCourseDateCanceled,
 	setParticipantPaysByCash,
 	toggleParticipantPaid,

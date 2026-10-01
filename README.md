@@ -73,6 +73,32 @@ Localhost uses the **live** Firebase project (Auth, Firestore, Cloud Functions) 
 pnpm verify   # biome lint + typecheck + unit tests
 ```
 
+## npm scripts
+
+| Script | Description |
+| --- | --- |
+| `pnpm dev` | Lint, then start Next.js on port **3417** |
+| `pnpm build` | Optimize images, lint, then production Next.js build |
+| `pnpm start` | Serve the production build (`next start`) |
+| `pnpm optimize-images` | Generate WebP/responsive thumbnails under `public/` |
+| `pnpm lint` | Biome lint only |
+| `pnpm format` | Lint + write Biome format fixes |
+| `pnpm check` | Biome check with `--write` (lint + format) |
+| `pnpm typecheck` | TypeScript `tsc --noEmit` |
+| `pnpm test` | Lint + Vitest once |
+| `pnpm test:unit` | Vitest once (no lint) |
+| `pnpm test:watch` | Lint + Vitest watch mode |
+| `pnpm verify` | Lint + typecheck + unit tests (CI / agent stop hook) |
+| `pnpm functions:build` | Compile Cloud Functions (`functions/`) |
+| `pnpm deploy:functions` | Build and deploy Functions only |
+| `pnpm deploy:firestore:rules` | Deploy Firestore security rules |
+| `pnpm deploy:auth` | Deploy Auth config (`auth` target) |
+| `pnpm deploy:all` | App build + Functions build, then App Hosting + Functions + Firestore |
+| `pnpm bootstrap:admin` | Create/bootstrap admin user (needs `firebase login` / ADC) |
+| `pnpm configure:auth` | Apply Auth settings via Admin SDK (action URL, etc.) |
+
+`preinstall` runs automatically and ensures the `packages/ui` git submodule is present.
+
 ## Auth Console checklist
 
 Enable **Email/Password**, **Email link**, and **Google**. Authorized domains:
@@ -85,6 +111,8 @@ Enable **Email/Password**, **Email link**, and **Google**. Authorized domains:
 **Custom email action URL** (Authentication → Templates → Customize action URL):
 
 `https://szkolenia.glocksklep.pl/auth/action`
+
+If the Console rejects the change (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`), the app still sends password-reset and email-link messages via Cloud Functions (`/api/password-reset`, `/api/email-sign-in-link`) with links rewritten to that URL. Requires SMTP env on Functions.
 
 This routes password-reset / verify-email links into the app (`/auth/action` → `/reset-hasla`).
 

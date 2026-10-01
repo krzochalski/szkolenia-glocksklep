@@ -28,5 +28,35 @@ export const responsiveImages: Readonly<Record<string, ResponsiveImage>> = {
 		srcSet: '/hero/ipsc_competition-640w.webp 640w, /hero/ipsc_competition.webp 1024w',
 		sizes: '100vw',
 	},
+	'/thumbnails/idpa.webp': {
+		src: '/thumbnails/idpa.webp',
+		srcSet: '/thumbnails/idpa-640w.webp 640w, /thumbnails/idpa.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
+	'/thumbnails/ipsc.webp': {
+		src: '/thumbnails/ipsc.webp',
+		srcSet: '/thumbnails/ipsc-640w.webp 640w, /thumbnails/ipsc.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
+	'/thumbnails/movement-fundamentals-extended.webp': {
+		src: '/thumbnails/movement-fundamentals-extended.webp',
+		srcSet: '/thumbnails/movement-fundamentals-extended-640w.webp 640w, /thumbnails/movement-fundamentals-extended.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
+	'/thumbnails/movement-fundamentals.webp': {
+		src: '/thumbnails/movement-fundamentals.webp',
+		srcSet: '/thumbnails/movement-fundamentals-640w.webp 640w, /thumbnails/movement-fundamentals.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
+	'/thumbnails/pistol-basic-course.webp': {
+		src: '/thumbnails/pistol-basic-course.webp',
+		srcSet: '/thumbnails/pistol-basic-course-640w.webp 640w, /thumbnails/pistol-basic-course.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
+	'/thumbnails/target-focus.webp': {
+		src: '/thumbnails/target-focus.webp',
+		srcSet: '/thumbnails/target-focus-640w.webp 640w, /thumbnails/target-focus.webp 1024w',
+		sizes: '(max-width: 600px) 72px, 96px',
+	},
 } as const;
 

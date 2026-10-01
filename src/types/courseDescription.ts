@@ -30,9 +30,9 @@ export interface CourseDescription {
 	headline: [string, string];
 	/** Lead paragraph below the headline */
 	description: string;
-	/** List-card thumbnail path under `public/` (e.g. `/hero/….webp`) */
+	/** List-card thumbnail under `public/thumbnails/` (e.g. `/thumbnails/….webp`) */
 	thumbnail?: string;
-	/** Detail-page hero image path under `public/` */
+	/** Detail-page hero under `public/hero/` (e.g. `/hero/….webp`) */
 	hero?: string;
 	/**
 	 * @deprecated Prefer `thumbnail` / `hero`. Kept for existing Firestore docs.

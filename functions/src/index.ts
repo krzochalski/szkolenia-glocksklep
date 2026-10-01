@@ -7,6 +7,7 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { onRequest } from 'firebase-functions/v2/https';
 import { z, ZodError } from 'zod';
 
+import { sendEmailSignInMail, sendPasswordResetMail } from './authMail';
 import { runBootstrap } from './bootstrap';
 import {
 	enrollBodySchema,
@@ -22,6 +23,10 @@ initializeApp();
 const app = express();
 app.use(cors({ origin: true }));
 app.use(express.json({ limit: '256kb' }));
+
+const emailBodySchema = z.object({
+	email: z.string().email(),
+});
 
 const bearerUid = async (req: express.Request): Promise<string | null> => {
 	const header = req.get('authorization') ?? '';
@@ -47,6 +52,46 @@ const notifyEnrollmentBodySchema = z.object({
 		name: z.string().min(1),
 		email: z.string().email(),
 	}),
+});
+
+/** Public: password reset email with action URL on szkolenia.glocksklep.pl */
+app.post(['/api/password-reset', '/password-reset'], async (req, res) => {
+	try {
+		const { email } = emailBodySchema.parse(req.body);
+		const result = await sendPasswordResetMail(email);
+		if (!result.ok) {
+			res.status(503).json({ error: 'Nie udało się wysłać e-maila. Spróbuj później.' });
+			return;
+		}
+		res.status(200).json({ ok: true });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowy adres e-mail.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać e-maila.' });
+	}
+});
+
+/** Public: email-link sign-in with action URL on szkolenia.glocksklep.pl */
+app.post(['/api/email-sign-in-link', '/email-sign-in-link'], async (req, res) => {
+	try {
+		const { email } = emailBodySchema.parse(req.body);
+		const result = await sendEmailSignInMail(email);
+		if (!result.ok) {
+			res.status(503).json({ error: 'Nie udało się wysłać e-maila. Spróbuj później.' });
+			return;
+		}
+		res.status(200).json({ ok: true });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowy adres e-mail.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać e-maila.' });
+	}
 });
 
 app.post(['/api/enroll', '/enroll'], async (req, res) => {

@@ -6,14 +6,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
 import { useState } from 'react';
 import type { BillingData } from '@/types/billingData';
-import { AdminGate } from './AdminGate';
 import { BillingDataFormDialog } from './forms/BillingDataFormDialog';
 
-export const AdminBillingDataView = () => (
-	<AdminGate>
-		<BillingInner />
-	</AdminGate>
-);
+export const AdminBillingDataView = () => <BillingInner />;
 
 const BillingInner = () => {
 	const queryClient = useQueryClient();

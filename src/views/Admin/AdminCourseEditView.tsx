@@ -8,18 +8,13 @@ import { Box, Button, CircularProgress, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
-import { AdminGate } from './AdminGate';
 import { CourseDetailsForm } from './forms/CourseDetailsForm';
 
 type Props = {
 	readonly courseId: string;
 };
 
-export const AdminCourseEditView = ({ courseId }: Props) => (
-	<AdminGate>
-		<EditInner courseId={courseId} />
-	</AdminGate>
-);
+export const AdminCourseEditView = ({ courseId }: Props) => <EditInner courseId={courseId} />;
 
 const EditInner = ({ courseId }: Props) => {
 	const { data: course, isLoading } = useQuery({
@@ -38,6 +33,9 @@ const EditInner = ({ courseId }: Props) => {
 		hours: course.hours,
 		level: course.level,
 		tags: course.tags ?? [],
+		thumbnail: course.thumbnail ?? '',
+		hero: course.hero ?? '',
+		inactive: course.inactive === true,
 	};
 
 	return (

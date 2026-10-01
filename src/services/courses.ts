@@ -2,29 +2,47 @@ import {
 	addDoc,
 	collection,
 	deleteDoc,
+	deleteField,
 	doc,
 	getDoc,
 	getDocs,
-	orderBy,
 	query,
 	updateDoc,
 	where,
+	writeBatch,
 } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
 import type { Course, Participant } from '@/types/course';
 import { stripUndefined } from '@/utils/common';
+import { sortCoursesByOrder } from '@/utils/courseOrder';
+import { toOptimizedImagePath } from '@/utils/optimizedImagePath';
 import type { CourseFormValues } from '@/utils/schemas';
 import { auth } from './auth';
 import { db } from './firestore';
 
-const withDateIds = (data: CourseFormValues) =>
-	stripUndefined({
-		...data,
+const normalizeImagePath = (value: string | undefined): string | undefined => {
+	const trimmed = value?.trim();
+	return trimmed ? toOptimizedImagePath(trimmed) : undefined;
+};
+
+const withDateIds = (data: CourseFormValues) => {
+	const { thumbnail, hero, inactive, ...rest } = data;
+	return stripUndefined({
+		...rest,
+		thumbnail: normalizeImagePath(thumbnail),
+		hero: normalizeImagePath(hero),
+		...(inactive ? { inactive: true } : {}),
 		dates: (data.dates ?? []).map((d) => ({ ...d, id: uuid(), participants: [] })),
 	});
+};
 
 export const createCourse = async (data: CourseFormValues): Promise<void> => {
-	await addDoc(collection(db, 'courses'), withDateIds(data));
+	const existing = await getCourses();
+	const maxOrder = existing.reduce((max, c) => Math.max(max, c.order ?? -1), -1);
+	await addDoc(collection(db, 'courses'), {
+		...withDateIds(data),
+		order: maxOrder + 1,
+	});
 };
 
 export const updateCourse = async (id: string, data: CourseFormValues): Promise<void> => {
@@ -38,14 +56,32 @@ export const updateCourse = async (id: string, data: CourseFormValues): Promise<
 					participants: existing?.dates?.[i]?.participants ?? [],
 				}))
 			: (existing?.dates ?? []);
-	const { dates: _dates, ...rest } = data;
-	await updateDoc(doc(db, 'courses', id), stripUndefined({ ...rest, dates }));
+	const { dates: _dates, thumbnail, hero, inactive, ...rest } = data;
+	const thumbnailPath = normalizeImagePath(thumbnail);
+	const heroPath = normalizeImagePath(hero);
+	await updateDoc(doc(db, 'courses', id), {
+		...stripUndefined({ ...rest, dates }),
+		thumbnail: thumbnailPath ?? deleteField(),
+		hero: heroPath ?? deleteField(),
+		inactive: inactive ? true : deleteField(),
+	});
 };
 
 export const getCourses = async (): Promise<Course[]> => {
-	const q = query(collection(db, 'courses'), orderBy('name'));
-	const snap = await getDocs(q);
-	return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Course);
+	const snap = await getDocs(collection(db, 'courses'));
+	return sortCoursesByOrder(
+		snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Course)
+	);
+};
+
+/** Writes contiguous `order` values (0..n-1) for the given course ids. */
+export const reorderCourses = async (orderedIds: string[]): Promise<void> => {
+	if (orderedIds.length === 0) return;
+	const batch = writeBatch(db);
+	for (const [index, id] of orderedIds.entries()) {
+		batch.update(doc(db, 'courses', id), { order: index });
+	}
+	await batch.commit();
 };
 
 export const getCourse = async (id: string): Promise<Course | null> => {

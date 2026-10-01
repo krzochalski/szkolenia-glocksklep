@@ -5,14 +5,9 @@ import type { UserProfile } from '@services/users';
 import { Box, Button, CircularProgress, ConfirmDialog, Paper, Stack, Typography } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { AdminGate } from './AdminGate';
 import { AdminEnrollDialog } from './forms/AdminEnrollDialog';
 
-export const AdminParticipantsView = () => (
-	<AdminGate>
-		<UsersInner />
-	</AdminGate>
-);
+export const AdminParticipantsView = () => <UsersInner />;
 
 const UsersInner = () => {
 	const queryClient = useQueryClient();

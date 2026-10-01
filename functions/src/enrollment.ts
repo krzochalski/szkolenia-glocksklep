@@ -36,6 +36,7 @@ type CourseDate = {
 };
 
 type CourseDoc = {
+	inactive?: boolean;
 	dates?: CourseDate[];
 };
 
@@ -57,6 +58,7 @@ export const enrollInCourseTx = async (
 		const snap = await tx.get(ref);
 		if (!snap.exists) throw new Error('Kurs nie istnieje.');
 		const course = snap.data() as CourseDoc;
+		if (course.inactive) throw new Error('To szkolenie nie jest obecnie dostępne.');
 		const dates = [...(course.dates ?? [])];
 		const idx = dates.findIndex((d) => matchDate(d, input.dateId));
 		if (idx < 0) throw new Error('Termin nie istnieje.');
