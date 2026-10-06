@@ -2,11 +2,22 @@
 
 import { Paths } from '@constants/paths';
 import { sendPasswordReset } from '@services/auth';
+import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
 import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
 import NextLink from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 export const PrzypomnijHasloView = () => {
+	const searchParams = useSearchParams();
+	const redirectParam = searchParams.get('redirect');
+	const termin = searchParams.get('termin');
+	const authRedirect = safeRedirectPath(redirectParam, Paths.profil);
+	const loginHref = withAuthReturnQuery(Paths.login, {
+		redirect: authRedirect,
+		termin,
+	});
+
 	const [email, setEmail] = useState('');
 	const [sent, setSent] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -40,7 +51,7 @@ export const PrzypomnijHasloView = () => {
 					}}
 				>
 					<TextField
-						label='E-mail'
+						label='E-mail *'
 						type='email'
 						fullWidth
 						required
@@ -56,7 +67,7 @@ export const PrzypomnijHasloView = () => {
 				</Stack>
 			)}
 			<Typography variant='body2' sx={{ mt: 3 }}>
-				<Link component={NextLink} href={Paths.login}>
+				<Link component={NextLink} href={loginHref}>
 					Wróć do logowania
 				</Link>
 			</Typography>

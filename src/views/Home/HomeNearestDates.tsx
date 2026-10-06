@@ -82,23 +82,29 @@ export const HomeNearestDates = () => {
 												justifyContent: 'space-between',
 											}}
 										>
-											<Box sx={{ minWidth: 0, flex: 1 }}>
+											<Stack spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
 												<Link
 													component={NextLink}
 													href={fillPath(Paths.coursePage, { slug: course.slug })}
 													underline='hover'
 													variant='h6'
+													sx={{ display: 'block' }}
 												>
 													{course.name}
 												</Link>
-												<Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
+												<Typography
+													variant='body2'
+													component='p'
+													color='text.secondary'
+													sx={{ m: 0 }}
+												>
 													{date.date} · {date.timeStart} · {date.place?.name ?? '—'} · wolne:{' '}
 													{slots}
 												</Typography>
-												<Typography variant='body2' sx={{ mt: 0.5, fontWeight: 600 }}>
+												<Typography variant='body2' component='p' sx={{ m: 0, fontWeight: 600 }}>
 													{formatPlnDisplay(date.customPrice ?? course.price)}
 												</Typography>
-											</Box>
+											</Stack>
 											<CourseDateActions
 												course={course}
 												date={date}

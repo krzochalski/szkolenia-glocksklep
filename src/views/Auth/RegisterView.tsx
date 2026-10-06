@@ -1,9 +1,11 @@
 'use client';
 
+import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
+import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import { Paths } from '@constants/paths';
 import { registerWithEmail } from '@services/auth';
 import { type RegisterFormValues, registerSchema } from '@/utils/schemas';
-import { safeRedirectPath, withRedirectQuery } from '@/utils/paths';
+import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	Box,
@@ -24,7 +26,10 @@ import { Controller, useForm } from 'react-hook-form';
 export const RegisterView = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const redirectTo = safeRedirectPath(searchParams.get('redirect'), Paths.profil);
+	const redirectParam = searchParams.get('redirect');
+	const termin = searchParams.get('termin');
+	const authRedirect = safeRedirectPath(redirectParam, Paths.profil);
+	const hasEnrollment = Boolean(termin);
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -33,6 +38,7 @@ export const RegisterView = () => {
 		formState: { errors, isSubmitting },
 	} = useForm<RegisterFormValues>({
 		resolver: zodResolver(registerSchema),
+		mode: 'onBlur',
 		defaultValues: { fullName: '', email: '', phone: '', terms: false },
 	});
 
@@ -40,7 +46,7 @@ export const RegisterView = () => {
 		setError(null);
 		try {
 			await registerWithEmail(values.email, values.fullName, values.phone);
-			router.push(withRedirectQuery(Paths.kontoUtworzone, redirectTo));
+			router.push(withAuthReturnQuery(Paths.kontoUtworzone, { redirect: authRedirect, termin }));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Błąd rejestracji.');
 		}
@@ -48,9 +54,16 @@ export const RegisterView = () => {
 
 	return (
 		<Box sx={{ px: 2, py: 6, maxWidth: 420, mx: 'auto' }}>
+			{hasEnrollment ? (
+				<AuthModeSwitch active='register' redirect={authRedirect} termin={termin} />
+			) : null}
 			<Typography variant='h4' component='h1' gutterBottom>
 				Rejestracja
 			</Typography>
+			<Typography color='text.secondary' sx={{ mb: 2 }}>
+				Wyślemy Ci link do ustawienia hasła na e-mail.
+			</Typography>
+			<AuthEnrollmentSummary />
 			<Stack component='form' spacing={2} onSubmit={handleSubmit(onSubmit)}>
 				<Controller
 					name='fullName'
@@ -58,8 +71,9 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='Imię i nazwisko'
+							label='Imię i nazwisko *'
 							fullWidth
+							required
 							error={Boolean(errors.fullName)}
 							helperText={errors.fullName?.message}
 						/>
@@ -71,9 +85,10 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='E-mail'
+							label='E-mail *'
 							type='email'
 							fullWidth
+							required
 							error={Boolean(errors.email)}
 							helperText={errors.email?.message}
 						/>
@@ -85,10 +100,11 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='Telefon'
+							label='Telefon *'
 							fullWidth
+							required
 							error={Boolean(errors.phone)}
-							helperText={errors.phone?.message}
+							helperText={errors.phone?.message ?? 'do kontaktu w dniu szkolenia'}
 						/>
 					)}
 				/>
@@ -103,7 +119,8 @@ export const RegisterView = () => {
 									Akceptuję{' '}
 									<Link component={NextLink} href={Paths.regulamin}>
 										regulamin
-									</Link>
+									</Link>{' '}
+									*
 								</>
 							}
 						/>
@@ -121,12 +138,17 @@ export const RegisterView = () => {
 					Utwórz konto
 				</Button>
 			</Stack>
-			<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
-				Masz już konto?{' '}
-				<Link component={NextLink} href={withRedirectQuery(Paths.login, redirectTo)}>
-					Zaloguj się
-				</Link>
-			</Typography>
+			{hasEnrollment ? null : (
+				<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
+					Masz już konto?{' '}
+					<Link
+						component={NextLink}
+						href={withAuthReturnQuery(Paths.login, { redirect: authRedirect, termin })}
+					>
+						Zaloguj się
+					</Link>
+				</Typography>
+			)}
 		</Box>
 	);
 };

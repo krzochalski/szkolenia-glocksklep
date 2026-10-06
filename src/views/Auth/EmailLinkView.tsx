@@ -2,6 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import { completeEmailLinkSignIn, EMAIL_LINK_STORAGE_KEY } from '@services/auth';
+import { takeAuthReturnPath } from '@/utils/paths';
 import { Box, Button, MotionAlert, Stack, TextField, Typography } from '@ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -14,14 +15,15 @@ export const EmailLinkView = () => {
 
 	useEffect(() => {
 		const stored = window.localStorage.getItem(EMAIL_LINK_STORAGE_KEY);
-		if (stored) {
-			setEmail(stored);
-			void completeEmailLinkSignIn(stored)
-				.then(() => router.replace(Paths.profil))
-				.catch(() => {
-					/* użytkownik musi podać e-mail ręcznie */
-				});
-		}
+		if (!stored) return;
+		setEmail(stored);
+		void completeEmailLinkSignIn(stored)
+			.then(() => {
+				router.replace(takeAuthReturnPath(Paths.profil));
+			})
+			.catch(() => {
+				/* użytkownik musi podać e-mail ręcznie */
+			});
 	}, [router]);
 
 	const complete = async () => {
@@ -29,7 +31,7 @@ export const EmailLinkView = () => {
 		setError(null);
 		try {
 			await completeEmailLinkSignIn(email || undefined);
-			router.replace(Paths.profil);
+			router.replace(takeAuthReturnPath(Paths.profil));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Nie udało się dokończyć logowania.');
 		} finally {
@@ -47,9 +49,10 @@ export const EmailLinkView = () => {
 			</Typography>
 			<Stack spacing={2}>
 				<TextField
-					label='E-mail'
+					label='E-mail *'
 					type='email'
 					fullWidth
+					required
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 				/>

@@ -1,15 +1,20 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { Box, Button, brand, Stack, Typography } from '@ui';
+import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
+import { Box, Button, Stack, Typography, brand } from '@ui';
 import NextLink from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { safeRedirectPath, withRedirectQuery } from '@/utils/paths';
 
 export const KontoUtworzoneView = () => {
 	const searchParams = useSearchParams();
-	const redirectTo = safeRedirectPath(searchParams.get('redirect'), Paths.profil);
-	const loginHref = withRedirectQuery(Paths.login, redirectTo);
+	const redirectParam = searchParams.get('redirect');
+	const termin = searchParams.get('termin');
+	const authRedirect = safeRedirectPath(redirectParam, Paths.profil);
+	const loginHref = withAuthReturnQuery(Paths.login, {
+		redirect: authRedirect,
+		termin,
+	});
 
 	return (
 		<Box sx={{ px: 2, py: 6, maxWidth: 560, mx: 'auto' }}>

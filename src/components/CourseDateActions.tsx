@@ -24,22 +24,30 @@ import {
 	Typography,
 } from '@ui';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
-import { fillPath, withRedirectQuery } from '@/utils/paths';
+import { fillPath, withAuthReturnQuery } from '@/utils/paths';
 
 type Props = {
 	readonly course: Course;
 	readonly date: CourseClass;
 	readonly size?: 'small' | 'medium' | 'large';
+	readonly autoPromptEnroll?: boolean;
 	readonly onError?: (message: string) => void;
 	readonly onSuccess?: () => void;
 };
 
 type ConfirmAction = 'enroll' | 'joinWaitlist' | 'leaveWaitlist';
 
-export const CourseDateActions = ({ course, date, size = 'medium', onError, onSuccess }: Props) => {
+export const CourseDateActions = ({
+	course,
+	date,
+	size = 'medium',
+	autoPromptEnroll = false,
+	onError,
+	onSuccess,
+}: Props) => {
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
 	const slots = getSlotsLeft(date);
@@ -47,10 +55,23 @@ export const CourseDateActions = ({ course, date, size = 'medium', onError, onSu
 	const uid = user?.uid;
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 	const [authGateOpen, setAuthGateOpen] = useState(false);
+	const autoPromptedRef = useRef(false);
 
 	const courseUrl = fillPath(Paths.coursePage, { slug: course.slug });
-	const loginHref = withRedirectQuery(Paths.login, courseUrl);
-	const registerHref = withRedirectQuery(Paths.register, courseUrl);
+	const loginHref = withAuthReturnQuery(Paths.login, {
+		redirect: courseUrl,
+		termin: date.id,
+	});
+	const registerHref = withAuthReturnQuery(Paths.register, {
+		redirect: courseUrl,
+		termin: date.id,
+	});
+
+	useEffect(() => {
+		if (!autoPromptEnroll || autoPromptedRef.current || !user || enrolled || slots <= 0) return;
+		autoPromptedRef.current = true;
+		setConfirmAction('enroll');
+	}, [autoPromptEnroll, user, enrolled, slots]);
 
 	const { data: waitingEntries = [] } = useQuery({
 		queryKey: ['waitingList', uid],
@@ -188,11 +209,11 @@ export const CourseDateActions = ({ course, date, size = 'medium', onError, onSu
 				<Button onClick={() => setAuthGateOpen(false)} variant='outlined'>
 					Anuluj
 				</Button>
-				<Button component={NextLink} href={registerHref} variant='outlined'>
-					Załóż konto
-				</Button>
-				<Button component={NextLink} href={loginHref} variant='contained'>
+				<Button component={NextLink} href={loginHref} variant='outlined'>
 					Zaloguj się
+				</Button>
+				<Button component={NextLink} href={registerHref} variant='contained'>
+					Załóż konto
 				</Button>
 			</DialogActions>
 		</HardShadowDialog>

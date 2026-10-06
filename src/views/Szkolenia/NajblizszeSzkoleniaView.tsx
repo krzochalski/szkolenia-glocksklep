@@ -60,8 +60,8 @@ export const NajblizszeSzkoleniaView = () => {
 							</Typography>
 							<Typography variant='body2'>
 								Gdy widać wolne miejsca — <strong>zapisz się</strong> na wybrany termin. Gdy termin
-								jest pełny, dołącz do <strong>listy oczekujących</strong>; odezwiemy się, gdy
-								zwolni się miejsce albo zbierzemy grupę.
+								jest pełny, dołącz do <strong>listy oczekujących</strong>; odezwiemy się, gdy zwolni
+								się miejsce albo zbierzemy grupę.
 							</Typography>
 							<Typography variant='body2'>
 								Można też wpaść na zajęcia indywidualne — będzie nam łatwiej ustalić termin niż
@@ -76,8 +76,8 @@ export const NajblizszeSzkoleniaView = () => {
 
 					{upcoming.length === 0 ? (
 						<Typography color='text.secondary'>
-							Brak nadchodzących terminów na liście. Zapisz się na listę oczekujących przy
-							wybranym szkoleniu albo sprawdź ofertę zajęć indywidualnych na stronie głównej.
+							Brak nadchodzących terminów na liście. Zapisz się na listę oczekujących przy wybranym
+							szkoleniu albo sprawdź ofertę zajęć indywidualnych na stronie głównej.
 						</Typography>
 					) : (
 						<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -94,27 +94,29 @@ export const NajblizszeSzkoleniaView = () => {
 													justifyContent: 'space-between',
 												}}
 											>
-												<Box sx={{ minWidth: 0, flex: 1 }}>
+												<Stack spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
 													<Link
 														component={NextLink}
 														href={fillPath(Paths.coursePage, { slug: course.slug })}
 														underline='hover'
 														variant='h6'
+														sx={{ display: 'block' }}
 													>
 														{course.name}
 													</Link>
 													<Typography
 														variant='body2'
+														component='p'
 														color='text.secondary'
-														sx={{ mt: 0.5 }}
+														sx={{ m: 0 }}
 													>
 														{date.date} · {date.timeStart} · {date.place?.name ?? '—'} · wolne:{' '}
 														{slots}
 													</Typography>
-													<Typography variant='body2' sx={{ mt: 0.5, fontWeight: 600 }}>
+													<Typography variant='body2' component='p' sx={{ m: 0, fontWeight: 600 }}>
 														{formatPlnDisplay(date.customPrice ?? course.price)}
 													</Typography>
-												</Box>
+												</Stack>
 												<CourseDateActions
 													course={course}
 													date={date}

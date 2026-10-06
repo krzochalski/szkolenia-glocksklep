@@ -10,7 +10,7 @@ import { Paths } from '@constants/paths';
 import { Box, Button, Divider, HardShadow, Typography } from '@ui';
 import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 export type { CourseModule, CourseSchemaData } from './CourseLayout.types';
 
@@ -224,7 +224,11 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 				</>
 			) : null}
 
-			{slug ? <CourseDatesSection slug={slug} /> : null}
+			{slug ? (
+				<Suspense fallback={null}>
+					<CourseDatesSection slug={slug} />
+				</Suspense>
+			) : null}
 
 			{hasBringSection ? (
 				<>

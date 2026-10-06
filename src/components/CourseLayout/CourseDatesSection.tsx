@@ -18,7 +18,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import 'dayjs/locale/pl';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 dayjs.locale('pl');
 
@@ -28,6 +29,8 @@ type CourseDatesSectionProps = {
 
 export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 	const user = useAuthUser();
+	const searchParams = useSearchParams();
+	const termin = searchParams.get('termin');
 	const [error, setError] = useState<string | null>(null);
 
 	const { data: course, isLoading } = useQuery({
@@ -35,10 +38,7 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 		queryFn: () => getCourseBySlug(slug),
 	});
 
-	if (!isLoading && course && isCourseInactive(course)) {
-		return null;
-	}
-
+	const inactive = !isLoading && Boolean(course && isCourseInactive(course));
 	const threeMonthsAhead = dayjs().add(3, 'month').endOf('month');
 	const futureDates = (course?.dates ?? [])
 		.filter((d) => {
@@ -64,6 +64,16 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 			: futureDates.length === 0
 				? 'empty'
 				: 'content';
+
+	useEffect(() => {
+		if (inactive || !termin || datesState !== 'content') return;
+		const el = document.getElementById(`termin-${termin}`);
+		el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	}, [inactive, termin, datesState]);
+
+	if (inactive) {
+		return null;
+	}
 
 	return (
 		<Box sx={{ mb: 6 }}>
@@ -127,9 +137,11 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 									{dates.map((date) => {
 										const slots = getSlotsLeft(date);
 										const canceled = isCourseClassCanceled(date);
+										const highlighted = termin === date.id;
 										return (
 											<StaggerItem key={date.id}>
 												<Box
+													id={`termin-${date.id}`}
 													sx={{
 														display: 'flex',
 														flexDirection: { xs: 'column', sm: 'row' },
@@ -138,8 +150,15 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 														gap: 2,
 														p: 2.5,
 														border: '2px solid',
-														borderColor: 'ink.main',
-														bgcolor: canceled ? 'surface.muted' : 'background.paper',
+														borderColor: highlighted ? 'primary.main' : 'ink.main',
+														boxShadow: highlighted
+															? (theme) => `4px 4px 0 ${theme.palette.primary.main}`
+															: undefined,
+														bgcolor: canceled
+															? 'surface.muted'
+															: highlighted
+																? 'surface.muted'
+																: 'background.paper',
 													}}
 												>
 													<Box>
@@ -166,6 +185,7 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 														<CourseDateActions
 															course={course}
 															date={date}
+															autoPromptEnroll={highlighted && Boolean(user)}
 															onError={setError}
 														/>
 													)}

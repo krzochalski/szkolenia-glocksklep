@@ -32,7 +32,9 @@ describe('SiteHeader', () => {
 		expect(about).toHaveAttribute('rel', 'noreferrer');
 		expect(about.querySelector('svg')).toBeTruthy();
 		expect(screen.queryByRole('link', { name: 'Kontakt' })).toBeNull();
-		expect(screen.getAllByRole('link', { name: 'Profil' }).length).toBeGreaterThan(0);
+		const profileLinks = screen.getAllByRole('link', { name: 'Zaloguj' });
+		expect(profileLinks.length).toBeGreaterThan(0);
+		expect(profileLinks[0]).toHaveAttribute('href', '/login?redirect=%2Fprofil');
 	});
 
 	it('marks the current section as active', () => {
@@ -45,7 +47,9 @@ describe('SiteHeader', () => {
 		wrap(<SiteHeader />);
 		expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
 		fireEvent.click(screen.getByRole('button', { name: 'Otwórz nawigację' }));
-		expect(screen.getByRole('dialog', { name: 'Menu' })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: 'Zaloguj' })).toHaveAttribute('href', '/login');
+		const menu = screen.getByRole('dialog', { name: 'Menu' });
+		expect(menu).toBeInTheDocument();
+		expect(menu.querySelector('a[href="/login"]')).toHaveAttribute('href', '/login');
 	});
 });
+

@@ -3,10 +3,11 @@
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { signOut } from '@services/auth';
+import { withRedirectQuery } from '@/utils/paths';
 import { Box, Button, ConfirmDialog, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 
 const NAV = [
 	{ label: 'Profil', href: Paths.profil, exact: true },
@@ -26,16 +27,12 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	const [logoutOpen, setLogoutOpen] = useState(false);
 	const [loggingOut, setLoggingOut] = useState(false);
 
-	if (!user) {
-		return (
-			<Box sx={{ textAlign: 'center' }}>
-				<Typography sx={{ mb: 2 }}>Zaloguj się, aby zobaczyć profil.</Typography>
-				<Button component={NextLink} href={Paths.login} variant='contained'>
-					Zaloguj
-				</Button>
-			</Box>
-		);
-	}
+	useEffect(() => {
+		if (user) return;
+		router.replace(withRedirectQuery(Paths.login, pathname || Paths.profil));
+	}, [user, pathname, router]);
+
+	if (!user) return null;
 
 	return (
 		<Box sx={{ display: 'flex', gap: { md: 3 }, flex: 1, minHeight: 0 }}>

@@ -11,5 +11,6 @@ alwaysApply: true
 - Admin gate: `admins/{uid}` document exists — never client-writable.
 - Clients must **not** update `courses.dates`. Use `/api/enroll` and `/api/unenroll` (Bearer ID token).
 - Browser `/api/*` goes through Next `src/app/api/[...path]` → private Cloud Run `api` (Google ID token). Firebase Bearer is forwarded as `X-Firebase-Authorization`.
+- Gen2 `api` runtime SA (`PROJECT_NUMBER-compute@developer.gserviceaccount.com`) needs `roles/datastore.user` (+ `roles/firebaseauth.admin` for Auth admin APIs). Org policy blocks public invoker.
 - Admin CRUD of courses/dates/CMS uses Firestore with admin rules.
 - Localhost uses the real Firebase project (Auth, Firestore, Cloud Functions) — no emulators. For local `/api` proxy, ADC must mint Cloud Run ID tokens (e.g. App Hosting compute SA impersonation).

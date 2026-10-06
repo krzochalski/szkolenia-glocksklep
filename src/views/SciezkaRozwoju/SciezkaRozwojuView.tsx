@@ -1,8 +1,9 @@
 'use client';
 
+import { PageHeading } from '@components';
 import { getCourses } from '@services/courses';
 import { getDevelopmentPath } from '@services/developmentPath';
-import type { Course } from '@/types/course';
+import { useQuery } from '@tanstack/react-query';
 import {
 	Box,
 	CircularProgress,
@@ -15,8 +16,8 @@ import {
 	StaggerItem,
 	Typography,
 } from '@ui';
-import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import type { Course } from '@/types/course';
 import { PathStep } from './PathStep';
 
 export const SciezkaRozwojuView = () => {
@@ -76,35 +77,7 @@ export const SciezkaRozwojuView = () => {
 
 	return (
 		<>
-			<Box>
-				<Typography
-					variant='h1'
-					sx={{
-						fontSize: { xs: '1.75rem', md: '2.5rem' },
-						textTransform: 'uppercase',
-						letterSpacing: '-0.02em',
-						borderBottom: '3px solid',
-						borderColor: 'ink.main',
-						pb: 1.25,
-					}}
-				>
-					Ścieżka rozwoju
-				</Typography>
-				{pathDoc?.intro ? (
-					<Typography
-						sx={{
-							fontFamily: '"Space Mono", monospace',
-							fontSize: '0.8125rem',
-							color: 'text.secondary',
-							mt: 1.5,
-							maxWidth: 640,
-							lineHeight: 1.55,
-						}}
-					>
-						{pathDoc.intro}
-					</Typography>
-				) : null}
-			</Box>
+			<PageHeading title='Ścieżka rozwoju' description={pathDoc?.intro} />
 
 			<ContentSwap state={pathState}>
 				{isLoading ? (
@@ -174,8 +147,7 @@ export const SciezkaRozwojuView = () => {
 												>
 													{lvl.items.map((item) => {
 														const course = courseBySlug.get(item.courseSlug);
-														const label =
-															item.label?.trim() || course?.name || item.courseSlug;
+														const label = item.label?.trim() || course?.name || item.courseSlug;
 														return (
 															<StaggerItem key={item.id}>
 																<PathStep

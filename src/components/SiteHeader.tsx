@@ -2,6 +2,8 @@
 
 import { isCurrentPath, navigationItems } from '@constants/nav';
 import { Paths } from '@constants/paths';
+import { useAuthUser } from '@hooks';
+import { withRedirectQuery } from '@/utils/paths';
 import { IconButton, SiteHeader as UiSiteHeader } from '@ui';
 import { PersonOutlined } from '@ui/icons';
 import NextLink from 'next/link';
@@ -9,16 +11,21 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { MainMenu } from './MainMenu';
 
-const ProfileButton = () => (
-	<IconButton
-		component={NextLink}
-		href={Paths.profil}
-		aria-label='Profil'
-		sx={{ color: 'primary.main', width: 48, height: 48 }}
-	>
-		<PersonOutlined />
-	</IconButton>
-);
+const ProfileButton = () => {
+	const user = useAuthUser();
+	const href = user ? Paths.profil : withRedirectQuery(Paths.login, Paths.profil);
+
+	return (
+		<IconButton
+			component={NextLink}
+			href={href}
+			aria-label={user ? 'Profil' : 'Zaloguj'}
+			sx={{ color: 'primary.main', width: 48, height: 48 }}
+		>
+			<PersonOutlined />
+		</IconButton>
+	);
+};
 
 export const SiteHeader = () => {
 	const pathname = usePathname();
