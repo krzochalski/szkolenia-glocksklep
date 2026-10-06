@@ -3,6 +3,7 @@
 import { Paths } from '@constants/paths';
 import { registerWithEmail } from '@services/auth';
 import { type RegisterFormValues, registerSchema } from '@/utils/schemas';
+import { safeRedirectPath, withRedirectQuery } from '@/utils/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
 	Box,
@@ -16,12 +17,14 @@ import {
 	Typography,
 } from '@ui';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export const RegisterView = () => {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const redirectTo = safeRedirectPath(searchParams.get('redirect'), Paths.profil);
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -37,7 +40,7 @@ export const RegisterView = () => {
 		setError(null);
 		try {
 			await registerWithEmail(values.email, values.fullName, values.phone);
-			router.push(Paths.kontoUtworzone);
+			router.push(withRedirectQuery(Paths.kontoUtworzone, redirectTo));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Błąd rejestracji.');
 		}
@@ -120,7 +123,7 @@ export const RegisterView = () => {
 			</Stack>
 			<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
 				Masz już konto?{' '}
-				<Link component={NextLink} href={Paths.login}>
+				<Link component={NextLink} href={withRedirectQuery(Paths.login, redirectTo)}>
 					Zaloguj się
 				</Link>
 			</Typography>

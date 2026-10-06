@@ -9,12 +9,25 @@ import {
 	removeFromWaitingList,
 } from '@services/courseWaitingList';
 import { getUserProfile } from '@services/users';
-import type { Course, CourseClass } from '@/types/course';
-import { getSlotsLeft } from '@/utils/courseDates';
-import { Button, ConfirmDialog, Stack, Typography } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+	Button,
+	ConfirmDialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	HardShadowDialog,
+	hardShadowDialogActionsSx,
+	hardShadowDialogContentSx,
+	hardShadowDialogTitleSx,
+	Stack,
+	Typography,
+} from '@ui';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import type { Course, CourseClass } from '@/types/course';
+import { getSlotsLeft } from '@/utils/courseDates';
+import { fillPath, withRedirectQuery } from '@/utils/paths';
 
 type Props = {
 	readonly course: Course;
@@ -26,19 +39,18 @@ type Props = {
 
 type ConfirmAction = 'enroll' | 'joinWaitlist' | 'leaveWaitlist';
 
-export const CourseDateActions = ({
-	course,
-	date,
-	size = 'medium',
-	onError,
-	onSuccess,
-}: Props) => {
+export const CourseDateActions = ({ course, date, size = 'medium', onError, onSuccess }: Props) => {
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
 	const slots = getSlotsLeft(date);
 	const enrolled = date.participants?.some((p) => p.id === user?.uid) ?? false;
 	const uid = user?.uid;
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+	const [authGateOpen, setAuthGateOpen] = useState(false);
+
+	const courseUrl = fillPath(Paths.coursePage, { slug: course.slug });
+	const loginHref = withRedirectQuery(Paths.login, courseUrl);
+	const registerHref = withRedirectQuery(Paths.register, courseUrl);
 
 	const { data: waitingEntries = [] } = useQuery({
 		queryKey: ['waitingList', uid],
@@ -158,6 +170,34 @@ export const CourseDateActions = ({
 		</ConfirmDialog>
 	) : null;
 
+	const authGate = (
+		<HardShadowDialog
+			open={authGateOpen}
+			onClose={() => setAuthGateOpen(false)}
+			fullWidth
+			maxWidth='sm'
+		>
+			<DialogTitle sx={hardShadowDialogTitleSx}>Zapisz się na szkolenie</DialogTitle>
+			<DialogContent sx={hardShadowDialogContentSx}>
+				<Typography>
+					Żeby zająć miejsce na „{course.name}” ({date.date}), zaloguj się albo załóż konto. Potem
+					wrócisz na stronę szkolenia i dokończysz zapis.
+				</Typography>
+			</DialogContent>
+			<DialogActions sx={hardShadowDialogActionsSx}>
+				<Button onClick={() => setAuthGateOpen(false)} variant='outlined'>
+					Anuluj
+				</Button>
+				<Button component={NextLink} href={registerHref} variant='outlined'>
+					Załóż konto
+				</Button>
+				<Button component={NextLink} href={loginHref} variant='contained'>
+					Zaloguj się
+				</Button>
+			</DialogActions>
+		</HardShadowDialog>
+	);
+
 	if (enrolled) {
 		return (
 			<Typography color='success.main' sx={{ fontWeight: 600 }}>
@@ -167,10 +207,21 @@ export const CourseDateActions = ({
 	}
 
 	if (!user) {
+		if (slots <= 0) {
+			return (
+				<Button component={NextLink} href={courseUrl} variant='outlined' size={size}>
+					Lista oczekujących
+				</Button>
+			);
+		}
+
 		return (
-			<Button component={NextLink} href={Paths.login} variant='contained' size={size}>
-				Zaloguj się
-			</Button>
+			<>
+				<Button variant='contained' size={size} onClick={() => setAuthGateOpen(true)}>
+					Zapisz się
+				</Button>
+				{authGate}
+			</>
 		);
 	}
 

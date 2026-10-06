@@ -1,8 +1,8 @@
 'use client';
 
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { completeGoogleRedirectSignIn } from '@services/auth';
 import { queryClient } from '@services/queryClient';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { brand, UiProvider } from '@ui';
 import { type ReactNode, useEffect } from 'react';
@@ -31,6 +31,18 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 							padding: '0 2rem',
 						}}
 						buttonText='Spoko'
+						declineButtonText='Nie zgadzam się'
+						enableDeclineButton
+						declineButtonStyle={{
+							color: brand.ink,
+							background: 'transparent',
+							fontSize: '1rem',
+							border: `2px solid ${brand.borderMuted}`,
+							height: '3rem',
+							minHeight: '48px',
+							padding: '0 1.5rem',
+							marginRight: '0.75rem',
+						}}
 						cookieName='cookiesConsent'
 						expires={150}
 						location='bottom'
@@ -43,7 +55,8 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 							fontWeight: 'bold',
 						}}
 					>
-						Ta strona używa cookies, korzystając z niej zgadzasz się na korzystanie z nich.
+						Ta strona używa cookies. Możesz zaakceptować albo odrzucić — wybór zapisujemy w cookie,
+						żeby nie pytać przy każdej wizycie.
 					</CookieConsent>
 				</QueryClientProvider>
 			</UiProvider>

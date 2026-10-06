@@ -8,6 +8,7 @@ import {
 	signInWithGoogle,
 } from '@services/auth';
 import { type LoginFormValues, loginSchema } from '@/utils/schemas';
+import { safeRedirectPath, withRedirectQuery } from '@/utils/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
 import NextLink from 'next/link';
@@ -19,7 +20,7 @@ export const LoginView = () => {
 	const user = useAuthUser();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const redirectTo = searchParams.get('redirect') || Paths.profil;
+	const redirectTo = safeRedirectPath(searchParams.get('redirect'), Paths.profil);
 	const justReset = searchParams.get('reset') === '1';
 	const [error, setError] = useState<string | null>(null);
 	const [linkSent, setLinkSent] = useState(false);
@@ -35,8 +36,8 @@ export const LoginView = () => {
 	});
 
 	useEffect(() => {
-		if (user) router.replace(Paths.profil);
-	}, [user, router]);
+		if (user) router.replace(redirectTo);
+	}, [user, router, redirectTo]);
 
 	if (user) return null;
 
@@ -161,7 +162,7 @@ export const LoginView = () => {
 
 			<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
 				Nie masz konta?{' '}
-				<Link component={NextLink} href={Paths.register}>
+				<Link component={NextLink} href={withRedirectQuery(Paths.register, redirectTo)}>
 					Zarejestruj się
 				</Link>
 			</Typography>

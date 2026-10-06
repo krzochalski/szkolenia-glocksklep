@@ -22,6 +22,7 @@ import { useState } from 'react';
 import { CourseDateActions } from '@/components/CourseDateActions';
 import { getFutureCourseDates, getSlotsLeft } from '@/utils/courseDates';
 import { fillPath } from '@/utils/paths';
+import { formatPlnDisplay } from '@/utils/pricing';
 
 export const NajblizszeSzkoleniaView = () => {
 	const [error, setError] = useState<string | null>(null);
@@ -58,9 +59,9 @@ export const NajblizszeSzkoleniaView = () => {
 								na to pozwolą.
 							</Typography>
 							<Typography variant='body2'>
-								Aktualnie polecam zapisywać się na <strong>listy oczekujących</strong> pod
-								konkretne zajęcia i poczekać na kontakt w tej sprawie. Gdy zwolni się miejsce albo
-								zbierzemy wystarczającą liczbę chętnych, odezwiemy się.
+								Gdy widać wolne miejsca — <strong>zapisz się</strong> na wybrany termin. Gdy termin
+								jest pełny, dołącz do <strong>listy oczekujących</strong>; odezwiemy się, gdy
+								zwolni się miejsce albo zbierzemy grupę.
 							</Typography>
 							<Typography variant='body2'>
 								Można też wpaść na zajęcia indywidualne — będzie nam łatwiej ustalić termin niż
@@ -93,7 +94,7 @@ export const NajblizszeSzkoleniaView = () => {
 													justifyContent: 'space-between',
 												}}
 											>
-												<Box>
+												<Box sx={{ minWidth: 0, flex: 1 }}>
 													<Link
 														component={NextLink}
 														href={fillPath(Paths.coursePage, { slug: course.slug })}
@@ -102,12 +103,16 @@ export const NajblizszeSzkoleniaView = () => {
 													>
 														{course.name}
 													</Link>
-													<Typography variant='body2' color='text.secondary'>
+													<Typography
+														variant='body2'
+														color='text.secondary'
+														sx={{ mt: 0.5 }}
+													>
 														{date.date} · {date.timeStart} · {date.place?.name ?? '—'} · wolne:{' '}
 														{slots}
 													</Typography>
-													<Typography variant='body2'>
-														{(date.customPrice ?? course.price).toFixed(2)} zł
+													<Typography variant='body2' sx={{ mt: 0.5, fontWeight: 600 }}>
+														{formatPlnDisplay(date.customPrice ?? course.price)}
 													</Typography>
 												</Box>
 												<CourseDateActions

@@ -26,9 +26,9 @@ export const HomeView = () => {
 					<HomeHero content={data} />
 					<Alert severity='warning' sx={{ borderRadius: 0 }}>
 						Mamy już jesień, więc będzie szybko ciemno, będzie zimno i prawdopodobnie w każdy
-						weekend będzie padać&nbsp;:) Aktualnie polecam zapisywać się na listy oczekujących pod
-						konkretne zajęcia i poczekać na kontakt w tej sprawie. Można też wpaść na zajęcia
-						indywidualne.
+						weekend będzie padać&nbsp;:) Gdy jest wolne miejsce — zapisz się na termin poniżej.
+						Gdy termin jest pełny, zostaw kontakt na liście oczekujących. Można też wpaść na
+						zajęcia indywidualne.
 					</Alert>
 					<HomeMissionAndWays content={data} />
 					<HomeGrowthPathTeaser content={data} />
