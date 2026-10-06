@@ -9,11 +9,18 @@ import {
 	Button,
 	ConfirmDialog,
 	m,
+	mobileStickyContentPb,
 	motionTransition,
 	Stack,
 	Typography,
 	useReducedMotion,
 } from '@ui';
+import {
+	CalendarMonthIcon,
+	EventAvailableIcon,
+	HowToRegIcon,
+	PersonOutlined,
+} from '@ui/icons';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -25,10 +32,34 @@ import {
 } from 'react';
 
 const NAV = [
-	{ label: 'Profil', href: Paths.profil, exact: true },
-	{ label: 'Moje szkolenia', href: Paths.mojeShkolenia, exact: false },
-	{ label: 'Harmonogram', href: Paths.harmonogram, exact: false },
-	{ label: 'Lista oczekujących', href: Paths.listaOczekujacych, exact: true },
+	{
+		label: 'Profil',
+		shortLabel: 'Profil',
+		href: Paths.profil,
+		exact: true,
+		icon: PersonOutlined,
+	},
+	{
+		label: 'Moje szkolenia',
+		shortLabel: 'Szkolenia',
+		href: Paths.mojeShkolenia,
+		exact: false,
+		icon: EventAvailableIcon,
+	},
+	{
+		label: 'Harmonogram',
+		shortLabel: 'Terminy',
+		href: Paths.harmonogram,
+		exact: false,
+		icon: CalendarMonthIcon,
+	},
+	{
+		label: 'Lista oczekujących',
+		shortLabel: 'Oczekujące',
+		href: Paths.listaOczekujacych,
+		exact: true,
+		icon: HowToRegIcon,
+	},
 ] as const;
 
 type ProfilShellProps = {
@@ -81,6 +112,8 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	}, [pathname]);
 
 	if (!user) return null;
+
+	const openLogout = () => setLogoutOpen(true);
 
 	return (
 		<Box sx={{ display: 'flex', gap: { md: 3 }, flex: 1, minHeight: 0 }}>
@@ -163,11 +196,80 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 						);
 					})}
 				</Stack>
-				<Button variant='contained' fullWidth onClick={() => setLogoutOpen(true)}>
+				<Button variant='contained' fullWidth onClick={openLogout}>
 					Wyloguj
 				</Button>
 			</Box>
-			<Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>
+			<Box sx={{ flex: 1, minWidth: 0, pb: { xs: mobileStickyContentPb.xs, md: 0 } }}>
+				{children}
+			</Box>
+			<Box
+				component='nav'
+				aria-label='Nawigacja profilu'
+				sx={{
+					display: { xs: 'flex', md: 'none' },
+					position: 'fixed',
+					left: 0,
+					right: 0,
+					bottom: 0,
+					zIndex: 20,
+					bgcolor: 'background.paper',
+					borderTop: '3px solid',
+					borderColor: 'ink.main',
+					pt: 0.75,
+					pb: 'max(8px, env(safe-area-inset-bottom))',
+					px: 0.5,
+					justifyContent: 'space-around',
+					alignItems: 'stretch',
+					gap: 0.25,
+				}}
+			>
+				{NAV.map((item) => {
+					const active = isNavActive(pathname, item);
+					const Icon = item.icon;
+					return (
+						<Box
+							key={item.href}
+							component={NextLink}
+							href={item.href}
+							aria-label={item.label}
+							aria-current={active ? 'page' : undefined}
+							sx={{
+								flex: 1,
+								minWidth: 0,
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								justifyContent: 'center',
+								gap: 0.25,
+								py: 0.75,
+								px: 0.5,
+								textDecoration: 'none',
+								color: active ? 'primary.main' : 'text.secondary',
+								fontFamily: '"Space Grotesk", sans-serif',
+								fontSize: '0.625rem',
+								fontWeight: 700,
+								letterSpacing: '0.04em',
+								textTransform: 'uppercase',
+								lineHeight: 1.2,
+								textAlign: 'center',
+								borderTop: '3px solid',
+								borderColor: active ? 'primary.main' : 'transparent',
+								mt: '-3px',
+								'&:hover': {
+									color: 'ink.main',
+									bgcolor: 'surface.muted',
+								},
+							}}
+						>
+							<Icon sx={{ fontSize: 22 }} aria-hidden />
+							<Box component='span' sx={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+								{item.shortLabel}
+							</Box>
+						</Box>
+					);
+				})}
+			</Box>
 			<ConfirmDialog
 				open={logoutOpen}
 				title='Potwierdź wylogowanie'

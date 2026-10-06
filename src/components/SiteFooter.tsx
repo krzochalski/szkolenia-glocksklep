@@ -1,19 +1,26 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { Box, Container, Link, Stack, Typography } from '@ui';
+import { Box, type BoxProps, Container, Link, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 
-export const SiteFooter = () => (
+type SiteFooterProps = {
+	readonly sx?: BoxProps['sx'];
+};
+
+export const SiteFooter = ({ sx }: SiteFooterProps) => (
 	<Box
 		component='footer'
-		sx={{
-			mt: 'auto',
-			borderTop: 1,
-			borderColor: 'divider',
-			py: 3,
-			bgcolor: 'background.subtle',
-		}}
+		sx={[
+			{
+				mt: 'auto',
+				borderTop: 1,
+				borderColor: 'divider',
+				py: 3,
+				bgcolor: 'background.subtle',
+			},
+			...(Array.isArray(sx) ? sx : [sx]),
+		]}
 	>
 		<Container maxWidth='xl'>
 			<Stack

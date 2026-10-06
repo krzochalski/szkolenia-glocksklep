@@ -23,13 +23,22 @@ const PublicBody = ({ children }: PublicLayoutProps) => {
 };
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
+	const pathname = usePathname();
+	const hideFooterForProfilNav = isProfilPath(pathname);
+
 	return (
 		<Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 			<SiteHeader />
 			<PageColumn component='main' sx={{ flex: 1 }}>
 				<PublicBody>{children}</PublicBody>
 			</PageColumn>
-			<SiteFooter />
+			<SiteFooter
+				sx={
+					hideFooterForProfilNav
+						? { display: { xs: 'none', md: 'block' } }
+						: undefined
+				}
+			/>
 		</Box>
 	);
 };

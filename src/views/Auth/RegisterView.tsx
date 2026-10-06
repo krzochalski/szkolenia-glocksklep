@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { registerWithEmail } from '@services/auth';
 import {
 	Box,
-	Button,
 	Checkbox,
 	FormControlLabel,
 	Link,
@@ -18,6 +17,7 @@ import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { AuthBusyButton } from '@/components/AuthBusyButton';
 import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
 import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
@@ -134,9 +134,15 @@ export const RegisterView = () => {
 				<MotionAlert show={Boolean(error)} severity='error'>
 					{error}
 				</MotionAlert>
-				<Button type='submit' variant='contained' fullWidth disabled={isSubmitting}>
-					Utwórz konto
-				</Button>
+				<AuthBusyButton
+					type='submit'
+					variant='contained'
+					fullWidth
+					busy={isSubmitting}
+					label='Utwórz konto'
+					busyLabel='Tworzenie konta…'
+					slowHint='Tworzymy Twoje konto — pozostań na tej stronie.'
+				/>
 			</Stack>
 			{hasEnrollment ? null : (
 				<Typography

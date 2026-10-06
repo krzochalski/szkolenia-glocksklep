@@ -84,8 +84,15 @@ export const sendPasswordResetMail = async (
 			typeof err === 'object' && err !== null && 'code' in err
 				? String((err as { code: string }).code)
 				: '';
-		// User not found / invalid email → still report success to the client
-		if (code === 'auth/user-not-found' || code === 'auth/invalid-email') {
+		const message = err instanceof Error ? err.message : String(err);
+		// User not found / invalid email → still report success (no account enumeration).
+		// With improved email privacy, missing users often surface as auth/internal-error
+		// ("Unable to create the email action link") instead of auth/user-not-found.
+		if (
+			code === 'auth/user-not-found' ||
+			code === 'auth/invalid-email' ||
+			(code === 'auth/internal-error' && message.includes('Unable to create the email action link'))
+		) {
 			return { ok: true };
 		}
 		console.error('sendPasswordResetMail', err);

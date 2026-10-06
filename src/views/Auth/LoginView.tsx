@@ -9,6 +9,7 @@ import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { AuthBusyButton } from '@/components/AuthBusyButton';
 import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
 import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import {
@@ -34,6 +35,8 @@ export const LoginView = () => {
 	const [method, setMethod] = useState<LoginMethod>('password');
 	const [error, setError] = useState<string | null>(null);
 	const [linkSent, setLinkSent] = useState(false);
+	const [linkLoading, setLinkLoading] = useState(false);
+	const [googleLoading, setGoogleLoading] = useState(false);
 
 	const {
 		control,
@@ -50,6 +53,8 @@ export const LoginView = () => {
 	useEffect(() => {
 		if (user) router.replace(redirectTo);
 	}, [user, router, redirectTo]);
+
+	const busy = isSubmitting || linkLoading || googleLoading;
 
 	if (user) return null;
 
@@ -68,6 +73,7 @@ export const LoginView = () => {
 		setLinkSent(false);
 		const emailOk = await trigger('email');
 		if (!emailOk) return;
+		setLinkLoading(true);
 		try {
 			const email = getValues('email');
 			storeAuthReturnPath(redirectTo);
@@ -75,6 +81,8 @@ export const LoginView = () => {
 			setLinkSent(true);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Nie udało się wysłać linku.');
+		} finally {
+			setLinkLoading(false);
 		}
 	};
 
@@ -128,6 +136,7 @@ export const LoginView = () => {
 						fullWidth
 						size='small'
 						variant={method === 'password' ? 'contained' : 'outlined'}
+						disabled={busy}
 						onClick={() => setMethod('password')}
 					>
 						Zaloguj hasłem
@@ -137,6 +146,7 @@ export const LoginView = () => {
 						fullWidth
 						size='small'
 						variant={method === 'link' ? 'contained' : 'outlined'}
+						disabled={busy}
 						onClick={() => setMethod('link')}
 					>
 						Wyślij link
@@ -175,24 +185,31 @@ export const LoginView = () => {
 						<MotionAlert show={Boolean(error)} severity='error'>
 							{error}
 						</MotionAlert>
-						<Button type='submit' variant='contained' fullWidth disabled={isSubmitting}>
-							Zaloguj się
-						</Button>
+						<AuthBusyButton
+							type='submit'
+							variant='contained'
+							fullWidth
+							busy={isSubmitting}
+							label='Zaloguj się'
+							busyLabel='Logowanie…'
+							slowHint='Trwa logowanie — pozostań na tej stronie.'
+						/>
 					</>
 				) : (
 					<>
 						<MotionAlert show={Boolean(error)} severity='error'>
 							{error}
 						</MotionAlert>
-						<Button
+						<AuthBusyButton
 							type='button'
 							variant='contained'
 							fullWidth
-							disabled={isSubmitting}
+							busy={linkLoading}
+							label='Wyślij link do logowania'
+							busyLabel='Wysyłanie…'
+							slowHint='Wysyłamy link — pozostań na tej stronie.'
 							onClick={() => void onSendLink()}
-						>
-							Wyślij link do logowania
-						</Button>
+						/>
 						{linkSent ? (
 							<Typography variant='caption' color='success.main' sx={{ display: 'block' }}>
 								Sprawdź skrzynkę — wysłaliśmy link do logowania.
@@ -202,23 +219,28 @@ export const LoginView = () => {
 				)}
 			</Box>
 
-			<Button
+			<AuthBusyButton
 				sx={{ mt: 2 }}
 				fullWidth
 				variant='outlined'
+				busy={googleLoading}
+				label='Zaloguj przez Google'
+				busyLabel='Logowanie…'
+				slowHint='Trwa logowanie — pozostań na tej stronie.'
 				onClick={async () => {
 					setError(null);
+					setGoogleLoading(true);
 					try {
 						storeAuthReturnPath(redirectTo);
 						await signInWithGoogle();
 						router.push(redirectTo);
 					} catch (err) {
 						setError(err instanceof Error ? err.message : 'Błąd logowania Google.');
+					} finally {
+						setGoogleLoading(false);
 					}
 				}}
-			>
-				Zaloguj przez Google
-			</Button>
+			/>
 
 			{hasEnrollment ? null : (
 				<Typography
