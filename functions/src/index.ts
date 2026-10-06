@@ -207,6 +207,8 @@ export const api = onRequest(
 		region: 'europe-west1',
 		memory: '512MiB',
 		timeoutSeconds: 60,
+		/** Cloud Run IAM must allow unauthenticated HTTP; Firebase ID tokens are verified in-app. */
+		invoker: 'public',
 	},
 	app
 );
