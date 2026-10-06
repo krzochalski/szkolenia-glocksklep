@@ -29,7 +29,7 @@ import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatBookingSummary } from '@/utils/formatEnrollment';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
-import { formatPlnDisplay } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 type Props = {
 	readonly course: Course;
@@ -80,7 +80,7 @@ export const CourseDateActions = ({
 		place: date.place?.name,
 		price: bookingPrice,
 	});
-	const priceLabel = formatPlnDisplay(bookingPrice);
+	const priceLabel = formatPlnNettoBrutto(bookingPrice);
 
 	useEffect(() => {
 		if (!autoPromptEnroll || autoPromptedRef.current || !user || enrolled || slots <= 0) return;

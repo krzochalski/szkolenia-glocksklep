@@ -17,7 +17,9 @@ describe('formatBookingSummary', () => {
 				place: 'Strzelnica Czacz',
 				price: 500,
 			})
-		).toBe('Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł');
+		).toBe(
+			'Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł netto / 615 zł brutto'
+		);
 	});
 
 	it('uses em dash when place is missing', () => {
@@ -29,6 +31,6 @@ describe('formatBookingSummary', () => {
 				place: null,
 				price: 100.5,
 			})
-		).toBe('Course, 2 stycznia 2026, 09:00, —, 100.50 zł');
+		).toBe('Course, 2 stycznia 2026, 09:00, —, 100.50 zł netto / 123.62 zł brutto');
 	});
 });

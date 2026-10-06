@@ -3,7 +3,8 @@
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { OptimizedImage } from '@components';
-import { Box, Button, CatalogCard, Chip, type PriceMode, PriceToggle } from '@ui';
+import { usePriceMode } from '@hooks';
+import { Box, Button, CatalogCard, Chip, PriceToggle } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
@@ -49,7 +50,7 @@ const chipSx = {
 } as const;
 
 export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
-	const [priceMode, setPriceMode] = useState<PriceMode>('netto');
+	const { mode: priceMode, setMode: setPriceMode } = usePriceMode();
 	const [imageFailed, setImageFailed] = useState(false);
 	const tags = course.tags ?? [];
 	const level = (COURSE_LEVEL_LABEL[course.level] ?? course.level).toUpperCase();

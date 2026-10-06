@@ -76,7 +76,9 @@ describe('CourseDateActions', () => {
 			'/register?redirect=%2Fszkolenia%2Fmovement-fundamentals&termin=d1'
 		);
 		expect(
-			screen.getByText(/Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł/)
+			screen.getByText(
+				/Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł netto \/ 615 zł brutto/
+			)
 		).toBeInTheDocument();
 	});
 });

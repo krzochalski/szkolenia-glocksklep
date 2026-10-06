@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/pl';
 
-import { formatPlnDisplay } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 dayjs.locale('pl');
 
@@ -30,7 +30,7 @@ export const formatBookingSummary = ({
 		formatCourseDatePl(date),
 		timeStart,
 		place?.trim() || '—',
-		formatPlnDisplay(price),
+		formatPlnNettoBrutto(price),
 	];
 	return parts.join(', ');
 };

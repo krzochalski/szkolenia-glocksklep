@@ -1,11 +1,17 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { PriceModeProvider } from '@hooks';
 import { UiProvider } from '@ui';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import type { Course } from '@/types/course';
 import { CourseCard } from './CourseCard';
 
-const wrap = (ui: ReactElement) => render(<UiProvider>{ui}</UiProvider>);
+const wrap = (ui: ReactElement) =>
+	render(
+		<UiProvider>
+			<PriceModeProvider>{ui}</PriceModeProvider>
+		</UiProvider>
+	);
 
 const course: Course = {
 	id: 'c1',

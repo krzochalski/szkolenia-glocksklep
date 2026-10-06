@@ -8,13 +8,6 @@ export const roundMoney = (n: number): number => Math.round(n * 100) / 100;
 /** Format amount as `0.00` (no currency suffix). */
 export const formatMoney = (n: number): string => roundMoney(n).toFixed(2);
 
-/** Display PLN for nearest-date rows: `500 zł` (drops trailing `.00`). */
-export const formatPlnDisplay = (n: number): string => {
-	const amount = roundMoney(n);
-	const formatted = Number.isInteger(amount) ? String(amount) : formatMoney(amount);
-	return `${formatted} zł`;
-};
-
 /** VAT 23%: kwota VAT = round(netto × 0.23) to grosze. */
 export const vatFromNetto = (netto: number): number => roundMoney(roundMoney(netto) * VAT_RATE);
 
@@ -26,6 +19,17 @@ export const bruttoFromNetto = (netto: number): number => {
 	const n = roundMoney(netto);
 	return roundMoney(n + vatFromNetto(n));
 };
+
+/** Display PLN for nearest-date rows: `500 zł` (drops trailing `.00`). */
+export const formatPlnDisplay = (netto: number, mode?: PriceMode): string => {
+	const amount = roundMoney(mode === 'brutto' ? bruttoFromNetto(netto) : netto);
+	const formatted = Number.isInteger(amount) ? String(amount) : formatMoney(amount);
+	return `${formatted} zł`;
+};
+
+/** Compact dual label for dialogs / one-line summaries. */
+export const formatPlnNettoBrutto = (netto: number): string =>
+	`${formatPlnDisplay(netto)} netto / ${formatPlnDisplay(netto, 'brutto')} brutto`;
 
 /** Course list/detail price: stored as netto, shown as `850.00PLN`. */
 export const formatCoursePrice = (netto: number, mode: PriceMode): string => {

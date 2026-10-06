@@ -1,7 +1,8 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { Box, Link, Paper, Stack, Typography } from '@ui';
+import { usePriceMode } from '@hooks';
+import { Box, Link, Paper, PriceToggle, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
@@ -37,11 +38,12 @@ export const CourseDateRow = ({
 	action,
 	id,
 }: CourseDateRowProps) => {
+	const { mode, setMode } = usePriceMode();
 	const href = titleHref ?? fillPath(Paths.coursePage, { slug: course.slug });
 	const canceled = isCourseClassCanceled(date);
 	const place = date.place?.name ?? '—';
 	const when = `${formatCourseDatePl(date.date)} · ${date.timeStart}`;
-	const priceLabel = formatPlnDisplay(date.customPrice ?? course.price);
+	const priceLabel = formatPlnDisplay(date.customPrice ?? course.price, mode);
 
 	const metaParts = showTitle
 		? [when, place]
@@ -101,21 +103,29 @@ export const CourseDateRow = ({
 						{meta}
 					</Typography>
 					{!canceled ? (
-						<Typography
-							variant='body2'
-							component='p'
+						<Stack
+							direction='row'
+							spacing={1.5}
 							sx={{
-								m: 0,
 								mt: 0.75,
 								pt: 0.75,
 								borderTop: '1px solid',
 								borderColor: 'divider',
-								fontWeight: 600,
-								display: 'block',
+								alignItems: 'center',
+								justifyContent: 'space-between',
+								flexWrap: 'wrap',
+								gap: 1,
 							}}
 						>
-							{priceLabel}
-						</Typography>
+							<Typography
+								variant='body2'
+								component='p'
+								sx={{ m: 0, fontWeight: 600, display: 'block' }}
+							>
+								{priceLabel}
+							</Typography>
+							<PriceToggle mode={mode} onChange={setMode} />
+						</Stack>
 					) : null}
 				</Stack>
 				{action ? (
