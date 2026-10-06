@@ -29,7 +29,8 @@ const emailBodySchema = z.object({
 });
 
 const bearerUid = async (req: express.Request): Promise<string | null> => {
-	const header = req.get('authorization') ?? '';
+	/** Prefer X-Firebase-Authorization when App Hosting proxies with a Google ID token in Authorization. */
+	const header = req.get('x-firebase-authorization') ?? req.get('authorization') ?? '';
 	const match = /^Bearer\s+(.+)$/i.exec(header);
 	if (!match?.[1]) return null;
 	try {
@@ -202,13 +203,12 @@ app.post(['/api/dev/claim-admin', '/dev/claim-admin'], async (req, res) => {
 	res.status(200).json({ ok: true });
 });
 
+/** HTTP API stays private (org blocks allUsers). App Hosting proxies via Google ID token. */
 export const api = onRequest(
 	{
 		region: 'europe-west1',
 		memory: '512MiB',
 		timeoutSeconds: 60,
-		/** Cloud Run IAM must allow unauthenticated HTTP; Firebase ID tokens are verified in-app. */
-		invoker: 'public',
 	},
 	app
 );

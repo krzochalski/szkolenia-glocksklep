@@ -7,9 +7,6 @@ const appBuildId =
 	process.env.GITHUB_SHA?.slice(0, 12) ??
 	`local-${Date.now().toString(36)}`;
 
-const functionsApiDestination =
-	'https://europe-west1-szkolenia-glocksklep.cloudfunctions.net/api/api/:path*';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	env: {
@@ -39,14 +36,6 @@ const nextConfig = {
 				source: '/__/auth/action',
 				destination: '/auth/action',
 				permanent: false,
-			},
-		];
-	},
-	async rewrites() {
-		return [
-			{
-				source: '/api/:path*',
-				destination: functionsApiDestination,
 			},
 		];
 	},

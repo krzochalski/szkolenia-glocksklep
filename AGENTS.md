@@ -18,6 +18,7 @@ When writing or migrating screens, read those files first. Skill: `.cursor/skill
 - Next.js App Router: thin `src/app/**/page.tsx`, UI in `src/views/**`
 - Firebase client only in `src/services/**`
 - Enrollment/unenrollment via Cloud Functions (`/api/enroll`, `/api/unenroll`) — clients must not write `courses.dates`
+- Browser `/api/*` is proxied by Next (`src/app/api/[...path]`) with a Google ID token; Firebase Bearer is forwarded as `X-Firebase-Authorization` (org Domain Restricted Sharing blocks public Cloud Run invoker)
 - Admin = existence of `admins/{uid}` (Console / bootstrap CF only)
 - Paths: `src/constants/paths.ts`
 - End tasks with `pnpm verify`

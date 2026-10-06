@@ -48,3 +48,8 @@ env:
     availability:
       - BUILD
       - RUNTIME
+  # Private Cloud Run URL for the `api` function (org blocks allUsers invoker).
+  - variable: FUNCTIONS_API_ORIGIN
+    value: https://api-3ulnhgpqbq-ew.a.run.app
+    availability:
+      - RUNTIME
