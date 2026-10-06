@@ -1,27 +1,23 @@
 'use client';
 
+import { Paths } from '@constants/paths';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuthUser } from '@hooks';
+import { sendEmailSignInLink, signInWithEmail, signInWithGoogle } from '@services/auth';
+import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
+import NextLink from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
 import { AuthModeSwitch } from '@/components/AuthModeSwitch';
-import { Paths } from '@constants/paths';
-import { useAuthUser } from '@hooks';
-import {
-	sendEmailSignInLink,
-	signInWithEmail,
-	signInWithGoogle,
-} from '@services/auth';
-import { type LoginFormValues, loginSchema } from '@/utils/schemas';
 import {
 	buildPostAuthPath,
 	safeRedirectPath,
 	storeAuthReturnPath,
 	withAuthReturnQuery,
 } from '@/utils/paths';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Link, MotionAlert, Stack, TextField, Typography } from '@ui';
-import NextLink from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { type LoginFormValues, loginSchema } from '@/utils/schemas';
 
 type LoginMethod = 'password' | 'link';
 
@@ -225,11 +221,23 @@ export const LoginView = () => {
 			</Button>
 
 			{hasEnrollment ? null : (
-				<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
-					Nie masz konta?{' '}
+				<Typography
+					variant='body2'
+					component='p'
+					sx={{ mt: 4, mb: 0, textAlign: 'center', color: 'text.secondary' }}
+				>
+					Nie masz konta?
 					<Link
 						component={NextLink}
 						href={withAuthReturnQuery(Paths.register, { redirect: authRedirect, termin })}
+						underline='always'
+						sx={{
+							display: 'inline-block',
+							ml: 1,
+							fontWeight: 700,
+							color: 'primary.main',
+							fontSize: '1rem',
+						}}
 					>
 						Zarejestruj się
 					</Link>

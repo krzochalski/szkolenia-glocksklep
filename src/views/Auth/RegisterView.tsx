@@ -1,12 +1,8 @@
 'use client';
 
-import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
-import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import { Paths } from '@constants/paths';
-import { registerWithEmail } from '@services/auth';
-import { type RegisterFormValues, registerSchema } from '@/utils/schemas';
-import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { registerWithEmail } from '@services/auth';
 import {
 	Box,
 	Button,
@@ -22,6 +18,10 @@ import NextLink from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
+import { AuthModeSwitch } from '@/components/AuthModeSwitch';
+import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
+import { type RegisterFormValues, registerSchema } from '@/utils/schemas';
 
 export const RegisterView = () => {
 	const router = useRouter();
@@ -139,11 +139,23 @@ export const RegisterView = () => {
 				</Button>
 			</Stack>
 			{hasEnrollment ? null : (
-				<Typography variant='body2' sx={{ mt: 3, textAlign: 'center' }}>
-					Masz już konto?{' '}
+				<Typography
+					variant='body2'
+					component='p'
+					sx={{ mt: 4, mb: 0, textAlign: 'center', color: 'text.secondary' }}
+				>
+					Masz już konto?
 					<Link
 						component={NextLink}
 						href={withAuthReturnQuery(Paths.login, { redirect: authRedirect, termin })}
+						underline='always'
+						sx={{
+							display: 'inline-block',
+							ml: 1,
+							fontWeight: 700,
+							color: 'primary.main',
+							fontSize: '1rem',
+						}}
 					>
 						Zaloguj się
 					</Link>
