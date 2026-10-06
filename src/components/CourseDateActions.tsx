@@ -27,7 +27,9 @@ import NextLink from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
+import { formatBookingSummary } from '@/utils/formatEnrollment';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
+import { formatPlnDisplay } from '@/utils/pricing';
 
 type Props = {
 	readonly course: Course;
@@ -39,6 +41,9 @@ type Props = {
 };
 
 type ConfirmAction = 'enroll' | 'joinWaitlist' | 'leaveWaitlist';
+
+const ENROLL_PAYMENT_HINT =
+	'Po zapisie wyślemy potwierdzenie e-mailem. Proformę i dane do przelewu znajdziesz w Moje szkolenia.';
 
 export const CourseDateActions = ({
 	course,
@@ -66,6 +71,16 @@ export const CourseDateActions = ({
 		redirect: courseUrl,
 		termin: date.id,
 	});
+
+	const bookingPrice = date.customPrice ?? course.price;
+	const bookingSummary = formatBookingSummary({
+		name: course.name,
+		date: date.date,
+		timeStart: date.timeStart,
+		place: date.place?.name,
+		price: bookingPrice,
+	});
+	const priceLabel = formatPlnDisplay(bookingPrice);
 
 	useEffect(() => {
 		if (!autoPromptEnroll || autoPromptedRef.current || !user || enrolled || slots <= 0) return;
@@ -148,16 +163,10 @@ export const CourseDateActions = ({
 
 	const pending = enroll.isPending || joinWaitlist.isPending || leaveWaitlist.isPending;
 
-	const confirmCopy: Record<
-		ConfirmAction,
+	const waitlistConfirmCopy: Record<
+		Exclude<ConfirmAction, 'enroll'>,
 		{ title: string; confirmLabel: string; confirmColor: 'primary' | 'error'; message: string }
 	> = {
-		enroll: {
-			title: 'Potwierdź zapis',
-			confirmLabel: 'Zapisz się',
-			confirmColor: 'primary',
-			message: `Czy na pewno chcesz zapisać się na „${course.name}” (${date.date})?`,
-		},
 		joinWaitlist: {
 			title: 'Potwierdź dołączenie do listy',
 			confirmLabel: 'Dołącz',
@@ -172,24 +181,70 @@ export const CourseDateActions = ({
 		},
 	};
 
-	const dialog = confirmAction ? (
-		<ConfirmDialog
-			open
-			title={confirmCopy[confirmAction].title}
-			cancelLabel='Anuluj'
-			confirmLabel={confirmCopy[confirmAction].confirmLabel}
-			confirmColor={confirmCopy[confirmAction].confirmColor}
-			loading={pending}
-			onCancel={() => setConfirmAction(null)}
-			onConfirm={() => {
-				if (confirmAction === 'enroll') enroll.mutate();
-				else if (confirmAction === 'joinWaitlist') joinWaitlist.mutate();
-				else leaveWaitlist.mutate();
-			}}
-		>
-			{confirmCopy[confirmAction].message}
-		</ConfirmDialog>
-	) : null;
+	const enrollDialog =
+		confirmAction === 'enroll' ? (
+			<HardShadowDialog
+				open
+				onClose={pending ? undefined : () => setConfirmAction(null)}
+				fullWidth
+				maxWidth='sm'
+			>
+				<DialogTitle sx={hardShadowDialogTitleSx}>Potwierdź zapis</DialogTitle>
+				<DialogContent sx={hardShadowDialogContentSx}>
+					<Stack spacing={1.5}>
+						<Typography sx={{ fontWeight: 600 }}>{bookingSummary}</Typography>
+						<Typography color='text.secondary'>{ENROLL_PAYMENT_HINT}</Typography>
+					</Stack>
+				</DialogContent>
+				<DialogActions
+					sx={{
+						...hardShadowDialogActionsSx,
+						justifyContent: 'space-between',
+						alignItems: 'center',
+						gap: 1.5,
+					}}
+				>
+					<Typography sx={{ fontWeight: 700, mr: 'auto' }}>{priceLabel}</Typography>
+					<Button onClick={() => setConfirmAction(null)} disabled={pending} variant='outlined'>
+						Anuluj
+					</Button>
+					<Button
+						variant='contained'
+						color='primary'
+						disabled={pending}
+						onClick={() => enroll.mutate()}
+					>
+						Zapisz się
+					</Button>
+				</DialogActions>
+			</HardShadowDialog>
+		) : null;
+
+	const waitlistDialog =
+		confirmAction && confirmAction !== 'enroll' ? (
+			<ConfirmDialog
+				open
+				title={waitlistConfirmCopy[confirmAction].title}
+				cancelLabel='Anuluj'
+				confirmLabel={waitlistConfirmCopy[confirmAction].confirmLabel}
+				confirmColor={waitlistConfirmCopy[confirmAction].confirmColor}
+				loading={pending}
+				onCancel={() => setConfirmAction(null)}
+				onConfirm={() => {
+					if (confirmAction === 'joinWaitlist') joinWaitlist.mutate();
+					else leaveWaitlist.mutate();
+				}}
+			>
+				{waitlistConfirmCopy[confirmAction].message}
+			</ConfirmDialog>
+		) : null;
+
+	const dialog = (
+		<>
+			{enrollDialog}
+			{waitlistDialog}
+		</>
+	);
 
 	const authGate = (
 		<HardShadowDialog
@@ -201,8 +256,8 @@ export const CourseDateActions = ({
 			<DialogTitle sx={hardShadowDialogTitleSx}>Zapisz się na szkolenie</DialogTitle>
 			<DialogContent sx={hardShadowDialogContentSx}>
 				<Typography>
-					Żeby zająć miejsce na „{course.name}” ({date.date}), zaloguj się albo załóż konto. Potem
-					wrócisz na stronę szkolenia i dokończysz zapis.
+					Żeby zająć miejsce na {bookingSummary}, zaloguj się albo załóż konto. Potem wrócisz na
+					stronę szkolenia i dokończysz zapis.
 				</Typography>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>

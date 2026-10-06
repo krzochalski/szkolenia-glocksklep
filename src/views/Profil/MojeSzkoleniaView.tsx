@@ -9,13 +9,13 @@ import {
 	CircularProgress,
 	ContentSwap,
 	Link,
-	Paper,
 	Stagger,
 	StaggerItem,
 	Typography,
 } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
+import { CourseDateRow } from '@/components/CourseDateRow';
 
 export const MojeSzkoleniaView = () => {
 	const user = useAuthUser();
@@ -56,29 +56,28 @@ export const MojeSzkoleniaView = () => {
 							<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 								{mine.map(({ course, date }) => (
 									<StaggerItem key={`${course.id}-${date.id}`}>
-										<Paper variant='outlined' sx={{ p: 2 }}>
-											<Link
-												component={NextLink}
-												href={fillPath(Paths.szkolenieSzczegoly, {
-													slug: course.slug,
-													dateId: date.id,
-												})}
-												underline='hover'
-												variant='h6'
-											>
-												{course.name}
-											</Link>
-											<Typography variant='body2' color='text.secondary'>
-												{date.date} · {date.timeStart} · {date.place?.name}
-											</Typography>
-											<Link
-												component={NextLink}
-												href={fillPath(Paths.proforma, { slug: course.slug, dateId: date.id })}
-												sx={{ mt: 1, display: 'inline-block' }}
-											>
-												Proforma
-											</Link>
-										</Paper>
+										<CourseDateRow
+											course={course}
+											date={date}
+											showSlots={false}
+											titleHref={fillPath(Paths.szkolenieSzczegoly, {
+												slug: course.slug,
+												dateId: date.id,
+											})}
+											action={
+												<Link
+													component={NextLink}
+													href={fillPath(Paths.proforma, {
+														slug: course.slug,
+														dateId: date.id,
+													})}
+													underline='hover'
+													sx={{ fontWeight: 600 }}
+												>
+													Proforma
+												</Link>
+											}
+										/>
 									</StaggerItem>
 								))}
 							</Stagger>

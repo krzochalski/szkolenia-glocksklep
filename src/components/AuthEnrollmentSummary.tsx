@@ -3,13 +3,9 @@
 import { getCourseBySlug } from '@services/courses';
 import { Box, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
-import dayjs from 'dayjs';
-import 'dayjs/locale/pl';
 import { useSearchParams } from 'next/navigation';
+import { formatBookingSummary } from '@/utils/formatEnrollment';
 import { courseSlugFromRedirect } from '@/utils/paths';
-import { formatPlnDisplay } from '@/utils/pricing';
-
-dayjs.locale('pl');
 
 /** Compact “Zapisujesz się na…” banner when auth was entered from a course date. */
 export const AuthEnrollmentSummary = () => {
@@ -29,8 +25,13 @@ export const AuthEnrollmentSummary = () => {
 	const date = course.dates?.find((d) => d.id === termin);
 	if (!date) return null;
 
-	const price = formatPlnDisplay(date.customPrice ?? course.price);
-	const when = `${dayjs(date.date).format('D MMMM')}, ${date.timeStart}`;
+	const summary = formatBookingSummary({
+		name: course.name,
+		date: date.date,
+		timeStart: date.timeStart,
+		place: date.place?.name,
+		price: date.customPrice ?? course.price,
+	});
 
 	return (
 		<Box
@@ -43,7 +44,7 @@ export const AuthEnrollmentSummary = () => {
 			}}
 		>
 			<Typography variant='body2' sx={{ fontWeight: 600 }}>
-				Zapisujesz się na: {course.name}, {when}, {price}
+				Zapisujesz się na: {summary}
 			</Typography>
 		</Box>
 	);

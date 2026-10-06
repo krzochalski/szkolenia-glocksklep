@@ -107,7 +107,14 @@ export const ProfilView = () => {
 						<Controller
 							name='nip'
 							control={control}
-							render={({ field }) => <TextField {...field} label='NIP' fullWidth />}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label='NIP'
+									fullWidth
+									helperText='opcjonalnie, do faktury'
+								/>
+							)}
 						/>
 						<Typography variant='body2' color='text.secondary'>
 							E-mail: {user.email}

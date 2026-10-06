@@ -8,9 +8,7 @@ import {
 	Button,
 	CircularProgress,
 	ContentSwap,
-	Link,
 	MotionAlert,
-	Paper,
 	Stack,
 	Stagger,
 	StaggerItem,
@@ -19,9 +17,8 @@ import {
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { CourseDateActions } from '@/components/CourseDateActions';
-import { getFutureCourseDates, getSlotsLeft } from '@/utils/courseDates';
-import { fillPath } from '@/utils/paths';
-import { formatPlnDisplay } from '@/utils/pricing';
+import { CourseDateRow } from '@/components/CourseDateRow';
+import { getFutureCourseDates } from '@/utils/courseDates';
 
 const NEAREST_LIMIT = 4;
 
@@ -69,54 +66,23 @@ export const HomeNearestDates = () => {
 					<Typography color='text.secondary'>Brak nadchodzących terminów.</Typography>
 				) : (
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-						{upcoming.map(({ course, date }) => {
-							const slots = getSlotsLeft(date);
-							return (
-								<StaggerItem key={`${course.id}-${date.id}`}>
-									<Paper sx={{ p: 2.5 }} variant='outlined'>
-										<Stack
-											direction={{ xs: 'column', sm: 'row' }}
-											spacing={2}
-											sx={{
-												alignItems: { xs: 'flex-start', sm: 'center' },
-												justifyContent: 'space-between',
-											}}
-										>
-											<Stack spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
-												<Link
-													component={NextLink}
-													href={fillPath(Paths.coursePage, { slug: course.slug })}
-													underline='hover'
-													variant='h6'
-													sx={{ display: 'block' }}
-												>
-													{course.name}
-												</Link>
-												<Typography
-													variant='body2'
-													component='p'
-													color='text.secondary'
-													sx={{ m: 0 }}
-												>
-													{date.date} · {date.timeStart} · {date.place?.name ?? '—'} · wolne:{' '}
-													{slots}
-												</Typography>
-												<Typography variant='body2' component='p' sx={{ m: 0, fontWeight: 600 }}>
-													{formatPlnDisplay(date.customPrice ?? course.price)}
-												</Typography>
-											</Stack>
-											<CourseDateActions
-												course={course}
-												date={date}
-												size='small'
-												onError={(message) => setError(message)}
-												onSuccess={() => setError(null)}
-											/>
-										</Stack>
-									</Paper>
-								</StaggerItem>
-							);
-						})}
+						{upcoming.map(({ course, date }) => (
+							<StaggerItem key={`${course.id}-${date.id}`}>
+								<CourseDateRow
+									course={course}
+									date={date}
+									action={
+										<CourseDateActions
+											course={course}
+											date={date}
+											size='small'
+											onError={(message) => setError(message)}
+											onSuccess={() => setError(null)}
+										/>
+									}
+								/>
+							</StaggerItem>
+						))}
 					</Stagger>
 				)}
 			</ContentSwap>

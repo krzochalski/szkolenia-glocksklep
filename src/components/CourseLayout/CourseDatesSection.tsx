@@ -1,11 +1,12 @@
 'use client';
 
 import { CourseDateActions } from '@/components/CourseDateActions';
+import { CourseDateRow } from '@/components/CourseDateRow';
 import { CourseWaitingListSection } from '@/components/CourseLayout/CourseWaitingListSection';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { useAuthUser } from '@hooks';
 import { getCourseBySlug } from '@services/courses';
-import { getSlotsLeft, isCourseClassCanceled, isCourseInactive, isFutureDate } from '@/utils/courseDates';
+import { isCourseClassCanceled, isCourseInactive, isFutureDate } from '@/utils/courseDates';
 import {
 	Box,
 	CircularProgress,
@@ -135,61 +136,36 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 								</Typography>
 								<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 									{dates.map((date) => {
-										const slots = getSlotsLeft(date);
 										const canceled = isCourseClassCanceled(date);
 										const highlighted = termin === date.id;
 										return (
 											<StaggerItem key={date.id}>
-												<Box
+												<CourseDateRow
 													id={`termin-${date.id}`}
-													sx={{
-														display: 'flex',
-														flexDirection: { xs: 'column', sm: 'row' },
-														alignItems: { xs: 'stretch', sm: 'center' },
-														justifyContent: 'space-between',
-														gap: 2,
-														p: 2.5,
-														border: '2px solid',
-														borderColor: highlighted ? 'primary.main' : 'ink.main',
-														boxShadow: highlighted
-															? (theme) => `4px 4px 0 ${theme.palette.primary.main}`
-															: undefined,
-														bgcolor: canceled
-															? 'surface.muted'
-															: highlighted
-																? 'surface.muted'
-																: 'background.paper',
-													}}
-												>
-													<Box>
-														<Typography sx={{ fontWeight: 700 }}>
-															{dayjs(date.date).format('D MMMM YYYY')} · {date.timeStart}
-														</Typography>
-														<Typography variant='body2' color='text.secondary'>
-															{date.place?.name ?? '—'}
-															{date.instructor?.name
-																? ` · instruktor: ${date.instructor.name}`
-																: ''}
-															{canceled ? ' · odwołane' : ` · wolne: ${slots}`}
-														</Typography>
-													</Box>
-													{canceled ? (
-														<Typography
-															variant='body2'
-															color='error.main'
-															sx={{ fontWeight: 600, alignSelf: { sm: 'center' } }}
-														>
-															Odwołane
-														</Typography>
-													) : (
-														<CourseDateActions
-															course={course}
-															date={date}
-															autoPromptEnroll={highlighted && Boolean(user)}
-															onError={setError}
-														/>
-													)}
-												</Box>
+													course={course}
+													date={date}
+													showTitle={false}
+													showInstructor
+													highlighted={highlighted}
+													action={
+														canceled ? (
+															<Typography
+																variant='body2'
+																color='error.main'
+																sx={{ fontWeight: 600 }}
+															>
+																Odwołane
+															</Typography>
+														) : (
+															<CourseDateActions
+																course={course}
+																date={date}
+																autoPromptEnroll={highlighted && Boolean(user)}
+																onError={setError}
+															/>
+														)
+													}
+												/>
 											</StaggerItem>
 										);
 									})}

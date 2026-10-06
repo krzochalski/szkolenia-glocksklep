@@ -52,6 +52,10 @@ describe('ProfilShell', () => {
 			'href',
 			'/profil/lista-oczekujacych'
 		);
+		expect(bottom.getByText('Moje szkolenia')).toBeInTheDocument();
+		expect(bottom.getByText('Lista oczekujących')).toBeInTheDocument();
+		expect(bottom.queryByText('Szkolenia')).toBeNull();
+		expect(bottom.queryByText('Oczekujące')).toBeNull();
 		expect(bottom.getByRole('link', { name: 'Profil' })).toHaveAttribute(
 			'aria-current',
 			'page'

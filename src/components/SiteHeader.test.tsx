@@ -34,7 +34,7 @@ describe('SiteHeader', () => {
 		expect(screen.queryByRole('link', { name: 'Kontakt' })).toBeNull();
 		const profileLinks = screen.getAllByRole('link', { name: 'Zaloguj' });
 		expect(profileLinks.length).toBeGreaterThan(0);
-		expect(profileLinks[0]).toHaveAttribute('href', '/login?redirect=%2Fprofil');
+		expect(profileLinks[0]).toHaveAttribute('href', '/login?redirect=%2F');
 	});
 
 	it('marks the current section as active', () => {
@@ -43,13 +43,27 @@ describe('SiteHeader', () => {
 		expect(screen.getByRole('link', { name: 'Szkolenia' })).toHaveAttribute('aria-current', 'page');
 	});
 
+	it('returns logged-out profile icon to the current course page', () => {
+		setMockPathname('/szkolenia/movement-fundamentals');
+		wrap(<SiteHeader />);
+		const profileLinks = screen.getAllByRole('link', { name: 'Zaloguj' });
+		expect(profileLinks[0]).toHaveAttribute(
+			'href',
+			'/login?redirect=%2Fszkolenia%2Fmovement-fundamentals'
+		);
+	});
+
 	it('opens the mobile drawer', () => {
+		setMockPathname('/');
 		wrap(<SiteHeader />);
 		expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
 		fireEvent.click(screen.getByRole('button', { name: 'Otwórz nawigację' }));
 		const menu = screen.getByRole('dialog', { name: 'Menu' });
 		expect(menu).toBeInTheDocument();
-		expect(menu.querySelector('a[href="/login"]')).toHaveAttribute('href', '/login');
+		expect(menu.querySelector('a[href="/login?redirect=%2F"]')).toHaveAttribute(
+			'href',
+			'/login?redirect=%2F'
+		);
 	});
 });
 

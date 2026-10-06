@@ -7,7 +7,7 @@ import { withRedirectQuery } from '@/utils/paths';
 import {
 	Box,
 	Button,
-	ConfirmDialog,
+	Link,
 	m,
 	mobileStickyContentPb,
 	motionTransition,
@@ -34,28 +34,24 @@ import {
 const NAV = [
 	{
 		label: 'Profil',
-		shortLabel: 'Profil',
 		href: Paths.profil,
 		exact: true,
 		icon: PersonOutlined,
 	},
 	{
 		label: 'Moje szkolenia',
-		shortLabel: 'Szkolenia',
 		href: Paths.mojeShkolenia,
 		exact: false,
 		icon: EventAvailableIcon,
 	},
 	{
 		label: 'Harmonogram',
-		shortLabel: 'Terminy',
 		href: Paths.harmonogram,
 		exact: false,
 		icon: CalendarMonthIcon,
 	},
 	{
 		label: 'Lista oczekujących',
-		shortLabel: 'Oczekujące',
 		href: Paths.listaOczekujacych,
 		exact: true,
 		icon: HowToRegIcon,
@@ -77,7 +73,6 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 	const router = useRouter();
 	const reduceMotion = useReducedMotion();
 	const navRef = useRef<HTMLElement | null>(null);
-	const [logoutOpen, setLogoutOpen] = useState(false);
 	const [loggingOut, setLoggingOut] = useState(false);
 	const [indicator, setIndicator] = useState({ y: 0, height: 0 });
 	const [indicatorReady, setIndicatorReady] = useState(false);
@@ -113,7 +108,15 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 
 	if (!user) return null;
 
-	const openLogout = () => setLogoutOpen(true);
+	const handleLogout = () => {
+		if (loggingOut) return;
+		setLoggingOut(true);
+		void signOut()
+			.then(() => {
+				router.push(Paths.home);
+			})
+			.finally(() => setLoggingOut(false));
+	};
 
 	return (
 		<Box sx={{ display: 'flex', gap: { md: 3 }, flex: 1, minHeight: 0 }}>
@@ -141,7 +144,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 				<Stack
 					ref={navRef}
 					component='nav'
-					spacing={1}
+					spacing={0.5}
 					sx={{ flex: 1, position: 'relative' }}
 				>
 					{indicatorReady ? (
@@ -154,7 +157,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 							sx={{
 								position: 'absolute',
 								left: 0,
-								right: 0,
+								width: 3,
 								top: 0,
 								bgcolor: 'primary.main',
 								zIndex: 0,
@@ -165,38 +168,48 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 					{NAV.map((item) => {
 						const active = isNavActive(pathname, item);
 						return (
-							<Button
+							<Link
 								key={item.href}
 								component={NextLink}
 								href={item.href}
-								variant='outlined'
-								fullWidth
+								underline='none'
 								aria-current={active ? 'page' : undefined}
 								sx={{
 									position: 'relative',
 									zIndex: 1,
-									...(active
-										? {
-												color: 'primary.contrastText',
-												borderColor: 'primary.main',
-												bgcolor: 'transparent',
-												'&:hover': {
-													bgcolor: 'transparent',
-													borderColor: 'primary.main',
-													color: 'primary.contrastText',
-												},
-											}
-										: {
-												bgcolor: 'background.paper',
-											}),
+									display: 'block',
+									px: 1.5,
+									py: 1,
+									fontFamily: '"Space Grotesk", sans-serif',
+									fontWeight: active ? 700 : 500,
+									fontSize: '0.9375rem',
+									color: active ? 'ink.main' : 'text.secondary',
+									'&:hover': {
+										color: 'ink.main',
+										bgcolor: 'surface.muted',
+									},
 								}}
 							>
 								{item.label}
-							</Button>
+							</Link>
 						);
 					})}
 				</Stack>
-				<Button variant='contained' fullWidth onClick={openLogout}>
+				<Button
+					variant='text'
+					color='inherit'
+					fullWidth
+					disabled={loggingOut}
+					onClick={handleLogout}
+					sx={{
+						justifyContent: 'flex-start',
+						px: 1.5,
+						color: 'text.secondary',
+						fontWeight: 500,
+						textTransform: 'none',
+						'&:hover': { color: 'ink.main', bgcolor: 'transparent' },
+					}}
+				>
 					Wyloguj
 				</Button>
 			</Box>
@@ -247,11 +260,11 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 								textDecoration: 'none',
 								color: active ? 'primary.main' : 'text.secondary',
 								fontFamily: '"Space Grotesk", sans-serif',
-								fontSize: '0.625rem',
+								fontSize: '0.5625rem',
 								fontWeight: 700,
-								letterSpacing: '0.04em',
+								letterSpacing: '0.02em',
 								textTransform: 'uppercase',
-								lineHeight: 1.2,
+								lineHeight: 1.15,
 								textAlign: 'center',
 								borderTop: '3px solid',
 								borderColor: active ? 'primary.main' : 'transparent',
@@ -263,33 +276,16 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 							}}
 						>
 							<Icon sx={{ fontSize: 22 }} aria-hidden />
-							<Box component='span' sx={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
-								{item.shortLabel}
+							<Box
+								component='span'
+								sx={{ overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}
+							>
+								{item.label}
 							</Box>
 						</Box>
 					);
 				})}
 			</Box>
-			<ConfirmDialog
-				open={logoutOpen}
-				title='Potwierdź wylogowanie'
-				cancelLabel='Anuluj'
-				confirmLabel='Wyloguj'
-				confirmColor='primary'
-				loading={loggingOut}
-				onCancel={() => setLogoutOpen(false)}
-				onConfirm={() => {
-					setLoggingOut(true);
-					void signOut()
-						.then(() => {
-							setLogoutOpen(false);
-							router.push(Paths.home);
-						})
-						.finally(() => setLoggingOut(false));
-				}}
-			>
-				Czy na pewno chcesz się wylogować?
-			</ConfirmDialog>
 		</Box>
 	);
 };

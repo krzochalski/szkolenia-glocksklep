@@ -1,23 +1,19 @@
 'use client';
 
 import { CourseDateActions } from '@/components/CourseDateActions';
-import { Paths } from '@constants/paths';
+import { CourseDateRow } from '@/components/CourseDateRow';
 import { getCourses } from '@services/courses';
-import { getFutureCourseDates, getSlotsLeft } from '@/utils/courseDates';
-import { fillPath } from '@/utils/paths';
+import { getFutureCourseDates } from '@/utils/courseDates';
 import {
 	Box,
 	CircularProgress,
 	ContentSwap,
-	Link,
 	MotionAlert,
-	Paper,
 	Stagger,
 	StaggerItem,
 	Typography,
 } from '@ui';
 import { useQuery } from '@tanstack/react-query';
-import NextLink from 'next/link';
 import { useState } from 'react';
 
 export const HarmonogramView = () => {
@@ -51,35 +47,23 @@ export const HarmonogramView = () => {
 							<Typography color='text.secondary'>Brak terminów.</Typography>
 						) : (
 							<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-								{upcoming.map(({ course, date }) => {
-									const slots = getSlotsLeft(date);
-									return (
-										<StaggerItem key={`${course.id}-${date.id}`}>
-											<Paper variant='outlined' sx={{ p: 2 }}>
-												<Link
-													component={NextLink}
-													href={fillPath(Paths.coursePage, { slug: course.slug })}
-													underline='hover'
-													variant='subtitle1'
-												>
-													{course.name}
-												</Link>
-												<Typography variant='body2' color='text.secondary'>
-													{date.date} · {date.timeStart} · wolne: {slots}
-												</Typography>
-												<Box sx={{ mt: 1 }}>
-													<CourseDateActions
-														course={course}
-														date={date}
-														size='small'
-														onError={(message) => setError(message)}
-														onSuccess={() => setError(null)}
-													/>
-												</Box>
-											</Paper>
-										</StaggerItem>
-									);
-								})}
+								{upcoming.map(({ course, date }) => (
+									<StaggerItem key={`${course.id}-${date.id}`}>
+										<CourseDateRow
+											course={course}
+											date={date}
+											action={
+												<CourseDateActions
+													course={course}
+													date={date}
+													size='small'
+													onError={(message) => setError(message)}
+													onSuccess={() => setError(null)}
+												/>
+											}
+										/>
+									</StaggerItem>
+								))}
 							</Stagger>
 						)}
 					</ContentSwap>

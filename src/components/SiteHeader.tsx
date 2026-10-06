@@ -13,7 +13,10 @@ import { MainMenu } from './MainMenu';
 
 const ProfileButton = () => {
 	const user = useAuthUser();
-	const href = user ? Paths.profil : withRedirectQuery(Paths.login, Paths.profil);
+	const pathname = usePathname();
+	const href = user
+		? Paths.profil
+		: withRedirectQuery(Paths.login, pathname || Paths.home);
 
 	return (
 		<IconButton
