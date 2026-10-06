@@ -13,6 +13,8 @@ import {
 	isSignInWithEmailLink,
 	onAuthStateChanged,
 	reauthenticateWithCredential,
+	sendPasswordResetEmail,
+	sendSignInLinkToEmail,
 	signInWithEmailAndPassword,
 	signInWithEmailLink,
 	signInWithPopup,
@@ -26,13 +28,31 @@ import { v4 as uuidv4 } from 'uuid';
 import { firebaseApp } from './firebase';
 import { db } from './firestore';
 
+const siteOrigin = (): string =>
+	typeof window !== 'undefined' ? window.location.origin : 'https://szkolenia.glocksklep.pl';
+
+/** Prefer CF (custom action URL via SMTP). Fall back to Firebase Auth mailer if CF/SMTP is down. */
 const postAuthEmail = async (path: '/api/password-reset' | '/api/email-sign-in-link', email: string) => {
 	const res = await fetch(path, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ email }),
 	});
-	if (!res.ok) {
+	if (res.ok) return;
+
+	try {
+		if (path === '/api/password-reset') {
+			await sendPasswordResetEmail(auth, email, {
+				url: `${siteOrigin()}/login?reset=1`,
+				handleCodeInApp: true,
+			});
+			return;
+		}
+		await sendSignInLinkToEmail(auth, email, {
+			url: `${siteOrigin()}/auth/email-link`,
+			handleCodeInApp: true,
+		});
+	} catch {
 		const e = await res.json().catch(() => ({}));
 		throw new Error(
 			typeof e === 'object' && e !== null && 'error' in e && typeof e.error === 'string'
@@ -87,16 +107,20 @@ export const registerWithEmail = async (
 ): Promise<void> => {
 	const randomPassword = uuidv4() + uuidv4(); // 72-char random string, never shown
 	const { user } = await createUserWithEmailAndPassword(auth, email, randomPassword);
-	await updateProfile(user, { displayName });
-	await setDoc(doc(db, 'users', user.uid), {
-		uid: user.uid,
-		email,
-		displayName,
-		phoneNumber: phone,
-		createdAt: user.metadata.creationTime ?? new Date().toISOString(),
-	});
-	await postAuthEmail('/api/password-reset', email);
-	await firebaseSignOut(auth);
+	try {
+		await updateProfile(user, { displayName });
+		await setDoc(doc(db, 'users', user.uid), {
+			uid: user.uid,
+			email,
+			displayName,
+			phoneNumber: phone,
+			createdAt: user.metadata.creationTime ?? new Date().toISOString(),
+		});
+		await postAuthEmail('/api/password-reset', email);
+	} finally {
+		// Always sign out — the random password is never shown; user must set one via email.
+		await firebaseSignOut(auth);
+	}
 };
 
 export const sendPasswordReset = async (email: string): Promise<void> => {

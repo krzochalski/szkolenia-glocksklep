@@ -1,5 +1,5 @@
 import type { User } from '@/types/user';
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { auth } from './auth';
 import { db } from './firestore';
 
@@ -54,5 +54,23 @@ export const adminGetUsers = async (): Promise<User[]> => {
 };
 
 export const adminDeleteUser = async (uid: string): Promise<void> => {
-	await deleteDoc(doc(db, 'users', uid));
+	const user = auth.currentUser;
+	if (!user) throw new Error('Brak zalogowanego użytkownika.');
+	const token = await user.getIdToken();
+	const res = await fetch('/api/delete-user', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ uid }),
+	});
+	if (!res.ok) {
+		const e = await res.json().catch(() => ({}));
+		throw new Error(
+			typeof e === 'object' && e !== null && 'error' in e && typeof e.error === 'string'
+				? e.error
+				: 'Nie udało się usunąć użytkownika.'
+		);
+	}
 };

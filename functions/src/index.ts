@@ -9,6 +9,7 @@ import { z, ZodError } from 'zod';
 
 import { sendEmailSignInMail, sendPasswordResetMail } from './authMail';
 import { runBootstrap } from './bootstrap';
+import { deleteUserAccount, deleteUserBodySchema } from './deleteUser';
 import {
 	enrollBodySchema,
 	enrollInCourseTx,
@@ -168,6 +169,32 @@ app.post(['/api/unenroll', '/unenroll'], async (req, res) => {
 			return;
 		}
 		const message = err instanceof Error ? err.message : 'Błąd wypisu.';
+		res.status(400).json({ error: message });
+	}
+});
+
+/** Admin-only: delete Firebase Auth user + users/{uid} profile. */
+app.post(['/api/delete-user', '/delete-user'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const body = deleteUserBodySchema.parse(req.body);
+		await deleteUserAccount(getAuth(), getFirestore(), uid, body.uid);
+		res.status(200).json({ ok: true });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowe dane.' });
+			return;
+		}
+		const message = err instanceof Error ? err.message : 'Błąd usuwania użytkownika.';
+		console.error(err);
 		res.status(400).json({ error: message });
 	}
 });

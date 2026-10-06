@@ -139,6 +139,7 @@ MAIL_FROM=zamowienia@glocksklep.pl
 ```
 
 Without `SMTP_PASS`, enroll / waitlist still work; confirmation emails are skipped (logged).
+Password-reset and email-link endpoints return 503; the web app then falls back to Firebase Auth’s built-in mailer (action URL on `*.firebaseapp.com`).
 
 ## Deploy
 

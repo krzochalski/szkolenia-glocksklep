@@ -28,7 +28,8 @@ service cloud.firestore {
       allow update: if isOwner(userId) &&
                       request.resource.data.diff(resource.data).affectedKeys()
                         .hasOnly(['displayName', 'phoneNumber', 'email', 'fullName', 'bio', 'nip']);
-      allow delete: if isAdmin();
+      // Deletes go through /api/delete-user (Auth + profile); Admin SDK bypasses rules.
+      allow delete: if false;
     }
 
     match /places/{placeId} {

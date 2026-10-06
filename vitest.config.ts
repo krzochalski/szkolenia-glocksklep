@@ -19,6 +19,7 @@ export default defineConfig({
 		include: [
 			'src/**/*.test.ts',
 			'src/**/*.test.tsx',
+			'functions/src/**/*.test.ts',
 			'packages/ui/src/**/*.test.ts',
 			'packages/ui/src/**/*.test.tsx',
 		],

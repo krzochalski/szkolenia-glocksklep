@@ -99,8 +99,9 @@ const UsersInner = () => {
 				}}
 			>
 				<Typography>
-					Czy na pewno chcesz usunąć użytkownika <strong>{toDelete?.displayName || toDelete?.email}</strong>
-					? Zostanie usunięty tylko dokument profilu, nie konto Auth.
+					Czy na pewno chcesz usunąć użytkownika{' '}
+					<strong>{toDelete?.displayName || toDelete?.email}</strong>? Zostanie usunięte konto
+					logowania (Auth) oraz profil w bazie.
 				</Typography>
 			</ConfirmDialog>
 		</Box>
