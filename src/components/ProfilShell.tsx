@@ -19,6 +19,7 @@ import {
 	CalendarMonthIcon,
 	EventAvailableIcon,
 	HowToRegIcon,
+	MilitaryTechIcon,
 	PersonOutlined,
 } from '@ui/icons';
 import NextLink from 'next/link';
@@ -43,6 +44,12 @@ const NAV = [
 		href: Paths.mojeShkolenia,
 		exact: false,
 		icon: EventAvailableIcon,
+	},
+	{
+		label: 'Ścieżka',
+		href: Paths.profilSciezkaRozwoju,
+		exact: true,
+		icon: MilitaryTechIcon,
 	},
 	{
 		label: 'Harmonogram',

@@ -20,6 +20,7 @@ const NAV = [
 	{ label: 'Strona główna', href: Paths.adminHomepage },
 	{ label: 'E-mail po zapisie', href: Paths.adminEnrollmentEmail },
 	{ label: 'Ścieżka rozwoju', href: Paths.adminSciezkaRozwoju },
+	{ label: 'Odznaki', href: Paths.adminOdznaki },
 	{ label: 'Obiekty', href: Paths.adminPlaces },
 	{ label: 'Tagi', href: Paths.adminTags },
 ] as const;

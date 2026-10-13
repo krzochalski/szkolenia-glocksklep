@@ -16,6 +16,7 @@ import {
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AdminCourseCompletionsDialog } from './forms/AdminCourseCompletionsDialog';
 import { AdminEnrollDialog } from './forms/AdminEnrollDialog';
 
 export const AdminParticipantsView = () => <UsersInner />;
@@ -27,6 +28,7 @@ const UsersInner = () => {
 		queryFn: adminGetUsers,
 	});
 	const [enrollOpen, setEnrollOpen] = useState(false);
+	const [completionsUser, setCompletionsUser] = useState<UserProfile | null>(null);
 	const [toDelete, setToDelete] = useState<UserProfile | null>(null);
 
 	const remove = useMutation({
@@ -61,26 +63,41 @@ const UsersInner = () => {
 				}}
 			/>
 
+			<AdminCourseCompletionsDialog
+				open={Boolean(completionsUser)}
+				user={completionsUser}
+				onClose={() => setCompletionsUser(null)}
+			/>
+
 			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
 				{users.map((user) => (
 					<StaggerItem key={user.uid}>
 					<Paper variant='outlined' sx={{ p: 2 }}>
-						<Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-							<Box>
+						<Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+							<Box sx={{ minWidth: 0 }}>
 								<Typography sx={{ fontWeight: 600 }}>{user.displayName || '—'}</Typography>
 								<Typography variant='body2' color='text.secondary'>
 									{user.email} {user.phoneNumber ? `· ${user.phoneNumber}` : ''}
 								</Typography>
 							</Box>
-							<Button
-								size='small'
-								color='error'
-								variant='outlined'
-								disabled={remove.isPending}
-								onClick={() => setToDelete(user)}
-							>
-								Usuń
-							</Button>
+							<Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
+								<Button
+									size='small'
+									variant='outlined'
+									onClick={() => setCompletionsUser(user)}
+								>
+									Ukończenia
+								</Button>
+								<Button
+									size='small'
+									color='error'
+									variant='outlined'
+									disabled={remove.isPending}
+									onClick={() => setToDelete(user)}
+								>
+									Usuń
+								</Button>
+							</Stack>
 						</Stack>
 					</Paper>
 					</StaggerItem>

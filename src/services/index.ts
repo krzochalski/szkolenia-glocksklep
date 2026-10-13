@@ -45,6 +45,22 @@ export {
 	updateCourseDescriptionFields,
 } from './courseDescriptions';
 export {
+	adminGetUserCourseCompletions,
+	adminRemoveCourseCompletion,
+	adminSetCourseCompletion,
+	getMyCourseCompletions,
+} from './courseCompletions';
+export {
+	adminAwardBadge,
+	adminGetUserAwardedBadges,
+	adminRemoveAwardedBadge,
+	createBadge,
+	deleteBadge,
+	getBadges,
+	getMyAwardedBadges,
+	updateBadge,
+} from './badges';
+export {
 	adminEnrollParticipant,
 	createCourse,
 	deleteCourse,

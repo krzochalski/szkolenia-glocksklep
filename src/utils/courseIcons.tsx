@@ -50,6 +50,11 @@ export const COURSE_ICON_COMPONENTS: Record<string, CourseIconComponent> = {
 	Whatshot,
 };
 
+/** Sorted names for admin icon autocomplete. */
+export const COURSE_ICON_NAMES = Object.keys(COURSE_ICON_COMPONENTS).sort((a, b) =>
+	a.localeCompare(b)
+);
+
 export const getCourseIcon = (name: string): ReactNode => {
 	const Icon = COURSE_ICON_COMPONENTS[name] ?? GpsFixed;
 	return <Icon sx={{ fontSize: 20 }} />;

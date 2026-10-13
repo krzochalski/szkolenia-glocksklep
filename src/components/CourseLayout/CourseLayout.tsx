@@ -1,16 +1,16 @@
 'use client';
 
-import { CourseDatesSection } from '@/components/CourseLayout/CourseDatesSection';
-import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.types';
-import { ListItem } from '@/components/CourseLayout/ListItem';
-import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
-import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { OptimizedImage } from '@components';
 import { Paths } from '@constants/paths';
 import { Box, Button, Divider, HardShadow, Typography } from '@ui';
 import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
 import { Suspense, useState } from 'react';
+import { CourseDatesSection } from '@/components/CourseLayout/CourseDatesSection';
+import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.types';
+import { ListItem } from '@/components/CourseLayout/ListItem';
+import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
+import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 
 export type { CourseModule, CourseSchemaData } from './CourseLayout.types';
 
@@ -43,13 +43,31 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 
 	return (
 		<Box>
+			<Box sx={{ mb: 2 }}>
+				<Button
+					component={NextLink}
+					href={Paths.courses}
+					startIcon={<ArrowBack />}
+					variant='text'
+					sx={{
+						fontFamily: '"Space Mono", monospace',
+						fontSize: '0.75rem',
+						letterSpacing: '0.08em',
+						textTransform: 'uppercase',
+						px: 0,
+					}}
+				>
+					Powrót do listy szkoleń
+				</Button>
+			</Box>
+
 			<HardShadow
 				sx={{
 					position: 'relative',
 					overflow: 'hidden',
 					bgcolor: 'surface.muted',
 					p: { xs: 3, md: 5 },
-					mb: 2,
+					mb: 4,
 					minHeight: { xs: 220, md: 280 },
 					display: 'flex',
 					flexDirection: 'column',
@@ -126,24 +144,6 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 				</Box>
 			</HardShadow>
 
-			<Box sx={{ mb: 4 }}>
-				<Button
-					component={NextLink}
-					href={Paths.courses}
-					startIcon={<ArrowBack />}
-					variant='text'
-					sx={{
-						fontFamily: '"Space Mono", monospace',
-						fontSize: '0.75rem',
-						letterSpacing: '0.08em',
-						textTransform: 'uppercase',
-						px: 0,
-					}}
-				>
-					Powrót do listy szkoleń
-				</Button>
-			</Box>
-
 			{modules?.length ? (
 				<Box sx={{ mb: 6 }}>
 					<SectionLabel>Program zajęć</SectionLabel>
@@ -181,10 +181,7 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 						{forWhom?.length ? (
 							<Box>
 								<SectionLabel>Zajęcia dla</SectionLabel>
-								<Typography
-									variant='h2'
-									sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}
-								>
+								<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
 									{forWhomHeading || 'Kto powinien przyjść'}
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -202,10 +199,7 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 						{notExpect?.length ? (
 							<Box>
 								<SectionLabel>Czego nie będzie</SectionLabel>
-								<Typography
-									variant='h2'
-									sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}
-								>
+								<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
 									{notExpectHeading || 'Czego się nie spodziewaj'}
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -224,12 +218,6 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 				</>
 			) : null}
 
-			{slug ? (
-				<Suspense fallback={null}>
-					<CourseDatesSection slug={slug} />
-				</Suspense>
-			) : null}
-
 			{hasBringSection ? (
 				<>
 					<Divider sx={{ mb: 6 }} />
@@ -244,10 +232,7 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 						{bring?.length ? (
 							<Box>
 								<SectionLabel>Co zabrać</SectionLabel>
-								<Typography
-									variant='h2'
-									sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}
-								>
+								<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
 									{bringHeading || 'Wyposażenie'}
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -265,10 +250,7 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 						{dontBring?.length ? (
 							<Box>
 								<SectionLabel>Czego nie zabierać</SectionLabel>
-								<Typography
-									variant='h2'
-									sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}
-								>
+								<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
 									{dontBringHeading || 'Zostaw w domu'}
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -285,6 +267,12 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 						) : null}
 					</Box>
 				</>
+			) : null}
+
+			{slug ? (
+				<Suspense fallback={null}>
+					<CourseDatesSection slug={slug} />
+				</Suspense>
 			) : null}
 		</Box>
 	);

@@ -44,6 +44,10 @@ describe('ProfilShell', () => {
 			'href',
 			'/profil/moje-szkolenia'
 		);
+		expect(bottom.getByRole('link', { name: 'Ścieżka' })).toHaveAttribute(
+			'href',
+			'/profil/sciezka-rozwoju'
+		);
 		expect(bottom.getByRole('link', { name: 'Harmonogram' })).toHaveAttribute(
 			'href',
 			'/profil/harmonogram'

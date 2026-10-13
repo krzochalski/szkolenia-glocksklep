@@ -1,13 +1,15 @@
 import {
+	BADGE_CATALOGUE_IMAGES,
 	HERO_CATALOGUE_IMAGES,
 	THUMBNAIL_CATALOGUE_IMAGES,
 } from '@/generated/catalogueImages';
 import { toOptimizedImagePath } from '@/utils/optimizedImagePath';
 
-export { HERO_CATALOGUE_IMAGES, THUMBNAIL_CATALOGUE_IMAGES };
+export { BADGE_CATALOGUE_IMAGES, HERO_CATALOGUE_IMAGES, THUMBNAIL_CATALOGUE_IMAGES };
 
 export type HeroCatalogueImage = (typeof HERO_CATALOGUE_IMAGES)[number];
 export type ThumbnailCatalogueImage = (typeof THUMBNAIL_CATALOGUE_IMAGES)[number];
+export type BadgeCatalogueImage = (typeof BADGE_CATALOGUE_IMAGES)[number];
 
 const includesPath = (list: readonly string[], value: string): boolean =>
 	list.includes(toOptimizedImagePath(value));
@@ -34,4 +36,19 @@ export const catalogueSelectOptions = (
 		return [webp, ...catalogue];
 	}
 	return [...catalogue];
+};
+
+/**
+ * Admin badge image picker: `/public/badges` first, then course thumbnails
+ * so there are options before custom badge art is uploaded.
+ */
+export const badgeImageSelectOptions = (current: string): string[] => {
+	const seen = new Set<string>();
+	const merged: string[] = [];
+	for (const src of [...BADGE_CATALOGUE_IMAGES, ...THUMBNAIL_CATALOGUE_IMAGES]) {
+		if (seen.has(src)) continue;
+		seen.add(src);
+		merged.push(src);
+	}
+	return catalogueSelectOptions(merged, current);
 };
