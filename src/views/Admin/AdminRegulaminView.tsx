@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { Paths } from '@constants/paths';
 import {
 	getRegulamin,
@@ -91,7 +92,7 @@ const RegulaminInner = () => {
 			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
 				{message}
 			</MotionAlert>
-			<Stack direction='row' spacing={1}>
+			<AdminStickyActions>
 				<Button
 					variant='contained'
 					disabled={saving || !isDirty}
@@ -106,7 +107,7 @@ const RegulaminInner = () => {
 				>
 					Przywróć domyślny
 				</Button>
-			</Stack>
+			</AdminStickyActions>
 
 			<ConfirmDialog
 				open={saveOpen}

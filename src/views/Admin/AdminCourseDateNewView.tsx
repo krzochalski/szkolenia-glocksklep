@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourseDates } from '@services/courses';
 import { getInstructors } from '@services/instructors';
@@ -162,11 +163,11 @@ const NewDateInner = ({ courseId }: Props) => {
 						<MotionAlert show={Boolean(error)} severity='error'>
 							{error}
 						</MotionAlert>
-						<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+						<AdminStickyActions justifyContent='flex-end'>
 							<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
 								DODAJ TERMIN
 							</Button>
-						</Box>
+						</AdminStickyActions>
 					</Box>
 				</FormProvider>
 			</Paper>

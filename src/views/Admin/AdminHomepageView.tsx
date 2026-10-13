@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { HOMEPAGE_HERO_IMAGES, toHomepageHeroImage } from '@constants/homepageHeroImages';
 import { Paths } from '@constants/paths';
 import {
@@ -320,14 +321,14 @@ const HomepageInner = () => {
 			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
 				{message}
 			</MotionAlert>
-			<Stack direction='row' spacing={1}>
+			<AdminStickyActions>
 				<Button variant='contained' disabled={saving || !isDirty} onClick={() => setSaveOpen(true)}>
 					Zapisz
 				</Button>
 				<Button variant='outlined' disabled={saving} onClick={() => setResetOpen(true)}>
 					Przywróć domyślny
 				</Button>
-			</Stack>
+			</AdminStickyActions>
 
 			<ConfirmDialog
 				open={saveOpen}

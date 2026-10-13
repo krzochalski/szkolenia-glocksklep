@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { getCourse, updateCourseDates } from '@services/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
@@ -171,11 +172,11 @@ export const CourseDateEditForm = ({
 					<MotionAlert show={success} severity='success'>
 						Zapisano pomyślnie.
 					</MotionAlert>
-					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+					<AdminStickyActions justifyContent='flex-end'>
 						<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
 							ZAPISZ TERMIN
 						</Button>
-					</Box>
+					</AdminStickyActions>
 				</Box>
 			</FormProvider>
 		</Paper>

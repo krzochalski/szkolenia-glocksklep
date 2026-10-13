@@ -35,7 +35,7 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 	const [loggingOut, setLoggingOut] = useState(false);
 
 	return (
-		<Box sx={{ display: 'flex', minHeight: '100vh' }}>
+		<Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
 			<Box
 				component='aside'
 				sx={{
@@ -48,6 +48,7 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 					flexDirection: 'column',
 					gap: 1,
 					bgcolor: 'background.paper',
+					overflow: 'auto',
 				}}
 			>
 				<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>

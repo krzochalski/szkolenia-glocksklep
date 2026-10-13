@@ -1,4 +1,5 @@
 export { AdminShell } from './AdminShell';
+export { AdminStickyActions } from './AdminStickyActions';
 export { JsonLd, safeJsonLd } from './JsonLd';
 export { OptimizedImage } from './OptimizedImage';
 export { PageHeading } from './PageHeading';

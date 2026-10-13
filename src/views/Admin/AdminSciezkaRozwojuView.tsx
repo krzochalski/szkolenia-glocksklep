@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { Paths } from '@constants/paths';
 import { getCourses } from '@services/courses';
 import {
@@ -502,7 +503,7 @@ const SciezkaInner = () => {
 			<MotionAlert show={Boolean(message)} severity='success' sx={{ mb: 1 }}>
 				{message}
 			</MotionAlert>
-			<Stack direction='row' spacing={1}>
+			<AdminStickyActions>
 				<Button
 					variant='contained'
 					disabled={saving || !isDirty}
@@ -513,7 +514,7 @@ const SciezkaInner = () => {
 				<Button variant='outlined' disabled={saving} onClick={() => setResetOpen(true)}>
 					Przywróć domyślny
 				</Button>
-			</Stack>
+			</AdminStickyActions>
 
 			<ConfirmDialog
 				open={saveOpen}

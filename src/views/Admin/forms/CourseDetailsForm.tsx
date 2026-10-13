@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { getTags } from '@services/tags';
 import type { Tag } from '@/types/course';
 import { type CourseFormValues, courseSchema } from '@/utils/schemas';
@@ -118,11 +119,11 @@ export const CourseDetailsForm = ({
 						Zapisano pomyślnie.
 					</MotionAlert>
 
-					<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+					<AdminStickyActions justifyContent='flex-end'>
 						<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
 							{submitLabel}
 						</Button>
-					</Box>
+					</AdminStickyActions>
 				</Box>
 			</FormProvider>
 		</Paper>

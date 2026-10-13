@@ -1,5 +1,6 @@
 'use client';
 
+import { AdminStickyActions } from '@components';
 import { Box, Button, Divider, Paper, TextField, Typography } from '@ui';
 import { useState } from 'react';
 import type {
@@ -171,16 +172,16 @@ export const CourseDescriptionForm = ({
 			</Box>
 
 			<Divider />
-			<Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-				<Button variant='contained' onClick={handleSubmit} disabled={submitting}>
-					{submitting ? 'Zapisywanie...' : 'ZAPISZ OPIS'}
-				</Button>
-			</Box>
 			{!defaultValues ? (
 				<Typography variant='caption' color='text.secondary'>
 					Nowy opis dla slugu /{slug}
 				</Typography>
 			) : null}
+			<AdminStickyActions justifyContent='flex-end'>
+				<Button variant='contained' onClick={handleSubmit} disabled={submitting}>
+					{submitting ? 'Zapisywanie...' : 'ZAPISZ OPIS'}
+				</Button>
+			</AdminStickyActions>
 		</Paper>
 	);
 };

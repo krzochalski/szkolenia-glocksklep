@@ -16,7 +16,7 @@ Based on a site review only (not traffic or sales data). Goal: turn visitors int
 
 ## B. Bring people back
 
-6. **Personal “Ścieżka rozwoju”** — After each course, mark what the user completed and suggest the next step so the path is a reason to book again.
+6. ~~**Personal “Ścieżka rozwoju”** — After each course, mark what the user completed and suggest the next step so the path is a reason to book again.~~
 7. **Passes and bundles** — Sell blocks (e.g. 3 individual sessions) or path packages at a discount.
 8. **Gift vouchers** — Easy sale before Christmas and birthdays; redeemable for courses or 1:1 sessions.
 9. **Automatic emails**
@@ -40,7 +40,7 @@ Based on a site review only (not traffic or sales data). Goal: turn visitors int
 | 1 | 1, 2 | Paid seats = conversion + fewer no-shows |
 | 2 | 3, 4, 5 | Course page converts traffic you already have |
 | 3 | 9 | Cheap retention; supports path and next-date sales |
-| 4 | 6, 7, 8 | Repeat purchase and gifts |
+| 4 | ~~6~~, 7, 8 | Repeat purchase and gifts (6 done) |
 | 5 | 10–13 | Acquisition once the funnel and retention exist |
 
 ---
