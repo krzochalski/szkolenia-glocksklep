@@ -3,14 +3,13 @@
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { OptimizedImage } from '@components';
-import { usePriceMode } from '@hooks';
-import { Box, Button, CatalogCard, Chip, PriceToggle } from '@ui';
+import { Box, Button, CatalogCard, Chip } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import type { Course } from '@/types/course';
 import { fillPath } from '@/utils/paths';
-import { formatCoursePrice } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 type CourseCardProps = {
 	readonly course: Course;
@@ -50,7 +49,6 @@ const chipSx = {
 } as const;
 
 export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
-	const { mode: priceMode, setMode: setPriceMode } = usePriceMode();
 	const [imageFailed, setImageFailed] = useState(false);
 	const tags = course.tags ?? [];
 	const level = (COURSE_LEVEL_LABEL[course.level] ?? course.level).toUpperCase();
@@ -83,8 +81,7 @@ export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
 					))}
 				</Box>
 			}
-			price={formatCoursePrice(course.price, priceMode)}
-			priceToggle={<PriceToggle mode={priceMode} onChange={setPriceMode} />}
+			price={formatPlnNettoBrutto(course.price)}
 			action={
 				<Button
 					component={NextLink}

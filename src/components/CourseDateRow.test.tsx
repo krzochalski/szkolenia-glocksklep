@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { PriceModeProvider } from '@hooks';
+import { render, screen } from '@testing-library/react';
 import { UiProvider } from '@ui';
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
@@ -32,15 +31,10 @@ const date: CourseClass = {
 	},
 };
 
-const wrap = (ui: ReactElement) =>
-	render(
-		<UiProvider>
-			<PriceModeProvider>{ui}</PriceModeProvider>
-		</UiProvider>
-	);
+const wrap = (ui: ReactElement) => render(<UiProvider>{ui}</UiProvider>);
 
 describe('CourseDateRow', () => {
-	it('renders title, Polish meta, price, and action in separate blocks', () => {
+	it('renders title, Polish meta, dual price, and action in separate blocks', () => {
 		wrap(<CourseDateRow course={course} date={date} action={<span>Zapisano</span>} />);
 
 		expect(screen.getByRole('link', { name: 'Movement Fundamentals' })).toHaveAttribute(
@@ -50,16 +44,9 @@ describe('CourseDateRow', () => {
 		expect(
 			screen.getByText('18 października 2026 · 10:00 · Strzelnica Czacz · wolne: 7')
 		).toBeInTheDocument();
-		expect(screen.getByText('500 zł')).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: 'NETTO' })).toBeInTheDocument();
+		expect(screen.getByText('500 zł netto / 615 zł brutto')).toBeInTheDocument();
 		expect(screen.getByText('Zapisano')).toBeInTheDocument();
 		expect(screen.queryByText(/wolne: 4500/)).toBeNull();
-	});
-
-	it('toggles price between netto and brutto', () => {
-		wrap(<CourseDateRow course={course} date={date} />);
-		fireEvent.click(screen.getByRole('button', { name: 'BRUTTO' }));
-		expect(screen.getByText('615 zł')).toBeInTheDocument();
 	});
 
 	it('can hide slots and use a custom title href', () => {
@@ -99,7 +86,7 @@ describe('CourseDateRow', () => {
 				'Strzelnica Czacz · instruktor: Piotr "Glockacci" Krzoska · wolne: 7'
 			)
 		).toBeInTheDocument();
-		expect(screen.getByText('500 zł')).toBeInTheDocument();
+		expect(screen.getByText('500 zł netto / 615 zł brutto')).toBeInTheDocument();
 		expect(screen.queryByRole('link', { name: 'Movement Fundamentals' })).toBeNull();
 	});
 });

@@ -3,7 +3,8 @@
 import type { Instructor, Place } from '@/types/course';
 import { Box, IconButton, Paper, Tooltip, Typography } from '@ui';
 import { ContentCopy, Delete } from '@ui/icons';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { NettoBruttoHint } from '@components/NettoBruttoHint';
 import { FormDatePicker } from './FormDatePicker';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
@@ -26,7 +27,8 @@ export const DateEntry = ({
 	places,
 	instructors,
 }: DateEntryProps) => {
-	const { setValue } = useFormContext();
+	const { setValue, control } = useFormContext();
+	const customPrice = useWatch({ control, name: `dates.${index}.customPrice` });
 
 	const handlePlaceChange = (placeId: string) => {
 		const p = places.find((x) => x.id === placeId);
@@ -113,12 +115,15 @@ export const DateEntry = ({
 			/>
 
 			{isAdmin ? (
-				<FormTextField
-					name={`dates.${index}.customPrice`}
-					label='Cena indywidualna netto (PLN)'
-					placeholder='Zostaw puste = cena szkolenia'
-					type='number'
-				/>
+				<Box sx={{ display: 'flex', flexDirection: 'column' }}>
+					<FormTextField
+						name={`dates.${index}.customPrice`}
+						label='Cena indywidualna netto (PLN)'
+						placeholder='Zostaw puste = cena szkolenia'
+						type='number'
+					/>
+					<NettoBruttoHint netto={Number(customPrice) || 0} />
+				</Box>
 			) : null}
 		</Paper>
 	);

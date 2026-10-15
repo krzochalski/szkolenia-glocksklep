@@ -1,15 +1,14 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { usePriceMode } from '@hooks';
-import { Box, Link, Paper, PriceToggle, Stack, Typography } from '@ui';
+import { Box, Link, Paper, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft, isCourseClassCanceled } from '@/utils/courseDates';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
-import { formatPlnDisplay } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 export type CourseDateRowProps = {
 	readonly course: Pick<Course, 'name' | 'slug' | 'price'>;
@@ -38,16 +37,13 @@ export const CourseDateRow = ({
 	action,
 	id,
 }: CourseDateRowProps) => {
-	const { mode, setMode } = usePriceMode();
 	const href = titleHref ?? fillPath(Paths.coursePage, { slug: course.slug });
 	const canceled = isCourseClassCanceled(date);
 	const place = date.place?.name ?? '—';
 	const when = `${formatCourseDatePl(date.date)} · ${date.timeStart}`;
-	const priceLabel = formatPlnDisplay(date.customPrice ?? course.price, mode);
+	const priceLabel = formatPlnNettoBrutto(date.customPrice ?? course.price);
 
-	const metaParts = showTitle
-		? [when, place]
-		: [place];
+	const metaParts = showTitle ? [when, place] : [place];
 
 	if (showInstructor && date.instructor?.name) {
 		metaParts.push(`instruktor: ${date.instructor.name}`);
@@ -103,29 +99,21 @@ export const CourseDateRow = ({
 						{meta}
 					</Typography>
 					{!canceled ? (
-						<Stack
-							direction='row'
-							spacing={1.5}
+						<Typography
+							variant='body2'
+							component='p'
 							sx={{
+								m: 0,
 								mt: 0.75,
 								pt: 0.75,
 								borderTop: '1px solid',
 								borderColor: 'divider',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								flexWrap: 'wrap',
-								gap: 1,
+								fontWeight: 600,
+								display: 'block',
 							}}
 						>
-							<Typography
-								variant='body2'
-								component='p'
-								sx={{ m: 0, fontWeight: 600, display: 'block' }}
-							>
-								{priceLabel}
-							</Typography>
-							<PriceToggle mode={mode} onChange={setMode} />
-						</Stack>
+							{priceLabel}
+						</Typography>
 					) : null}
 				</Stack>
 				{action ? (

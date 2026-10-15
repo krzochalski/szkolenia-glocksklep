@@ -28,6 +28,7 @@ export const Paths = {
 	adminCourseDescriptionEdit: '/admin/course-descriptions/$slug',
 	adminFaq: '/admin/faq',
 	adminRegulamin: '/admin/regulamin',
+	adminPrivacyPolicy: '/admin/polityka-prywatnosci',
 	adminSciezkaRozwoju: '/admin/sciezka-rozwoju',
 	adminHomepage: '/admin/homepage',
 	adminEnrollmentEmail: '/admin/enrollment-email',
@@ -43,4 +44,5 @@ export const Paths = {
 	kontoUtworzone: '/konto-utworzone',
 	oNas: '/o-nas',
 	regulamin: '/regulamin',
+	politykaPrywatnosci: '/polityka-prywatnosci',
 };

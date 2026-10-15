@@ -38,9 +38,12 @@ export const truncatePlainText = (text: string, max = META_DESCRIPTION_MAX): str
 	return `${base.trim()}…`;
 };
 
+/** Browser/document title segment — layout template appends `| ${SITE_NAME}`. */
 export const itemTitle = (name: string, metaTitle?: string): string => {
 	const override = metaTitle?.trim();
-	return override ? pageTitle(override) : pageTitle(name);
+	if (override) return override;
+	const trimmed = name.trim();
+	return trimmed || SITE_NAME;
 };
 
 export const itemDescription = (fallback: string, metaDescription?: string): string => {

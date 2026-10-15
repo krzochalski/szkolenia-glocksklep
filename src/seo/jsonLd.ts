@@ -1,3 +1,4 @@
+import { PUBLIC_CONTACT_EMAIL } from '@constants/contact';
 import { Paths } from '@constants/paths';
 import { DEFAULT_OG_IMAGE_PATH, Links, SITE_NAME, SITE_ORIGIN, STATIC_SEO } from '@constants/seo';
 import { absoluteUrl, itemDescription } from './meta';
@@ -12,7 +13,7 @@ export const organizationJsonLd = (): JsonLd => ({
 	'@id': organizationId,
 	name: SITE_NAME,
 	url: SITE_ORIGIN,
-	email: 'szkolenia@glocksklep.pl',
+	email: PUBLIC_CONTACT_EMAIL,
 	logo: absoluteUrl(DEFAULT_OG_IMAGE_PATH),
 	sameAs: [Links.shop, Links.instagram, Links.youtube].filter(Boolean),
 });

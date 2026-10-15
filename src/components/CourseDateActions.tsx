@@ -29,6 +29,7 @@ import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatBookingSummary } from '@/utils/formatEnrollment';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
+import { WAITLIST_SECTION_ID } from '@constants/waitlist';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 type Props = {
@@ -285,7 +286,12 @@ export const CourseDateActions = ({
 	if (!user) {
 		if (slots <= 0) {
 			return (
-				<Button component={NextLink} href={courseUrl} variant='outlined' size={size}>
+				<Button
+					component={NextLink}
+					href={`${courseUrl}#${WAITLIST_SECTION_ID}`}
+					variant='outlined'
+					size={size}
+				>
 					Lista oczekujących
 				</Button>
 			);

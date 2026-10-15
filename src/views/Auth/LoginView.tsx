@@ -122,7 +122,7 @@ export const LoginView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='E-mail *'
+							label='E-mail'
 							type='email'
 							fullWidth
 							required
@@ -163,7 +163,7 @@ export const LoginView = () => {
 							render={({ field }) => (
 								<TextField
 									{...field}
-									label='Hasło *'
+									label='Hasło'
 									type='password'
 									fullWidth
 									required

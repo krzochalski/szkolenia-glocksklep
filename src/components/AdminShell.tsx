@@ -17,6 +17,7 @@ const NAV = [
 	{ label: 'Dane rozliczeniowe', href: Paths.adminBillingData },
 	{ label: 'FAQ', href: Paths.adminFaq },
 	{ label: 'Regulamin', href: Paths.adminRegulamin },
+	{ label: 'Polityka prywatności', href: Paths.adminPrivacyPolicy },
 	{ label: 'Strona główna', href: Paths.adminHomepage },
 	{ label: 'E-mail po zapisie', href: Paths.adminEnrollmentEmail },
 	{ label: 'Ścieżka rozwoju', href: Paths.adminSciezkaRozwoju },

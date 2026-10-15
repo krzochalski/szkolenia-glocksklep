@@ -27,7 +27,7 @@ import {
 	coursesNeedOrderBackfill,
 } from '@/utils/courseOrder';
 import { fillPath } from '@/utils/paths';
-import { formatCoursePrice } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 import {
 	Box,
 	Button,
@@ -132,7 +132,7 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				<Typography variant='body2'>{levelLabel}</Typography>
 			</TableCell>
 			<TableCell align='right'>
-				<Typography variant='body2'>{formatCoursePrice(course.price, 'netto')}</Typography>
+				<Typography variant='body2'>{formatPlnNettoBrutto(course.price)}</Typography>
 			</TableCell>
 			<TableCell align='right'>
 				<Typography variant='body2'>{course.hours} h</Typography>
@@ -286,7 +286,7 @@ const AdminCoursesInner = () => {
 									<TableCell>Nazwa</TableCell>
 									<TableCell>Slug</TableCell>
 									<TableCell>Poziom</TableCell>
-									<TableCell align='right'>Cena netto</TableCell>
+									<TableCell align='right'>Cena</TableCell>
 									<TableCell align='right'>Czas</TableCell>
 									<TableCell>Tagi</TableCell>
 									<TableCell>Terminy</TableCell>

@@ -1,3 +1,5 @@
+import { SOCIAL_LINKS } from './contact';
+
 export const SITE_ORIGIN = 'https://szkolenia.glocksklep.pl';
 export const SITE_NAME = 'GLOCKSKLEP Szkolenia';
 export const SITE_LANG = 'pl';
@@ -18,6 +20,7 @@ export type StaticSeoPage =
 	| 'sciezkaRozwoju'
 	| 'about'
 	| 'regulamin'
+	| 'privacyPolicy'
 	| 'login'
 	| 'register'
 	| 'auth'
@@ -33,6 +36,7 @@ export type StaticSeoConfig = {
 	readonly ogType?: 'website';
 };
 
+/** Page title segments only — layout template appends `| ${SITE_NAME}` once. */
 export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 	home: {
 		title: DEFAULT_TITLE,
@@ -41,71 +45,76 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 		ogType: 'website',
 	},
 	nearest: {
-		title: `Najbliższe szkolenia | ${SITE_NAME}`,
+		title: 'Najbliższe szkolenia',
 		description:
 			'Najbliższe terminy szkoleń strzeleckich Glocksklep — wolne miejsca i zapisy online.',
 		path: '/najblizsze-szkolenia',
 	},
 	courses: {
-		title: `Szkolenia | ${SITE_NAME}`,
+		title: 'Szkolenia',
 		description:
 			'Katalog szkoleń strzeleckich Glocksklep: poziomy, programy i aktualne terminy.',
 		path: '/szkolenia',
 	},
 	faq: {
-		title: `FAQ | ${SITE_NAME}`,
+		title: 'FAQ',
 		description: 'Najczęstsze pytania o szkolenia, zapisy, płatności i wymagania uczestników.',
 		path: '/faq',
 	},
 	sciezkaRozwoju: {
-		title: `Ścieżka rozwoju | ${SITE_NAME}`,
+		title: 'Ścieżka rozwoju',
 		description:
 			'Zalecana kolejność szkoleń strzeleckich Glocksklep — od podstaw do ruchu i soft skills.',
 		path: '/sciezka-rozwoju',
 	},
 	about: {
-		title: `O nas | ${SITE_NAME}`,
+		title: 'O nas',
 		description:
 			'Piotr „Glockacci” Krzoska — instruktor i zawodnik IPSC, IDPA i PiRO. Historia, osiągnięcia i podejście do szkoleń strzeleckich.',
 		path: '/o-nas',
 	},
 	regulamin: {
-		title: `Regulamin | ${SITE_NAME}`,
+		title: 'Regulamin',
 		description: 'Regulamin uczestnictwa w szkoleniach strzeleckich Glocksklep.',
 		path: '/regulamin',
 	},
+	privacyPolicy: {
+		title: 'Polityka prywatności',
+		description: 'Polityka prywatności i informacje o przetwarzaniu danych osobowych.',
+		path: '/polityka-prywatnosci',
+	},
 	login: {
-		title: `Logowanie | ${SITE_NAME}`,
+		title: 'Logowanie',
 		description: 'Zaloguj się do panelu uczestnika.',
 		path: '/login',
 		noindex: true,
 	},
 	register: {
-		title: `Rejestracja | ${SITE_NAME}`,
+		title: 'Rejestracja',
 		description: 'Załóż konto uczestnika szkoleń.',
 		path: '/register',
 		noindex: true,
 	},
 	auth: {
-		title: `Autoryzacja | ${SITE_NAME}`,
+		title: 'Autoryzacja',
 		description: 'Dokończenie logowania.',
 		path: '/auth/email-link',
 		noindex: true,
 	},
 	profil: {
-		title: `Profil | ${SITE_NAME}`,
+		title: 'Profil',
 		description: 'Panel uczestnika.',
 		path: '/profil',
 		noindex: true,
 	},
 	admin: {
-		title: `Admin | ${SITE_NAME}`,
+		title: 'Admin',
 		description: 'Panel administracyjny.',
 		path: '/admin',
 		noindex: true,
 	},
 	notFound: {
-		title: `Nie znaleziono | ${SITE_NAME}`,
+		title: 'Nie znaleziono',
 		description: 'Ta strona nie istnieje.',
 		path: '/404',
 		noindex: true,
@@ -120,11 +129,12 @@ export const SITEMAP_STATIC_PATHS: readonly string[] = [
 	'/faq',
 	'/o-nas',
 	'/regulamin',
+	'/polityka-prywatnosci',
 ];
 
 export const Links = {
 	shop: 'https://glocksklep.pl',
 	about: 'https://glocksklep.pl/o-mnie',
-	instagram: 'https://www.instagram.com/',
-	youtube: 'https://www.youtube.com/',
+	instagram: SOCIAL_LINKS.instagram,
+	youtube: SOCIAL_LINKS.youtube,
 };

@@ -23,6 +23,7 @@ import { DatesSection } from './DatesSection';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
 import { SectionTitle } from './SectionTitle';
+import { WatchedNettoBruttoHint } from './WatchedNettoBruttoHint';
 
 type CourseFormProps = {
 	readonly defaultValues?: Partial<CourseFormValues>;
@@ -112,7 +113,15 @@ export const CourseForm = ({
 						<Box
 							sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}
 						>
-							<FormTextField name='price' label='Cena netto (PLN)' placeholder='1200' type='number' />
+							<Box sx={{ display: 'flex', flexDirection: 'column' }}>
+								<FormTextField
+									name='price'
+									label='Cena netto (PLN)'
+									placeholder='1200'
+									type='number'
+								/>
+								<WatchedNettoBruttoHint control={methods.control} name='price' />
+							</Box>
 							<FormTextField name='hours' label='Czas trwania (h)' placeholder='8' type='number' />
 						</Box>
 					</Box>

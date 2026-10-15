@@ -1,10 +1,11 @@
 'use client';
 
 import { CourseWaitingListActions } from '@/components/CourseWaitingListActions';
+import { WAITLIST_SECTION_ID } from '@constants/waitlist';
 import { useAuthUser } from '@hooks';
 import type { Course, CourseClass } from '@/types/course';
 import { Box, MotionAlert, Typography } from '@ui';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type CourseWaitingListSectionProps = {
 	readonly course: Course;
@@ -27,16 +28,32 @@ export const CourseWaitingListSection = ({
 	const [error, setError] = useState<string | null>(null);
 	const enrolled = isEnrolledInFutureDate(futureDates, user?.uid);
 
+	useEffect(() => {
+		if (enrolled) return;
+		if (typeof window === 'undefined') return;
+		const scrollToWaitlist = () => {
+			if (window.location.hash !== `#${WAITLIST_SECTION_ID}`) return;
+			document
+				.getElementById(WAITLIST_SECTION_ID)
+				?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		};
+		scrollToWaitlist();
+		window.addEventListener('hashchange', scrollToWaitlist);
+		return () => window.removeEventListener('hashchange', scrollToWaitlist);
+	}, [enrolled]);
+
 	if (enrolled) return null;
 
 	return (
 		<Box
+			id={WAITLIST_SECTION_ID}
 			sx={{
 				mt: 4,
 				p: { xs: 3, md: 4 },
 				border: '2px solid',
 				borderColor: 'ink.main',
 				bgcolor: 'background.paper',
+				scrollMarginTop: 96,
 			}}
 		>
 			<Box sx={{ mb: 2 }}>

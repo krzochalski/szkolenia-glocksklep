@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { absoluteUrl, canonicalPath, pageTitle, truncatePlainText } from '../meta';
 
 describe('seo/meta', () => {
-	it('builds page titles', () => {
-		expect(pageTitle('FAQ')).toContain('GLOCKSKLEP Szkolenia');
+	it('builds page titles with a single site-name suffix', () => {
+		expect(pageTitle('FAQ')).toBe('FAQ | GLOCKSKLEP Szkolenia');
+		expect(pageTitle('FAQ | GLOCKSKLEP Szkolenia')).toBe('FAQ | GLOCKSKLEP Szkolenia');
 	});
 
 	it('canonicalizes paths', () => {

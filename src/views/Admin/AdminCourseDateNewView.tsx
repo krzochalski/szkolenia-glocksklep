@@ -13,7 +13,7 @@ import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { type Control, FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
 import { fillPath } from '@/utils/paths';
 import { cleanDateForFirestore } from './forms/cleanDateForFirestore';
@@ -23,20 +23,10 @@ import { FormSelect } from './forms/FormSelect';
 import { FormTextField } from './forms/FormTextField';
 import { FormTimePicker } from './forms/FormTimePicker';
 import { SectionTitle } from './forms/SectionTitle';
+import { WatchedNettoBruttoHint } from './forms/WatchedNettoBruttoHint';
 
 type Props = {
 	readonly courseId: string;
-};
-
-const BruttoInfo = ({ control }: { control: Control<DateEntryValues> }) => {
-	const customPrice = useWatch({ control, name: 'customPrice' });
-	const netto = Number(customPrice) || 0;
-	if (netto <= 0) return null;
-	return (
-		<Typography variant='caption' color='text.secondary' sx={{ mt: 0.5, ml: 0.5 }}>
-			Brutto: {(netto * 1.23).toFixed(2)} PLN
-		</Typography>
-	);
 };
 
 export const AdminCourseDateNewView = ({ courseId }: Props) => <NewDateInner courseId={courseId} />;
@@ -151,7 +141,7 @@ const NewDateInner = ({ courseId }: Props) => {
 											label='Cena indywidualna netto (PLN)'
 											type='number'
 										/>
-										<BruttoInfo control={methods.control} />
+										<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 									</Box>
 								</Box>
 								<Box

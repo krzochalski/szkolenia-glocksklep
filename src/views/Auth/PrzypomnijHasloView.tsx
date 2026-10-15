@@ -51,7 +51,7 @@ export const PrzypomnijHasloView = () => {
 					}}
 				>
 					<TextField
-						label='E-mail *'
+						label='E-mail'
 						type='email'
 						fullWidth
 						required

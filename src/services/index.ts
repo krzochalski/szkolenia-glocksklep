@@ -136,6 +136,11 @@ export {
 } from './proformaInvoices';
 export { queryClient } from './queryClient';
 export {
+	getPrivacyPolicy,
+	savePrivacyPolicy,
+	seedPrivacyPolicyIfMissing,
+} from './privacyPolicy';
+export {
 	getRegulamin,
 	saveRegulamin,
 	seedRegulaminIfMissing,

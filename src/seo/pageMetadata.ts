@@ -6,7 +6,7 @@ import {
 	type StaticSeoPage,
 } from '@constants/seo';
 import type { Metadata } from 'next';
-import { absoluteUrl, canonicalPath, defaultOgImageUrl } from './meta';
+import { absoluteUrl, canonicalPath, defaultOgImageUrl, pageTitle } from './meta';
 
 export const CATALOG_REVALIDATE_SECONDS = 300;
 
@@ -18,9 +18,11 @@ export const seoToMetadata = (
 	const canonical = canonicalPath(path);
 	const ogImage = options?.image ? absoluteUrl(options.image) : defaultOgImageUrl();
 	const robots = cfg.noindex ? { index: false, follow: false } : { index: true, follow: true };
+	const isHome = path === '/' || cfg.path === '/';
+	const ogTitle = isHome ? cfg.title : pageTitle(cfg.title);
 
 	return {
-		title: cfg.title,
+		title: isHome ? { absolute: cfg.title } : cfg.title,
 		description: cfg.description,
 		robots,
 		alternates: { canonical },
@@ -28,14 +30,14 @@ export const seoToMetadata = (
 			type: 'website',
 			siteName: SITE_NAME,
 			locale: OG_LOCALE,
-			title: cfg.title,
+			title: ogTitle,
 			description: cfg.description,
 			url: canonical,
 			images: [{ url: ogImage }],
 		},
 		twitter: {
 			card: 'summary_large_image',
-			title: cfg.title,
+			title: ogTitle,
 			description: cfg.description,
 			images: [ogImage],
 		},

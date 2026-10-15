@@ -6,9 +6,9 @@ import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import type { CourseClass, Instructor, Place } from '@/types/course';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, MotionAlert, Paper, Typography } from '@ui';
+import { Box, Button, MotionAlert, Paper } from '@ui';
 import { useEffect, useState } from 'react';
-import { type Control, FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
+import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { cleanDateForFirestore } from './cleanDateForFirestore';
 import { type DateEntryValues, dateEntrySchema } from './dateEntrySchema';
 import { FormDatePicker } from './FormDatePicker';
@@ -16,18 +16,7 @@ import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
 import { FormTimePicker } from './FormTimePicker';
 import { SectionTitle } from './SectionTitle';
-
-const BruttoInfo = ({ control }: { control: Control<DateEntryValues> }) => {
-	const customPrice = useWatch({ control, name: 'customPrice' });
-	const netto = Number(customPrice) || 0;
-	if (netto <= 0) return null;
-	const brutto = (netto * 1.23).toFixed(2);
-	return (
-		<Typography variant='caption' color='text.secondary' sx={{ mt: 0.5, ml: 0.5 }}>
-			Brutto: {brutto} PLN
-		</Typography>
-	);
-};
+import { WatchedNettoBruttoHint } from './WatchedNettoBruttoHint';
 
 type CourseDateEditFormProps = {
 	readonly courseId: string;
@@ -159,7 +148,7 @@ export const CourseDateEditForm = ({
 						<FormTextField name='slotsMax' label='Maks. miejsc' type='number' />
 						<Box sx={{ display: 'flex', flexDirection: 'column' }}>
 							<FormTextField name='customPrice' label='Cena indywidualna netto (PLN)' type='number' />
-							<BruttoInfo control={methods.control} />
+							<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 						</Box>
 					</Box>
 					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>

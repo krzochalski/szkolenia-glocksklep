@@ -1,3 +1,5 @@
+import { PUBLIC_CONTACT_EMAIL, SOCIAL_LINKS } from '@constants/contact';
+
 export type AboutAchievement = {
 	readonly year: string;
 	readonly title: string;
@@ -85,7 +87,7 @@ export const ABOUT_CONTENT = {
 			detail: 'Production Optics',
 		},
 	] satisfies readonly AboutAchievement[],
-	instagram: 'https://www.instagram.com/salvatoreglockacci/',
-	youtube: 'https://www.youtube.com/@SalvatoreGlockacci',
-	email: 'szkolenia@glocksklep.pl',
+	instagram: SOCIAL_LINKS.instagram,
+	youtube: SOCIAL_LINKS.youtube,
+	email: PUBLIC_CONTACT_EMAIL,
 } as const;

@@ -49,7 +49,7 @@ export const EmailLinkView = () => {
 			</Typography>
 			<Stack spacing={2}>
 				<TextField
-					label='E-mail *'
+					label='E-mail'
 					type='email'
 					fullWidth
 					required

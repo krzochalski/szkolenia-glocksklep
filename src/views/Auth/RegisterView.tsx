@@ -73,7 +73,7 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='Imię i nazwisko *'
+							label='Imię i nazwisko'
 							fullWidth
 							required
 							error={Boolean(errors.fullName)}
@@ -87,7 +87,7 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='E-mail *'
+							label='E-mail'
 							type='email'
 							fullWidth
 							required
@@ -102,7 +102,7 @@ export const RegisterView = () => {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label='Telefon *'
+							label='Telefon'
 							fullWidth
 							required
 							error={Boolean(errors.phone)}

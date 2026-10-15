@@ -1,10 +1,12 @@
 'use client';
 
+import { Paths } from '@constants/paths';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { completeGoogleRedirectSignIn } from '@services/auth';
 import { queryClient } from '@services/queryClient';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { brand, UiProvider } from '@ui';
+import NextLink from 'next/link';
 import { type ReactNode, useEffect } from 'react';
 import { CookieConsent } from 'react-cookie-consent';
 import { PriceModeProvider } from '@/hooks';
@@ -58,7 +60,14 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 							}}
 						>
 							Ta strona używa cookies. Możesz zaakceptować albo odrzucić — wybór zapisujemy w cookie,
-							żeby nie pytać przy każdej wizycie.
+							żeby nie pytać przy każdej wizycie. Szczegóły:{' '}
+							<NextLink
+								href={Paths.politykaPrywatnosci}
+								style={{ color: brand.accentDark, textDecoration: 'underline' }}
+							>
+								polityka prywatności
+							</NextLink>
+							.
 						</CookieConsent>
 					</QueryClientProvider>
 				</PriceModeProvider>
