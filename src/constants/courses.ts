@@ -10,3 +10,9 @@ export const COURSE_LEVEL_ORDER: Record<string, number> = {
 	intermediate: 1,
 	advanced: 2,
 };
+
+/** Default start time when creating a new course date. */
+export const DEFAULT_COURSE_TIME_START = '09:00';
+
+/** Default max seats when creating a new course date. */
+export const DEFAULT_COURSE_SLOTS_MAX = 12;

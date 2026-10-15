@@ -1,5 +1,6 @@
 'use client';
 
+import { DEFAULT_COURSE_SLOTS_MAX, DEFAULT_COURSE_TIME_START } from '@constants/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import { Box, Button, ConfirmDialog, Typography } from '@ui';
@@ -30,8 +31,8 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 	const addDate = () =>
 		append({
 			date: '',
-			timeStart: '09:00',
-			slotsMax: 12,
+			timeStart: DEFAULT_COURSE_TIME_START,
+			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
 			instructor: { name: '', slug: '' },
 			place: { name: '', link: '' },
 		});

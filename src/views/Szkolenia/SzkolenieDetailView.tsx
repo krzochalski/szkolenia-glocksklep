@@ -1,14 +1,14 @@
 'use client';
 
-import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/CourseLayout';
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
-import { getCourseBySlug } from '@services/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
+import { getCourseBySlug } from '@services/courses';
+import { useQuery } from '@tanstack/react-query';
+import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
+import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/CourseLayout';
 import { isCourseInactive } from '@/utils/courseDates';
 import { resolveCourseHeroFrom } from '@/utils/courseImages';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
-import { useQuery } from '@tanstack/react-query';
-import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 
 type Props = {
 	readonly slug: string;
@@ -36,6 +36,15 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 				? 'notfound'
 				: 'content';
 
+	const courseMeta = course
+		? {
+				price: course.price,
+				hours: course.hours,
+				level: course.level,
+				tags: course.tags,
+			}
+		: undefined;
+
 	return (
 		<ContentSwap state={swapState}>
 			{isLoading ? (
@@ -57,16 +66,20 @@ export const SzkolenieDetailView = ({ slug }: Props) => {
 				<CourseLayout
 					data={mapDescriptionToSchema(description)}
 					hero={resolveCourseHeroFrom(course, description)}
+					courseMeta={courseMeta}
 				/>
 			) : (
 				<CourseLayout
-					data={{
-						eyebrow: `Poziom ${(COURSE_LEVEL_LABEL[course.level] ?? course.level).toLowerCase()}`,
-						headline: [course.name, ''],
-						description: course.description,
-						slug: course.slug,
-					} satisfies CourseSchemaData}
+					data={
+						{
+							eyebrow: `Poziom ${(COURSE_LEVEL_LABEL[course.level] ?? course.level).toLowerCase()}`,
+							headline: [course.name, ''],
+							description: course.description,
+							slug: course.slug,
+						} satisfies CourseSchemaData
+					}
 					hero={resolveCourseHeroFrom(course, null)}
+					courseMeta={courseMeta}
 				/>
 			)}
 		</ContentSwap>

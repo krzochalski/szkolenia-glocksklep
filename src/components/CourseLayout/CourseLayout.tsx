@@ -6,6 +6,7 @@ import { Box, Button, Divider, HardShadow, Typography } from '@ui';
 import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
 import { Suspense, useState } from 'react';
+import { CourseFacts, type CourseFactsMeta } from '@/components/CourseFacts';
 import { CourseDatesSection } from '@/components/CourseLayout/CourseDatesSection';
 import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.types';
 import { ListItem } from '@/components/CourseLayout/ListItem';
@@ -17,9 +18,10 @@ export type { CourseModule, CourseSchemaData } from './CourseLayout.types';
 type CourseLayoutProps = {
 	readonly data: CourseSchemaData;
 	readonly hero?: string;
+	readonly courseMeta?: CourseFactsMeta;
 };
 
-export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
+export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 	const {
 		eyebrow,
 		headline,
@@ -141,6 +143,7 @@ export const CourseLayout = ({ data, hero }: CourseLayoutProps) => {
 					>
 						{description}
 					</Typography>
+					{courseMeta ? <CourseFacts meta={courseMeta} /> : null}
 				</Box>
 			</HardShadow>
 
