@@ -6,11 +6,17 @@ import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import type { RegulaminDocument } from '@/types/regulamin';
 
-export const RegulaminView = () => {
+type Props = {
+	readonly initialRegulamin?: RegulaminDocument;
+};
+
+export const RegulaminView = ({ initialRegulamin }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['regulamin'],
 		queryFn: getRegulamin,
+		...(initialRegulamin !== undefined ? { initialData: initialRegulamin } : {}),
 	});
 
 	return (

@@ -58,5 +58,10 @@ export const responsiveImages: Readonly<Record<string, ResponsiveImage>> = {
 		srcSet: '/thumbnails/target-focus-640w.webp 640w, /thumbnails/target-focus.webp 1024w',
 		sizes: '(max-width: 600px) 72px, 96px',
 	},
+	'/about/piotr-krzoska.webp': {
+		src: '/about/piotr-krzoska.webp',
+		srcSet: '/about/piotr-krzoska-640w.webp 640w, /about/piotr-krzoska.webp 1024w',
+		sizes: '(max-width: 600px) 200px, 220px',
+	},
 } as const;
 

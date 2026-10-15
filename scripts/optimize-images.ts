@@ -43,6 +43,8 @@ const HERO_FOLDERS: Record<string, string> = {
 	thumbnails: '(max-width: 600px) 72px, 96px',
 	/** Custom achievement badges on profile / path. */
 	badges: '(max-width: 600px) 72px, 96px',
+	/** About / instructor portrait. */
+	about: '(max-width: 600px) 200px, 220px',
 };
 
 /** Optional per-file sizes overrides (public URL path → sizes). */
@@ -333,7 +335,16 @@ async function main(): Promise<void> {
 	const responsiveEntries: ResponsiveEntry[] = [];
 	for (const [folder, sizes] of Object.entries(HERO_FOLDERS)) {
 		const heroDir = join(PUBLIC_DIR, folder);
-		const heroImages = findFiles(heroDir, SOURCE_EXT);
+		const fromRaster = findFiles(heroDir, SOURCE_EXT);
+		/** Also accept master `.webp` when no PNG/JPG source (e.g. `public/about/`). */
+		const fromWebp = listCatalogueWebps(folder).map((url) => join(PUBLIC_DIR, url.slice(1)));
+		const rasterStems = new Set(
+			fromRaster.map((p) => basename(p, extname(p)).toLowerCase())
+		);
+		const heroImages = [
+			...fromRaster,
+			...fromWebp.filter((p) => !rasterStems.has(basename(p, '.webp').toLowerCase())),
+		];
 		for (const heroImage of heroImages) {
 			const url = publicUrl(heroImage);
 			const webpUrl = url.replace(/\.(png|jpe?g)$/i, '.webp');

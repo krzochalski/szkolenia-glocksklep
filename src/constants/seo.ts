@@ -65,7 +65,8 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 	},
 	about: {
 		title: `O nas | ${SITE_NAME}`,
-		description: 'Instruktorzy i filozofia szkoleń strzeleckich Glocksklep.',
+		description:
+			'Piotr „Glockacci” Krzoska — instruktor i zawodnik IPSC, IDPA i PiRO. Historia, osiągnięcia i podejście do szkoleń strzeleckich.',
 		path: '/o-nas',
 	},
 	regulamin: {

@@ -1,12 +1,27 @@
 import { JsonLd } from '@components/JsonLd';
 import { STATIC_SEO } from '@constants/seo';
 import { collectionJsonLd } from '@seo/jsonLd';
-import { staticPageMetadata } from '@seo/pageMetadata';
+import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { getCourseDescriptions } from '@services/courseDescriptions';
+import { getCourses } from '@services/courses';
 import { SzkoleniaListView } from '@views/Szkolenia/SzkoleniaListView';
+import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('courses');
+export const revalidate = CATALOG_REVALIDATE_SECONDS;
 
-export default function SzkoleniaPage() {
+export default async function SzkoleniaPage() {
+	const [coursesResult, descriptionsResult] = await Promise.allSettled([
+		getCourses(),
+		getCourseDescriptions(),
+	]);
+	const initialCourses =
+		coursesResult.status === 'fulfilled' ? serializeForClient(coursesResult.value) : undefined;
+	const initialDescriptions =
+		descriptionsResult.status === 'fulfilled'
+			? serializeForClient(descriptionsResult.value)
+			: undefined;
+
 	return (
 		<>
 			<JsonLd
@@ -16,7 +31,10 @@ export default function SzkoleniaPage() {
 					description: STATIC_SEO.courses.description,
 				})}
 			/>
-			<SzkoleniaListView />
+			<SzkoleniaListView
+				initialCourses={initialCourses}
+				initialDescriptions={initialDescriptions}
+			/>
 		</>
 	);
 }

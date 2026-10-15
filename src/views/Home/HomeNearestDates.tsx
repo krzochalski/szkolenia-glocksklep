@@ -18,16 +18,22 @@ import NextLink from 'next/link';
 import { useState } from 'react';
 import { CourseDateActions } from '@/components/CourseDateActions';
 import { CourseDateRow } from '@/components/CourseDateRow';
+import type { Course } from '@/types/course';
 import { getFutureCourseDates } from '@/utils/courseDates';
 
 const NEAREST_LIMIT = 4;
 
-export const HomeNearestDates = () => {
+type Props = {
+	readonly initialCourses?: Course[];
+};
+
+export const HomeNearestDates = ({ initialCourses }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const { data: courses = [], isLoading } = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
+		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
 	});
 
 	const upcoming = getFutureCourseDates(courses).slice(0, NEAREST_LIMIT);

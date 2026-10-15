@@ -48,6 +48,25 @@ export const faqPageJsonLd = (
 	})),
 });
 
+export const personJsonLd = (input: {
+	readonly name: string;
+	readonly description: string;
+	readonly imagePath: string;
+	readonly email: string;
+	readonly sameAs: readonly string[];
+}): JsonLd => ({
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: input.name,
+	description: input.description,
+	url: absoluteUrl(STATIC_SEO.about.path),
+	image: absoluteUrl(input.imagePath),
+	email: input.email,
+	jobTitle: 'Instruktor szkoleń strzeleckich',
+	worksFor: { '@id': organizationId },
+	sameAs: [...input.sameAs],
+});
+
 export const breadcrumbJsonLd = (
 	items: readonly { name: string; path: string }[]
 ): JsonLd => ({

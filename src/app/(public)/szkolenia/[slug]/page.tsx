@@ -1,12 +1,18 @@
 import { JsonLd } from '@components/JsonLd';
 import { Paths } from '@constants/paths';
 import { courseJsonLd } from '@seo/jsonLd';
-import { courseItemMetadata, staticPageMetadata } from '@seo/pageMetadata';
 import { itemDescription, itemTitle } from '@seo/meta';
+import {
+	CATALOG_REVALIDATE_SECONDS,
+	courseItemMetadata,
+	staticPageMetadata,
+} from '@seo/pageMetadata';
+import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import { getCourseBySlug } from '@services/courses';
 import { SzkolenieDetailView } from '@views/Szkolenia/SzkolenieDetailView';
+import { serializeForClient } from '@/utils/serializeForClient';
 
-export const revalidate = 300;
+export const revalidate = CATALOG_REVALIDATE_SECONDS;
 
 type Props = {
 	params: Promise<{ slug: string }>;
@@ -29,25 +35,34 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function SzkoleniePage({ params }: Props) {
 	const { slug } = await params;
-	let jsonLd = null;
-	try {
-		const course = await getCourseBySlug(slug);
-		if (course) {
-			jsonLd = courseJsonLd({
+	const [courseResult, descriptionResult] = await Promise.allSettled([
+		getCourseBySlug(slug),
+		getCourseDescriptionBySlug(slug),
+	]);
+	const course = courseResult.status === 'fulfilled' ? courseResult.value : null;
+	const initialCourse =
+		courseResult.status === 'fulfilled' ? serializeForClient(courseResult.value) : undefined;
+	const initialDescription =
+		descriptionResult.status === 'fulfilled'
+			? serializeForClient(descriptionResult.value)
+			: undefined;
+	const jsonLd = course
+		? courseJsonLd({
 				name: course.name,
 				slug: course.slug,
 				description: course.description,
 				price: course.price,
-			});
-		}
-	} catch {
-		jsonLd = null;
-	}
+			})
+		: null;
 
 	return (
 		<>
 			{jsonLd ? <JsonLd data={jsonLd} /> : null}
-			<SzkolenieDetailView slug={slug} />
+			<SzkolenieDetailView
+				slug={slug}
+				initialCourse={initialCourse}
+				initialDescription={initialDescription}
+			/>
 		</>
 	);
 }

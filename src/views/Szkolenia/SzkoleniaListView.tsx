@@ -6,12 +6,19 @@ import { getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
 import { ContentSwap, Stagger, StaggerItem, Typography } from '@ui';
 import { useMemo } from 'react';
+import type { Course } from '@/types/course';
+import type { CourseDescription } from '@/types/courseDescription';
 import { isCourseInactive } from '@/utils/courseDates';
 import { resolveCourseThumbnailFrom } from '@/utils/courseImages';
 import { compareCoursesByOrder } from '@/utils/courseOrder';
 import { CourseCard } from './CourseCard';
 
-export const SzkoleniaListView = () => {
+type Props = {
+	readonly initialCourses?: Course[];
+	readonly initialDescriptions?: CourseDescription[];
+};
+
+export const SzkoleniaListView = ({ initialCourses, initialDescriptions }: Props) => {
 	const {
 		data: courses = [],
 		isLoading,
@@ -19,10 +26,12 @@ export const SzkoleniaListView = () => {
 	} = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
+		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
 	});
 	const { data: descriptions = [] } = useQuery({
 		queryKey: ['courseDescriptions'],
 		queryFn: getCourseDescriptions,
+		...(initialDescriptions !== undefined ? { initialData: initialDescriptions } : {}),
 	});
 
 	const descriptionBySlug = useMemo(() => {

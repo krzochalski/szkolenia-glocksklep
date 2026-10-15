@@ -11,11 +11,17 @@ import {
 	Typography,
 } from '@ui';
 import { useQuery } from '@tanstack/react-query';
+import type { FaqItem } from '@/types/faq';
 
-export const FaqView = () => {
+type Props = {
+	readonly initialItems?: FaqItem[];
+};
+
+export const FaqView = ({ initialItems }: Props) => {
 	const { data: items = [], isLoading } = useQuery({
 		queryKey: ['faq'],
 		queryFn: getFaqItems,
+		...(initialItems !== undefined ? { initialData: initialItems } : {}),
 	});
 
 	const listState = isLoading ? 'loading' : items.length === 0 ? 'empty' : 'content';

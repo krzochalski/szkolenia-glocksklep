@@ -3,16 +3,24 @@
 import { getHomepage } from '@services/homepage';
 import { Alert, Box, CircularProgress, ContentSwap, Stack } from '@ui';
 import { useQuery } from '@tanstack/react-query';
+import type { Course } from '@/types/course';
+import type { HomepageDocument } from '@/types/homepage';
 import { HomeGrowthPathTeaser } from './HomeGrowthPathTeaser';
 import { HomeHero } from './HomeHero';
 import { HomeMissionAndWays } from './HomeMissionAndWays';
 import { HomeNearestDates } from './HomeNearestDates';
 import { HomePrivateFormats } from './HomePrivateFormats';
 
-export const HomeView = () => {
+type Props = {
+	readonly initialHomepage?: HomepageDocument;
+	readonly initialCourses?: Course[];
+};
+
+export const HomeView = ({ initialHomepage, initialCourses }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['homepage'],
 		queryFn: getHomepage,
+		...(initialHomepage !== undefined ? { initialData: initialHomepage } : {}),
 	});
 
 	return (
@@ -32,7 +40,7 @@ export const HomeView = () => {
 					</Alert>
 					<HomeMissionAndWays content={data} />
 					<HomeGrowthPathTeaser content={data} />
-					<HomeNearestDates />
+					<HomeNearestDates initialCourses={initialCourses} />
 					<HomePrivateFormats content={data} />
 				</Stack>
 			)}

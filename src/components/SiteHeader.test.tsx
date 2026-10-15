@@ -27,10 +27,8 @@ describe('SiteHeader', () => {
 			'/sciezka-rozwoju'
 		);
 		const about = screen.getByRole('link', { name: 'O nas' });
-		expect(about).toHaveAttribute('href', 'https://glocksklep.pl/o-mnie');
-		expect(about).toHaveAttribute('target', '_blank');
-		expect(about).toHaveAttribute('rel', 'noreferrer');
-		expect(about.querySelector('svg')).toBeTruthy();
+		expect(about).toHaveAttribute('href', '/o-nas');
+		expect(about).not.toHaveAttribute('target');
 		expect(screen.queryByRole('link', { name: 'Kontakt' })).toBeNull();
 		const profileLinks = screen.getAllByRole('link', { name: 'Zaloguj' });
 		expect(profileLinks.length).toBeGreaterThan(0);

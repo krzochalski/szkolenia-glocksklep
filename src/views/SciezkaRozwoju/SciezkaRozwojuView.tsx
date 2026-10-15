@@ -18,9 +18,15 @@ import {
 } from '@ui';
 import { useMemo } from 'react';
 import type { Course } from '@/types/course';
+import type { DevelopmentPathDocument } from '@/types/developmentPath';
 import { PathStep } from './PathStep';
 
-export const SciezkaRozwojuView = () => {
+type Props = {
+	readonly initialPath?: DevelopmentPathDocument;
+	readonly initialCourses?: Course[];
+};
+
+export const SciezkaRozwojuView = ({ initialPath, initialCourses }: Props) => {
 	const {
 		data: pathDoc,
 		isLoading: pathLoading,
@@ -28,10 +34,12 @@ export const SciezkaRozwojuView = () => {
 	} = useQuery({
 		queryKey: ['developmentPath'],
 		queryFn: getDevelopmentPath,
+		...(initialPath !== undefined ? { initialData: initialPath } : {}),
 	});
 	const { data: courses = [], isLoading: coursesLoading } = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
+		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
 	});
 
 	const courseBySlug = useMemo(() => {

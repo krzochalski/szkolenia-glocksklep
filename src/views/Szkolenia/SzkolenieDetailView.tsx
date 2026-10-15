@@ -6,24 +6,30 @@ import { getCourseBySlug } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/CourseLayout';
+import type { Course } from '@/types/course';
+import type { CourseDescription } from '@/types/courseDescription';
 import { isCourseInactive } from '@/utils/courseDates';
 import { resolveCourseHeroFrom } from '@/utils/courseImages';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
 
 type Props = {
 	readonly slug: string;
+	readonly initialCourse?: Course | null;
+	readonly initialDescription?: CourseDescription | null;
 };
 
-export const SzkolenieDetailView = ({ slug }: Props) => {
+export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }: Props) => {
 	const { data: course, isLoading: courseLoading } = useQuery({
 		queryKey: ['course', slug],
 		queryFn: () => getCourseBySlug(slug),
+		...(initialCourse !== undefined ? { initialData: initialCourse } : {}),
 	});
 
 	const { data: description, isLoading: descriptionLoading } = useQuery({
 		queryKey: ['courseDescription', slug],
 		queryFn: () => getCourseDescriptionBySlug(slug),
 		enabled: Boolean(slug),
+		...(initialDescription !== undefined ? { initialData: initialDescription } : {}),
 	});
 
 	const isLoading = courseLoading || descriptionLoading;

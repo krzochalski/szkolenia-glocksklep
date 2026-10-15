@@ -17,14 +17,20 @@ import {
 import { useState } from 'react';
 import { CourseDateActions } from '@/components/CourseDateActions';
 import { CourseDateRow } from '@/components/CourseDateRow';
+import type { Course } from '@/types/course';
 import { getFutureCourseDates } from '@/utils/courseDates';
 
-export const NajblizszeSzkoleniaView = () => {
+type Props = {
+	readonly initialCourses?: Course[];
+};
+
+export const NajblizszeSzkoleniaView = ({ initialCourses }: Props) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const { data: courses = [], isLoading } = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
+		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
 	});
 
 	const upcoming = getFutureCourseDates(courses);

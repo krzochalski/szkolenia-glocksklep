@@ -1,5 +1,4 @@
 import { Paths } from './paths';
-import { Links } from './seo';
 
 export type NavItem = {
 	readonly label: string;
@@ -13,7 +12,7 @@ export const navigationItems: readonly NavItem[] = [
 	{ label: 'Ścieżka rozwoju', path: Paths.sciezkaRozwoju },
 	{ label: 'Najbliższe', path: Paths.najblizszeSzkolenia },
 	{ label: 'FAQ', path: Paths.faq },
-	{ label: 'O nas', path: Links.about, external: true },
+	{ label: 'O nas', path: Paths.oNas },
 ];
 
 export const isCurrentPath = (pathname: string, path: string): boolean => {
