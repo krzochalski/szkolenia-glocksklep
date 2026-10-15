@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { AuthBusyButton } from '@/components/AuthBusyButton';
+import { AuthEmailProviderWarning } from '@/components/AuthEmailProviderWarning';
 import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
 import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import {
@@ -94,6 +95,7 @@ export const LoginView = () => {
 			<Typography variant='h4' component='h1' gutterBottom>
 				Logowanie
 			</Typography>
+			<AuthEmailProviderWarning />
 			<AuthEnrollmentSummary />
 			{justReset ? (
 				<Typography color='success.main' sx={{ mb: 2 }}>

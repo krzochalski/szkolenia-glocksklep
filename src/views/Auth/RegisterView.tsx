@@ -18,6 +18,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { AuthBusyButton } from '@/components/AuthBusyButton';
+import { AuthEmailProviderWarning } from '@/components/AuthEmailProviderWarning';
 import { AuthEnrollmentSummary } from '@/components/AuthEnrollmentSummary';
 import { AuthModeSwitch } from '@/components/AuthModeSwitch';
 import { safeRedirectPath, withAuthReturnQuery } from '@/utils/paths';
@@ -63,6 +64,7 @@ export const RegisterView = () => {
 			<Typography color='text.secondary' sx={{ mb: 2 }}>
 				Wyślemy Ci link do ustawienia hasła na e-mail.
 			</Typography>
+			<AuthEmailProviderWarning />
 			<AuthEnrollmentSummary />
 			<Stack component='form' spacing={2} onSubmit={handleSubmit(onSubmit)}>
 				<Controller
