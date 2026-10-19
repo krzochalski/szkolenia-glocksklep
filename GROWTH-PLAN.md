@@ -18,16 +18,13 @@ Based on a site review only (not traffic or sales data). Goal: turn visitors int
 
 6. ~~**Personal “Ścieżka rozwoju”** — After each course, mark what the user completed and suggest the next step so the path is a reason to book again.~~
 7. ~~**Post-course debriefing** — Class plan + extra drills in the participant panel (markdown WYSIWYG with images and YouTube). Only users marked as having finished that course can open it. One of the main features called out on the homepage (retention / “what you get after the course”).~~
-8. **Passes and bundles** — Sell blocks (e.g. 3 individual sessions) or path packages at a discount.
-9. **Gift vouchers** — Easy sale before Christmas and birthdays; redeemable for courses or 1:1 sessions.
-10. **Automatic emails**
-   - Reminder 2 days before the session
-   - Post-course “jak poszło” with homework drills (link to debriefing)
-   - Nudge when a new date opens for the next level
+8. **Course-skill training** — Bookable training based on a course’s content: practice all the skills that were the subject of a course the person already took (refreshers / drill sessions, not a full re-run of the class).
+9. **Passes and bundles** — Sell blocks (e.g. 3 individual sessions) or path packages at a discount.
+10. **Gift vouchers** — Easy sale before Christmas and birthdays; redeemable for courses or 1:1 sessions.
+11. **Automatic emails** Reminder 2 days before the session. Nudge when a new date opens for the next level.
 
 ## C. Reach new people
 
-11. **Short drill videos** — Instagram and YouTube clips that each link to the matching course.
 12. **Free or cheap intro** — 1-hour assessment or 1:1 trial that ends with a clear “what to work on” — an easy first yes.
 13. **Club and team deals** — Put the dedicated-groups offer in front of local IPSC clubs.
 14. **Season-aware offer** — Autumn/winter: indoor dry-fire online sessions and winter 1:1s, not only waitlists when outdoor weather is a problem.
@@ -40,9 +37,9 @@ Based on a site review only (not traffic or sales data). Goal: turn visitors int
 |-------|-------|-----|
 | 1 | 1, 2 | Paid seats = conversion + fewer no-shows |
 | 2 | 3, 4, ~~5~~ | Course page converts traffic you already have (5 done) |
-| 3 | 10 | Cheap retention; supports path and next-date sales |
-| 4 | ~~6~~, ~~7~~, 8, 9 | Repeat purchase and gifts (6–7 done) |
-| 5 | 11–14 | Acquisition once the funnel and retention exist |
+| 3 | 11 | Cheap retention; supports path and next-date sales |
+| 4 | ~~6~~, ~~7~~, 8, 9, 10 | Repeat purchase and gifts (6–7 done) |
+| 5 | 12–15 | Acquisition once the funnel and retention exist |
 
 ---
 

@@ -1,5 +1,10 @@
 import { HOMEPAGE_HERO_IMAGES, toHomepageHeroImage } from '@constants/homepageHeroImages';
-import type { HomepageDocument, HomepageWayOfWorking, HomepageWritable } from '@/types/homepage';
+import type {
+	HomepageDocument,
+	HomepageMissionPoint,
+	HomepageWayOfWorking,
+	HomepageWritable,
+} from '@/types/homepage';
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
 import { db } from './firestore';
@@ -7,14 +12,32 @@ import { db } from './firestore';
 const COLLECTION = 'homepage';
 const DOC_ID = 'content';
 
+const DEFAULT_MISSION_POINTS: HomepageMissionPoint[] = [
+	{
+		id: 'small-groups',
+		body: 'Zajęcia odbywają się w małych grupach do 6 osób, aby każdy uczestnik otrzymał dostateczną ilość porad i sugestii poprawek.',
+	},
+	{
+		id: 'reps',
+		body: 'Wykonujemy sporą ilość powtórzeń „na głośno”, aby każdy miał szansę dostatecznie przećwiczyć nowe zagadnienia, a nie tylko dowiedzieć się o ich istnieniu.',
+	},
+	{
+		id: 'practical',
+		body: 'Zajęcia są oparte o najnowsze wzorce stosowane w strzelectwie praktycznym. Techniki działające na wideo lub w wyobraźni zostały tutaj odfiltrowane.',
+	},
+];
+
+const joinMissionBody = (points: HomepageMissionPoint[]): string =>
+	points.map((p) => p.body).join('\n\n');
+
 export const DEFAULT_HOMEPAGE: HomepageWritable = {
 	heroHeadline: 'Trening, który buduje realną skuteczność',
 	heroSubline:
 		'Profesjonalne szkolenia strzeleckie — od podstaw pistoletu po dynamikę ruchu i soft skills zawodów.',
 	heroImage: HOMEPAGE_HERO_IMAGES[0],
-	missionTitle: 'Misja',
-	missionBody:
-		'Uczymy strzelać tak, żebyście byli skuteczni pod presją — bez farmazonów, bez piknikowych strzelań. Praca na własnej broni, jasne standardy i kolejność rozwoju, która ma sens.',
+	missionTitle: 'Sposób pracy',
+	missionPoints: DEFAULT_MISSION_POINTS,
+	missionBody: joinMissionBody(DEFAULT_MISSION_POINTS),
 	waysOfWorking: [
 		{
 			id: 'practice',
@@ -34,6 +57,18 @@ export const DEFAULT_HOMEPAGE: HomepageWritable = {
 			description:
 				'Od fundamentów do ruchu i soft skills — w kolejności, która buduje nawyki zamiast je psuć.',
 		},
+		{
+			id: 'debrief',
+			title: 'Plan po ukończeniu',
+			description:
+				'Po oznaczeniu ukończenia szkolenia dostajesz plan zajęć oraz dodatkowe ćwiczenia i materiały w panelu uczestnika — możesz do nich wracać i ćwiczyć dalej.',
+		},
+		{
+			id: 'materials-training',
+			title: 'Treningi z materiałów kursu',
+			description:
+				'Absolwenci danego szkolenia mogą dołączać do treningów opartych o materiały z tego kursu — szybciej utrwalasz nawyki i przyspieszasz rozwój umiejętności.',
+		},
 	],
 	growthPathTeaser:
 		'Zalecana kolejność szkoleń — od podstaw pistoletu do ruchu i soft skills zawodów.',
@@ -48,6 +83,11 @@ export const DEFAULT_HOMEPAGE: HomepageWritable = {
 const asString = (value: unknown, fallback: string): string =>
 	typeof value === 'string' && value.trim() ? value.trim() : fallback;
 
+/** New default ways appended when an older CMS doc is missing them by id. */
+const RETENTION_WAY_IDS = ['debrief', 'materials-training'] as const;
+
+const DEFAULT_MISSION_POINT_IDS = DEFAULT_MISSION_POINTS.map((p) => p.id);
+
 const normalizeWay = (raw: unknown): HomepageWayOfWorking | null => {
 	if (!raw || typeof raw !== 'object') return null;
 	const entry = raw as Record<string, unknown>;
@@ -56,6 +96,50 @@ const normalizeWay = (raw: unknown): HomepageWayOfWorking | null => {
 	if (!title || !description) return null;
 	const id = typeof entry.id === 'string' && entry.id.trim() ? entry.id.trim() : uuid();
 	return { id, title, description };
+};
+
+const normalizeMissionPoint = (raw: unknown): HomepageMissionPoint | null => {
+	if (!raw || typeof raw !== 'object') return null;
+	const entry = raw as Record<string, unknown>;
+	const body = typeof entry.body === 'string' ? entry.body.trim() : '';
+	if (!body) return null;
+	const id = typeof entry.id === 'string' && entry.id.trim() ? entry.id.trim() : uuid();
+	return { id, body };
+};
+
+const pointsFromMissionBody = (body: string): HomepageMissionPoint[] => {
+	const parts = body
+		.split(/\n\s*\n/)
+		.map((p) => p.trim())
+		.filter(Boolean);
+	if (parts.length === 0) return DEFAULT_MISSION_POINTS;
+	return parts.map((text, index) => ({
+		id: DEFAULT_MISSION_POINT_IDS[index] ?? `mission-${index + 1}`,
+		body: text,
+	}));
+};
+
+const resolveMissionPoints = (
+	rawPoints: unknown,
+	missionBody: string
+): HomepageMissionPoint[] => {
+	if (Array.isArray(rawPoints)) {
+		const points = rawPoints
+			.map(normalizeMissionPoint)
+			.filter((p): p is HomepageMissionPoint => p !== null);
+		if (points.length > 0) return points;
+	}
+	if (missionBody.trim()) return pointsFromMissionBody(missionBody);
+	return DEFAULT_MISSION_POINTS;
+};
+
+const mergeWaysOfWorking = (ways: HomepageWayOfWorking[]): HomepageWayOfWorking[] => {
+	if (ways.length === 0) return DEFAULT_HOMEPAGE.waysOfWorking;
+	const ids = new Set(ways.map((w) => w.id));
+	const extras = DEFAULT_HOMEPAGE.waysOfWorking.filter(
+		(w) => (RETENTION_WAY_IDS as readonly string[]).includes(w.id) && !ids.has(w.id)
+	);
+	return extras.length > 0 ? [...ways, ...extras] : ways;
 };
 
 const normalizeDocument = (data: Record<string, unknown> | undefined): HomepageDocument => {
@@ -67,13 +151,18 @@ const normalizeDocument = (data: Record<string, unknown> | undefined): HomepageD
 	const heroImageRaw = typeof data?.heroImage === 'string' ? data.heroImage.trim() : '';
 	const heroImage = toHomepageHeroImage(heroImageRaw) ?? DEFAULT_HOMEPAGE.heroImage;
 
+	const missionBodyRaw =
+		typeof data?.missionBody === 'string' ? data.missionBody.trim() : '';
+	const missionPoints = resolveMissionPoints(data?.missionPoints, missionBodyRaw);
+
 	return {
 		heroHeadline: asString(data?.heroHeadline, DEFAULT_HOMEPAGE.heroHeadline),
 		heroSubline: asString(data?.heroSubline, DEFAULT_HOMEPAGE.heroSubline),
 		heroImage,
 		missionTitle: asString(data?.missionTitle, DEFAULT_HOMEPAGE.missionTitle),
-		missionBody: asString(data?.missionBody, DEFAULT_HOMEPAGE.missionBody),
-		waysOfWorking: ways.length > 0 ? ways : DEFAULT_HOMEPAGE.waysOfWorking,
+		missionPoints,
+		missionBody: joinMissionBody(missionPoints),
+		waysOfWorking: mergeWaysOfWorking(ways),
 		growthPathTeaser: asString(data?.growthPathTeaser, DEFAULT_HOMEPAGE.growthPathTeaser),
 		privateIndividualTitle: asString(
 			data?.privateIndividualTitle,
@@ -102,10 +191,15 @@ export const getHomepage = async (): Promise<HomepageDocument> => {
 };
 
 export const saveHomepage = async (docData: HomepageWritable): Promise<void> => {
+	const missionPoints = docData.missionPoints
+		.map((p) => ({ id: p.id, body: p.body.trim() }))
+		.filter((p) => p.body);
 	await setDoc(
 		doc(db, COLLECTION, DOC_ID),
 		{
 			...docData,
+			missionPoints,
+			missionBody: joinMissionBody(missionPoints),
 			updatedAt: serverTimestamp(),
 		},
 		{ merge: true }

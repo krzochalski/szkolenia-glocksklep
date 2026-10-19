@@ -29,7 +29,11 @@ import {
 import { AddIcon, ArrowDownward, ArrowUpward, Delete, OpenInNewIcon } from '@ui/icons';
 import { useEffect, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import type { HomepageWayOfWorking, HomepageWritable } from '@/types/homepage';
+import type {
+	HomepageMissionPoint,
+	HomepageWayOfWorking,
+	HomepageWritable,
+} from '@/types/homepage';
 
 const serialize = (doc: HomepageWritable) => JSON.stringify(doc);
 
@@ -38,6 +42,14 @@ const emptyWay = (): HomepageWayOfWorking => ({
 	title: '',
 	description: '',
 });
+
+const emptyMissionPoint = (): HomepageMissionPoint => ({
+	id: uuid(),
+	body: '',
+});
+
+const joinMissionBody = (points: HomepageMissionPoint[]) =>
+	points.map((p) => p.body.trim()).filter(Boolean).join('\n\n');
 
 export const AdminHomepageView = () => <HomepageInner />;
 
@@ -65,6 +77,7 @@ const HomepageInner = () => {
 				heroSubline: data.heroSubline,
 				heroImage: data.heroImage,
 				missionTitle: data.missionTitle,
+				missionPoints: data.missionPoints,
 				missionBody: data.missionBody,
 				waysOfWorking: data.waysOfWorking,
 				growthPathTeaser: data.growthPathTeaser,
@@ -91,17 +104,36 @@ const HomepageInner = () => {
 		}));
 	};
 
+	const updateMissionPoint = (id: string, body: string) => {
+		setForm((prev) => ({
+			...prev,
+			missionPoints: prev.missionPoints.map((p) => (p.id === id ? { ...p, body } : p)),
+		}));
+	};
+
+	const moveListItem = <T,>(list: T[], index: number, delta: number): T[] | null => {
+		const next = [...list];
+		const target = index + delta;
+		if (target < 0 || target >= next.length) return null;
+		const tmp = next[index];
+		const swap = next[target];
+		if (!tmp || !swap) return null;
+		next[index] = swap;
+		next[target] = tmp;
+		return next;
+	};
+
 	const moveWay = (index: number, delta: number) => {
 		setForm((prev) => {
-			const next = [...prev.waysOfWorking];
-			const target = index + delta;
-			if (target < 0 || target >= next.length) return prev;
-			const tmp = next[index];
-			const swap = next[target];
-			if (!tmp || !swap) return prev;
-			next[index] = swap;
-			next[target] = tmp;
-			return { ...prev, waysOfWorking: next };
+			const next = moveListItem(prev.waysOfWorking, index, delta);
+			return next ? { ...prev, waysOfWorking: next } : prev;
+		});
+	};
+
+	const moveMissionPoint = (index: number, delta: number) => {
+		setForm((prev) => {
+			const next = moveListItem(prev.missionPoints, index, delta);
+			return next ? { ...prev, missionPoints: next } : prev;
 		});
 	};
 
@@ -112,6 +144,13 @@ const HomepageInner = () => {
 		}));
 	};
 
+	const removeMissionPoint = (id: string) => {
+		setForm((prev) => ({
+			...prev,
+			missionPoints: prev.missionPoints.filter((p) => p.id !== id),
+		}));
+	};
+
 	const addWay = () => {
 		setForm((prev) => ({
 			...prev,
@@ -119,27 +158,42 @@ const HomepageInner = () => {
 		}));
 	};
 
-	const buildPayload = (): HomepageWritable => ({
-		heroHeadline: form.heroHeadline.trim() || DEFAULT_HOMEPAGE.heroHeadline,
-		heroSubline: form.heroSubline.trim() || DEFAULT_HOMEPAGE.heroSubline,
-		heroImage: toHomepageHeroImage(form.heroImage) ?? DEFAULT_HOMEPAGE.heroImage,
-		missionTitle: form.missionTitle.trim() || DEFAULT_HOMEPAGE.missionTitle,
-		missionBody: form.missionBody.trim() || DEFAULT_HOMEPAGE.missionBody,
-		waysOfWorking: form.waysOfWorking
-			.map((w) => ({
-				id: w.id,
-				title: w.title.trim(),
-				description: w.description.trim(),
-			}))
-			.filter((w) => w.title && w.description),
-		growthPathTeaser: form.growthPathTeaser.trim() || DEFAULT_HOMEPAGE.growthPathTeaser,
-		privateIndividualTitle:
-			form.privateIndividualTitle.trim() || DEFAULT_HOMEPAGE.privateIndividualTitle,
-		privateIndividualBody:
-			form.privateIndividualBody.trim() || DEFAULT_HOMEPAGE.privateIndividualBody,
-		privateGroupTitle: form.privateGroupTitle.trim() || DEFAULT_HOMEPAGE.privateGroupTitle,
-		privateGroupBody: form.privateGroupBody.trim() || DEFAULT_HOMEPAGE.privateGroupBody,
-	});
+	const addMissionPoint = () => {
+		setForm((prev) => ({
+			...prev,
+			missionPoints: [...prev.missionPoints, emptyMissionPoint()],
+		}));
+	};
+
+	const buildPayload = (): HomepageWritable => {
+		const missionPoints = form.missionPoints
+			.map((p) => ({ id: p.id, body: p.body.trim() }))
+			.filter((p) => p.body);
+		const resolvedPoints =
+			missionPoints.length > 0 ? missionPoints : DEFAULT_HOMEPAGE.missionPoints;
+		return {
+			heroHeadline: form.heroHeadline.trim() || DEFAULT_HOMEPAGE.heroHeadline,
+			heroSubline: form.heroSubline.trim() || DEFAULT_HOMEPAGE.heroSubline,
+			heroImage: toHomepageHeroImage(form.heroImage) ?? DEFAULT_HOMEPAGE.heroImage,
+			missionTitle: form.missionTitle.trim() || DEFAULT_HOMEPAGE.missionTitle,
+			missionPoints: resolvedPoints,
+			missionBody: joinMissionBody(resolvedPoints),
+			waysOfWorking: form.waysOfWorking
+				.map((w) => ({
+					id: w.id,
+					title: w.title.trim(),
+					description: w.description.trim(),
+				}))
+				.filter((w) => w.title && w.description),
+			growthPathTeaser: form.growthPathTeaser.trim() || DEFAULT_HOMEPAGE.growthPathTeaser,
+			privateIndividualTitle:
+				form.privateIndividualTitle.trim() || DEFAULT_HOMEPAGE.privateIndividualTitle,
+			privateIndividualBody:
+				form.privateIndividualBody.trim() || DEFAULT_HOMEPAGE.privateIndividualBody,
+			privateGroupTitle: form.privateGroupTitle.trim() || DEFAULT_HOMEPAGE.privateGroupTitle,
+			privateGroupBody: form.privateGroupBody.trim() || DEFAULT_HOMEPAGE.privateGroupBody,
+		};
+	};
 
 	return (
 		<ContentSwap state={isLoading ? 'loading' : 'content'}>
@@ -200,27 +254,89 @@ const HomepageInner = () => {
 			</Stack>
 
 			<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
-				Misja
+				Sposób pracy
 			</Typography>
-			<Stack spacing={2} sx={{ mb: 3 }}>
-				<TextField
-					label='Tytuł sekcji'
-					fullWidth
-					value={form.missionTitle}
-					onChange={(e) => patch({ missionTitle: e.target.value })}
-				/>
-				<TextField
-					label='Treść'
-					fullWidth
-					multiline
-					minRows={3}
-					value={form.missionBody}
-					onChange={(e) => patch({ missionBody: e.target.value })}
-				/>
-			</Stack>
-
-			<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
-				Jak pracujemy
+			<Typography variant='body2' color='text.secondary' sx={{ mb: 1.5 }}>
+				Jeden nagłówek, akapity wstępu z pixel-art oraz lista punktów z tytułami.
+			</Typography>
+			<TextField
+				label='Tytuł sekcji'
+				fullWidth
+				value={form.missionTitle}
+				onChange={(e) => patch({ missionTitle: e.target.value })}
+				sx={{ mb: 2 }}
+			/>
+			<Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
+				Wstęp — ikony po id: small-groups, reps, practical
+			</Typography>
+			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 1 }}>
+				{form.missionPoints.map((point, index) => (
+					<StaggerItem key={point.id}>
+						<Paper variant='outlined' sx={{ p: 2 }}>
+							<Stack spacing={1.5}>
+								<Stack direction='row' spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+									<IconButton
+										size='small'
+										aria-label='Przenieś w górę'
+										disabled={index === 0}
+										onClick={() => moveMissionPoint(index, -1)}
+									>
+										<ArrowUpward fontSize='small' />
+									</IconButton>
+									<IconButton
+										size='small'
+										aria-label='Przenieś w dół'
+										disabled={index === form.missionPoints.length - 1}
+										onClick={() => moveMissionPoint(index, 1)}
+									>
+										<ArrowDownward fontSize='small' />
+									</IconButton>
+									<IconButton
+										size='small'
+										aria-label='Usuń'
+										onClick={() => removeMissionPoint(point.id)}
+									>
+										<Delete fontSize='small' />
+									</IconButton>
+								</Stack>
+								<TextField
+									label='Id (ikona)'
+									fullWidth
+									size='small'
+									value={point.id}
+									onChange={(e) =>
+										setForm((prev) => ({
+											...prev,
+											missionPoints: prev.missionPoints.map((p) =>
+												p.id === point.id ? { ...p, id: e.target.value } : p
+											),
+										}))
+									}
+								/>
+								<TextField
+									label='Tekst'
+									fullWidth
+									multiline
+									minRows={2}
+									value={point.body}
+									onChange={(e) => updateMissionPoint(point.id, e.target.value)}
+								/>
+							</Stack>
+						</Paper>
+					</StaggerItem>
+				))}
+			</Stagger>
+			<Button
+				variant='outlined'
+				startIcon={<AddIcon />}
+				onClick={addMissionPoint}
+				sx={{ mb: 3 }}
+			>
+				Dodaj akapit wstępu
+			</Button>
+			<Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
+				Punkty z tytułem — ikony po id: practice, own-gun, path, debrief,
+				materials-training
 			</Typography>
 			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
 				{form.waysOfWorking.map((way, index) => (

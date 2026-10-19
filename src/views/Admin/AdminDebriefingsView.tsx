@@ -1,12 +1,10 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import {
-	adminGetCourseDebriefings,
-	deleteCourseDebriefing,
-} from '@services/courseDebriefings';
+import { adminGetCourseDebriefings, deleteCourseDebriefing } from '@services/courseDebriefings';
 import { getCourses } from '@services/courses';
 import type { CourseDebriefing } from '@/types/courseDebriefing';
+import { formatDebriefingMeta } from '@/utils/debriefingMeta';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
@@ -99,8 +97,8 @@ const DebriefingsInner = () => {
 						<Box>
 							<Typography variant='h5'>Debriefing po szkoleniu</Typography>
 							<Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-								Plan zajęć i ćwiczenia dodatkowe — widoczne tylko dla osób oznaczonych
-								jako absolwenci danego szkolenia.
+								Plan zajęć i ćwiczenia dodatkowe — widoczne tylko dla osób oznaczonych jako
+								absolwenci danego szkolenia.
 							</Typography>
 						</Box>
 						<Button
@@ -123,38 +121,35 @@ const DebriefingsInner = () => {
 					) : null}
 
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-						{items.map((item) => (
-							<StaggerItem key={item.courseId}>
-								<Paper variant='outlined' sx={{ p: 2 }}>
-									<Typography sx={{ fontWeight: 600 }}>{item.courseName}</Typography>
-									<Typography variant='body2' color='text.secondary'>
-										/{item.courseSlug}
-										{item.updatedAt
-											? ` · ${new Date(item.updatedAt).toLocaleString('pl-PL')}`
-											: ''}
-									</Typography>
-									<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
-										<Button
-											size='small'
-											variant='outlined'
-											component={NextLink}
-											href={fillPath(Paths.adminDebriefingEdit, {
-												courseId: item.courseId,
-											})}
-										>
-											Edytuj
-										</Button>
-										<Button
-											size='small'
-											color='error'
-											onClick={() => setToDelete(item)}
-										>
-											Usuń
-										</Button>
-									</Stack>
-								</Paper>
-							</StaggerItem>
-						))}
+						{items.map((item) => {
+							const metaLabel = formatDebriefingMeta(item);
+							return (
+								<StaggerItem key={item.courseId}>
+									<Paper variant='outlined' sx={{ p: 2 }}>
+										<Typography sx={{ fontWeight: 600 }}>{item.courseName}</Typography>
+										<Typography variant='body2' color='text.secondary'>
+											/{item.courseSlug}
+											{metaLabel ? ` · ${metaLabel}` : ''}
+										</Typography>
+										<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
+											<Button
+												size='small'
+												variant='outlined'
+												component={NextLink}
+												href={fillPath(Paths.adminDebriefingEdit, {
+													courseId: item.courseId,
+												})}
+											>
+												Edytuj
+											</Button>
+											<Button size='small' color='error' onClick={() => setToDelete(item)}>
+												Usuń
+											</Button>
+										</Stack>
+									</Paper>
+								</StaggerItem>
+							);
+						})}
 
 						{coursesWithoutDebriefing.map((course) => (
 							<StaggerItem key={course.id}>
@@ -164,11 +159,7 @@ const DebriefingsInner = () => {
 										/{course.slug} · brak debriefingu
 									</Typography>
 									<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
-										<Button
-											size='small'
-											variant='outlined'
-											onClick={() => goToEdit(course.id)}
-										>
+										<Button size='small' variant='outlined' onClick={() => goToEdit(course.id)}>
 											Utwórz
 										</Button>
 									</Stack>
@@ -208,11 +199,7 @@ const DebriefingsInner = () => {
 						</DialogContent>
 						<DialogActions sx={hardShadowDialogActionsSx}>
 							<Button onClick={() => setCreateOpen(false)}>Anuluj</Button>
-							<Button
-								variant='contained'
-								disabled={!selectedCourseId}
-								onClick={confirmCreate}
-							>
+							<Button variant='contained' disabled={!selectedCourseId} onClick={confirmCreate}>
 								Utwórz
 							</Button>
 						</DialogActions>
@@ -230,9 +217,8 @@ const DebriefingsInner = () => {
 						}}
 					>
 						<Typography>
-							Czy na pewno chcesz usunąć debriefing dla{' '}
-							<strong>{toDelete?.courseName}</strong>? Tej operacji nie można
-							cofnąć.
+							Czy na pewno chcesz usunąć debriefing dla <strong>{toDelete?.courseName}</strong>? Tej
+							operacji nie można cofnąć.
 						</Typography>
 					</ConfirmDialog>
 				</Box>

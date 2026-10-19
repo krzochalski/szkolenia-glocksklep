@@ -4,6 +4,7 @@ import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { getMyCourseCompletions } from '@services/courseCompletions';
 import { getMyCourseDebriefings } from '@services/courseDebriefings';
+import { formatDebriefingMeta } from '@/utils/debriefingMeta';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
@@ -41,13 +42,11 @@ export const ProfilDebriefingListView = () => {
 				Po szkoleniu
 			</Typography>
 			<Typography color='text.secondary' sx={{ mb: 3, maxWidth: 560 }}>
-				Plan zajęć i ćwiczenia dodatkowe po ukończonych szkoleniach. Dostęp po
-				oznaczeniu ukończenia przez instruktora.
+				Plan zajęć i ćwiczenia dodatkowe po ukończonych szkoleniach. Dostęp po oznaczeniu ukończenia
+				przez instruktora.
 			</Typography>
 
-			<ContentSwap
-				state={isLoading ? 'loading' : debriefings.length === 0 ? 'empty' : 'content'}
-			>
+			<ContentSwap state={isLoading ? 'loading' : debriefings.length === 0 ? 'empty' : 'content'}>
 				{isLoading ? (
 					<Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
 						<CircularProgress />
@@ -67,38 +66,40 @@ export const ProfilDebriefingListView = () => {
 					</Box>
 				) : (
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-						{debriefings.map((item) => (
-							<StaggerItem key={item.courseId}>
-								<Paper variant='outlined' sx={{ p: 2 }}>
-									<Stack
-										direction={{ xs: 'column', sm: 'row' }}
-										sx={{
-											alignItems: { sm: 'center' },
-											justifyContent: 'space-between',
-											gap: 1.5,
-										}}
-									>
-										<Box>
-											<Typography sx={{ fontWeight: 600 }}>
-												{item.courseName}
-											</Typography>
-											<Typography variant='body2' color='text.secondary'>
-												Plan zajęć i ćwiczenia dodatkowe
-											</Typography>
-										</Box>
-										<Button
-											variant='contained'
-											component={NextLink}
-											href={fillPath(Paths.profilDebriefingDetail, {
-												courseId: item.courseId,
-											})}
+						{debriefings.map((item) => {
+							const metaLabel = formatDebriefingMeta(item);
+							return (
+								<StaggerItem key={item.courseId}>
+									<Paper variant='outlined' sx={{ p: 2 }}>
+										<Stack
+											direction={{ xs: 'column', sm: 'row' }}
+											sx={{
+												alignItems: { sm: 'center' },
+												justifyContent: 'space-between',
+												gap: 1.5,
+											}}
 										>
-											Otwórz
-										</Button>
-									</Stack>
-								</Paper>
-							</StaggerItem>
-						))}
+											<Box>
+												<Typography sx={{ fontWeight: 600 }}>{item.courseName}</Typography>
+												<Typography variant='body2' color='text.secondary'>
+													Plan zajęć i ćwiczenia dodatkowe
+													{metaLabel ? ` · ${metaLabel}` : ''}
+												</Typography>
+											</Box>
+											<Button
+												variant='contained'
+												component={NextLink}
+												href={fillPath(Paths.profilDebriefingDetail, {
+													courseId: item.courseId,
+												})}
+											>
+												Otwórz
+											</Button>
+										</Stack>
+									</Paper>
+								</StaggerItem>
+							);
+						})}
 					</Stagger>
 				)}
 			</ContentSwap>

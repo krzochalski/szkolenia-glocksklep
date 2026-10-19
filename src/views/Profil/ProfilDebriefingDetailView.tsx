@@ -5,14 +5,8 @@ import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { getMyCourseCompletions } from '@services/courseCompletions';
 import { getCourseDebriefing } from '@services/courseDebriefings';
-import {
-	Box,
-	Button,
-	CircularProgress,
-	ContentSwap,
-	Stack,
-	Typography,
-} from '@ui';
+import { formatDebriefingMeta } from '@/utils/debriefingMeta';
+import { Box, Button, CircularProgress, ContentSwap, Stack, Typography } from '@ui';
 import { ArrowBackIcon } from '@ui/icons';
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
@@ -47,6 +41,7 @@ export const ProfilDebriefingDetailView = ({ courseId }: Props) => {
 	});
 
 	const isLoading = completionsLoading || (hasCompleted && debriefingLoading);
+	const metaLabel = debriefing ? formatDebriefingMeta(debriefing) : null;
 
 	return (
 		<Box sx={{ maxWidth: 800 }}>
@@ -62,11 +57,7 @@ export const ProfilDebriefingDetailView = ({ courseId }: Props) => {
 
 			<ContentSwap
 				state={
-					isLoading
-						? 'loading'
-						: !hasCompleted || isError || !debriefing
-							? 'empty'
-							: 'content'
+					isLoading ? 'loading' : !hasCompleted || isError || !debriefing ? 'empty' : 'content'
 				}
 			>
 				{isLoading ? (
@@ -77,8 +68,7 @@ export const ProfilDebriefingDetailView = ({ courseId }: Props) => {
 					<Stack spacing={2} sx={{ py: 2 }}>
 						<Typography sx={{ fontWeight: 600 }}>Brak dostępu</Typography>
 						<Typography color='text.secondary'>
-							Te materiały są dostępne tylko po oznaczeniu ukończenia szkolenia przez
-							instruktora.
+							Te materiały są dostępne tylko po oznaczeniu ukończenia szkolenia przez instruktora.
 						</Typography>
 						<Button
 							component={NextLink}
@@ -109,9 +99,16 @@ export const ProfilDebriefingDetailView = ({ courseId }: Props) => {
 						<Typography variant='h4' component='h1' gutterBottom>
 							{debriefing.courseName}
 						</Typography>
-						<Typography color='text.secondary' sx={{ mb: 3 }}>
+						<Typography color='text.secondary' sx={{ mb: 0.5 }}>
 							Debriefing — plan zajęć i ćwiczenia dodatkowe
 						</Typography>
+						{metaLabel ? (
+							<Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
+								{metaLabel}
+							</Typography>
+						) : (
+							<Box sx={{ mb: 3 }} />
+						)}
 						<MarkdownContent content={debriefing.content} />
 					</>
 				)}

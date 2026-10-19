@@ -6,6 +6,7 @@ import {
 	doc,
 	getDoc,
 	getDocs,
+	increment,
 	serverTimestamp,
 	setDoc,
 } from 'firebase/firestore';
@@ -27,11 +28,19 @@ const timestampToIso = (value: unknown): string | undefined => {
 	return undefined;
 };
 
+const mapVersion = (value: unknown): number => {
+	if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+		return Math.floor(value);
+	}
+	return 0;
+};
+
 const mapDoc = (id: string, data: Record<string, unknown>): CourseDebriefing => ({
 	courseId: typeof data.courseId === 'string' ? data.courseId : id,
 	courseSlug: typeof data.courseSlug === 'string' ? data.courseSlug : '',
 	courseName: typeof data.courseName === 'string' ? data.courseName : '',
 	content: typeof data.content === 'string' ? data.content : '',
+	version: mapVersion(data.version),
 	updatedAt: timestampToIso(data.updatedAt),
 });
 
@@ -86,6 +95,7 @@ export const saveCourseDebriefing = async ({
 			courseSlug: course.slug,
 			courseName: course.name,
 			content,
+			version: increment(1),
 			updatedAt: serverTimestamp(),
 		},
 		{ merge: true }

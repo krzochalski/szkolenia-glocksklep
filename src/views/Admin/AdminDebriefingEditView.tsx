@@ -3,11 +3,9 @@
 import { AdminStickyActions, MarkdownWysiwygEditor } from '@components';
 import { DEFAULT_COURSE_DEBRIEFING_MD } from '@constants/debriefingMarkdown';
 import { Paths } from '@constants/paths';
-import {
-	getCourseDebriefing,
-	saveCourseDebriefing,
-} from '@services/courseDebriefings';
+import { getCourseDebriefing, saveCourseDebriefing } from '@services/courseDebriefings';
 import { getCourse } from '@services/courses';
+import { formatDebriefingMeta } from '@/utils/debriefingMeta';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
@@ -28,9 +26,7 @@ type Props = {
 	readonly courseId: string;
 };
 
-export const AdminDebriefingEditView = ({ courseId }: Props) => (
-	<EditInner courseId={courseId} />
-);
+export const AdminDebriefingEditView = ({ courseId }: Props) => <EditInner courseId={courseId} />;
 
 const EditInner = ({ courseId }: Props) => {
 	const queryClient = useQueryClient();
@@ -66,6 +62,7 @@ const EditInner = ({ courseId }: Props) => {
 	}, [debriefing, isLoading, seeded]);
 
 	const isDirty = content !== savedContent;
+	const metaLabel = debriefing ? formatDebriefingMeta(debriefing) : null;
 
 	if (!isLoading && !course) {
 		return (
@@ -121,16 +118,11 @@ const EditInner = ({ courseId }: Props) => {
 							</Button>
 						) : null}
 					</Stack>
-					{debriefing?.updatedAt ? (
-						<Typography
-							variant='caption'
-							color='text.secondary'
-							sx={{ display: 'block', mb: 1 }}
-						>
-							Ostatnia aktualizacja:{' '}
-							{new Date(debriefing.updatedAt).toLocaleString('pl-PL')}
-						</Typography>
-					) : null}
+					<Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 1 }}>
+						{metaLabel
+							? `${metaLabel} · każdy zapis tworzy nową wersję`
+							: 'Pierwszy zapis opublikuje wersję 1'}
+					</Typography>
 
 					<MarkdownWysiwygEditor value={content} onChange={setContent} />
 
@@ -145,11 +137,7 @@ const EditInner = ({ courseId }: Props) => {
 						>
 							Zapisz
 						</Button>
-						<Button
-							variant='outlined'
-							onClick={() => setResetOpen(true)}
-							disabled={saving}
-						>
+						<Button variant='outlined' onClick={() => setResetOpen(true)} disabled={saving}>
 							Przywróć szablon
 						</Button>
 					</AdminStickyActions>
@@ -181,8 +169,8 @@ const EditInner = ({ courseId }: Props) => {
 								.finally(() => setSaving(false));
 						}}
 					>
-						Czy na pewno chcesz opublikować debriefing? Zobaczą go tylko użytkownicy
-						oznaczeni jako absolwenci tego szkolenia.
+						Czy na pewno chcesz opublikować debriefing? Zobaczą go tylko użytkownicy oznaczeni jako
+						absolwenci tego szkolenia.
 					</ConfirmDialog>
 
 					<ConfirmDialog
@@ -197,8 +185,8 @@ const EditInner = ({ courseId }: Props) => {
 							setResetOpen(false);
 						}}
 					>
-						Czy na pewno chcesz zastąpić bieżącą treść domyślnym szablonem? Zmiany nie
-						zostaną zapisane, dopóki nie klikniesz „Zapisz”.
+						Czy na pewno chcesz zastąpić bieżącą treść domyślnym szablonem? Zmiany nie zostaną
+						zapisane, dopóki nie klikniesz „Zapisz”.
 					</ConfirmDialog>
 				</Box>
 			)}

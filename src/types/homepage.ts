@@ -1,3 +1,8 @@
+export type HomepageMissionPoint = {
+	id: string;
+	body: string;
+};
+
 export type HomepageWayOfWorking = {
 	id: string;
 	title: string;
@@ -9,7 +14,9 @@ export type HomepageDocument = {
 	heroSubline: string;
 	heroImage: string;
 	missionTitle: string;
+	/** @deprecated Prefer `missionPoints`; kept in sync for older CMS docs. */
 	missionBody: string;
+	missionPoints: HomepageMissionPoint[];
 	waysOfWorking: HomepageWayOfWorking[];
 	growthPathTeaser: string;
 	privateIndividualTitle: string;
