@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
+import { DEFAULT_COURSE_SLOTS_MAX } from '@constants/courses';
 import { getTags } from '@services/tags';
 import type { Tag } from '@/types/course';
 import { type CourseFormValues, courseSchema } from '@/utils/schemas';
@@ -40,7 +41,12 @@ export const CourseForm = ({
 }: CourseFormProps) => {
 	const methods = useForm<CourseFormValues>({
 		resolver: zodResolver(courseSchema) as Resolver<CourseFormValues>,
-		defaultValues: { dates: [], tags: [], ...defaultValues },
+		defaultValues: {
+			dates: [],
+			tags: [],
+			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			...defaultValues,
+		},
 	});
 	const [success, setSuccess] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -109,7 +115,7 @@ export const CourseForm = ({
 					<Divider />
 
 					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-						<SectionTitle>Cena i czas trwania</SectionTitle>
+						<SectionTitle>Cena, czas i miejsca</SectionTitle>
 						<Box
 							sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}
 						>
@@ -123,6 +129,13 @@ export const CourseForm = ({
 								<WatchedNettoBruttoHint control={methods.control} name='price' />
 							</Box>
 							<FormTextField name='hours' label='Czas trwania (h)' placeholder='8' type='number' />
+							<FormTextField
+								name='slotsMax'
+								label='Maks. osób (domyślne)'
+								placeholder={String(DEFAULT_COURSE_SLOTS_MAX)}
+								type='number'
+								helperText='Na karcie szkolenia i jako domyślna wartość nowych terminów.'
+							/>
 						</Box>
 					</Box>
 

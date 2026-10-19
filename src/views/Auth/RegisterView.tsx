@@ -122,6 +122,10 @@ export const RegisterView = () => {
 									<Link component={NextLink} href={Paths.regulamin}>
 										regulamin
 									</Link>{' '}
+									i{' '}
+									<Link component={NextLink} href={Paths.politykaPrywatnosci}>
+										politykę prywatności
+									</Link>{' '}
 									*
 								</>
 							}

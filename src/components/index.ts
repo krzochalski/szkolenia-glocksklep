@@ -1,6 +1,8 @@
 export { AdminShell } from './AdminShell';
 export { AdminStickyActions } from './AdminStickyActions';
 export { JsonLd, safeJsonLd } from './JsonLd';
+export { MarkdownContent } from './MarkdownContent';
+export { MarkdownWysiwygEditor } from './MarkdownWysiwygEditor';
 export { OptimizedImage } from './OptimizedImage';
 export { PageHeading } from './PageHeading';
 export { ProfilShell } from './ProfilShell';

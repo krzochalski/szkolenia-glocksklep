@@ -4,6 +4,7 @@ import { CourseWaitingListActions } from '@/components/CourseWaitingListActions'
 import { WAITLIST_SECTION_ID } from '@constants/waitlist';
 import { useAuthUser } from '@hooks';
 import type { Course, CourseClass } from '@/types/course';
+import { formatWaitingListDemand } from '@/utils/courseDates';
 import { Box, MotionAlert, Typography } from '@ui';
 import { useEffect, useState } from 'react';
 
@@ -27,6 +28,10 @@ export const CourseWaitingListSection = ({
 	const user = useAuthUser();
 	const [error, setError] = useState<string | null>(null);
 	const enrolled = isEnrolledInFutureDate(futureDates, user?.uid);
+	const noUpcomingDates = futureDates.length === 0;
+	const waitingCount = course.waitingListCount ?? 0;
+	const demandLabel =
+		noUpcomingDates && waitingCount > 0 ? formatWaitingListDemand(waitingCount) : null;
 
 	useEffect(() => {
 		if (enrolled) return;
@@ -44,6 +49,11 @@ export const CourseWaitingListSection = ({
 
 	if (enrolled) return null;
 
+	const title = noUpcomingDates ? 'Brak terminów — zapisz się na listę' : 'Nie pasuje Ci żaden termin?';
+	const description = noUpcomingDates
+		? 'Powiadomimy Cię, gdy pojawi się nowy termin tego szkolenia.'
+		: 'Zapisz się na listę oczekujących — powiadomimy Cię, gdy pojawi się nowy termin tego szkolenia.';
+
 	return (
 		<Box
 			id={WAITLIST_SECTION_ID}
@@ -58,12 +68,19 @@ export const CourseWaitingListSection = ({
 		>
 			<Box sx={{ mb: 2 }}>
 				<Typography variant='h6' sx={{ fontSize: '1rem', fontWeight: 700, mb: 0.5 }}>
-					Nie pasuje Ci żaden termin?
+					{title}
 				</Typography>
 				<Typography variant='body2' color='text.secondary'>
-					Zapisz się na listę oczekujących — powiadomimy Cię, gdy pojawi się nowy termin tego
-					szkolenia.
+					{description}
 				</Typography>
+				{demandLabel ? (
+					<Typography
+						variant='body2'
+						sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+					>
+						{demandLabel}
+					</Typography>
+				) : null}
 			</Box>
 
 			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 2 }}>

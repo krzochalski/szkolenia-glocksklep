@@ -144,7 +144,10 @@ export const CourseDateActions = ({
 		onSuccess: async () => {
 			setConfirmAction(null);
 			onSuccess?.();
-			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
+				queryClient.invalidateQueries({ queryKey: ['course', course.slug] }),
+			]);
 		},
 		onError: (err: Error) => onError?.(err.message),
 	});
@@ -157,7 +160,10 @@ export const CourseDateActions = ({
 		onSuccess: async () => {
 			setConfirmAction(null);
 			onSuccess?.();
-			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
+				queryClient.invalidateQueries({ queryKey: ['course', course.slug] }),
+			]);
 		},
 		onError: (err: Error) => onError?.(err.message),
 	});

@@ -1,12 +1,12 @@
 'use client';
 
-import { DEFAULT_COURSE_SLOTS_MAX, DEFAULT_COURSE_TIME_START } from '@constants/courses';
+import { DEFAULT_COURSE_TIME_START, getCourseSlotsMax } from '@constants/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import { Box, Button, ConfirmDialog, Typography } from '@ui';
 import { Add } from '@ui/icons';
 import { useEffect, useState } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import type { Instructor, Place } from '@/types/course';
 import type { CourseFormValues } from '@/utils/schemas';
 import { DateEntry } from './DateEntry';
@@ -19,6 +19,7 @@ type DatesSectionProps = {
 export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 	const { control, formState, getValues } = useFormContext<CourseFormValues>();
 	const { fields, append, remove, insert } = useFieldArray({ control, name: 'dates' });
+	const courseSlotsMax = useWatch({ control, name: 'slotsMax' });
 	const [places, setPlaces] = useState<Place[]>([]);
 	const [instructors, setInstructors] = useState<Instructor[]>([]);
 	const [toRemoveIndex, setToRemoveIndex] = useState<number | null>(null);
@@ -32,7 +33,7 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 		append({
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
-			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			slotsMax: getCourseSlotsMax({ slotsMax: courseSlotsMax }),
 			instructor: { name: '', slug: '' },
 			place: { name: '', link: '' },
 		});

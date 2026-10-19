@@ -25,6 +25,11 @@ export interface Course {
 	price: number;
 	/* How many hours will the class last */
 	hours: number;
+	/**
+	 * Default max participants for this course (card + new date defaults).
+	 * Each date can still override via `dates[].slotsMax`.
+	 */
+	slotsMax?: number;
 	/* Tags for this date */
 	tags: string[];
 	/* Level of proficiency for this date */
@@ -40,6 +45,11 @@ export interface Course {
 	inactive?: boolean;
 	/** Display order in admin and public catalog (ascending). */
 	order?: number;
+	/**
+	 * Public waitlist size for this course (denormalized; maintained by Cloud Functions).
+	 * Used to show demand when there are no upcoming dates.
+	 */
+	waitingListCount?: number;
 	dates?: CourseClass[];
 }
 

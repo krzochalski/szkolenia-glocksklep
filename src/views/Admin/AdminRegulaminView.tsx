@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
+import { DEFAULT_REGULAMIN_MD } from '@constants/legalMarkdown';
 import { Paths } from '@constants/paths';
 import {
 	getRegulamin,
@@ -21,11 +22,6 @@ import {
 import { OpenInNewIcon } from '@ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-
-const DEFAULT_MARKDOWN = `# Regulamin
-
-Treść regulaminu zostanie uzupełniona.
-`;
 
 export const AdminRegulaminView = () => <RegulaminInner />;
 
@@ -141,7 +137,7 @@ const RegulaminInner = () => {
 				confirmColor='warning'
 				onCancel={() => setResetOpen(false)}
 				onConfirm={() => {
-					setContent(DEFAULT_MARKDOWN);
+							setContent(DEFAULT_REGULAMIN_MD);
 					setResetOpen(false);
 				}}
 			>

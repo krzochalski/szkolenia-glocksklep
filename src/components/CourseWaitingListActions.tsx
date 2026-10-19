@@ -16,7 +16,7 @@ import {
 } from '@/utils/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, ConfirmDialog, Link, Stack, TextField, Typography } from '@ui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -29,11 +29,27 @@ type Props = {
 
 type ConfirmAction = 'join' | 'leave';
 
+const bumpCourseWaitingListCount = (
+	queryClient: QueryClient,
+	slug: string,
+	delta: number
+): void => {
+	queryClient.setQueryData<Course | null>(['course', slug], (prev) => {
+		if (!prev) return prev;
+		return {
+			...prev,
+			waitingListCount: Math.max(0, (prev.waitingListCount ?? 0) + delta),
+		};
+	});
+	void queryClient.invalidateQueries({ queryKey: ['course', slug] });
+};
+
 const GuestWaitingListForm = ({
 	course,
 	onError,
 	onSuccess,
 }: Props) => {
+	const queryClient = useQueryClient();
 	const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
 
 	const {
@@ -54,6 +70,7 @@ const GuestWaitingListForm = ({
 				email: values.email,
 			});
 			setSubmittedEmail(values.email.trim());
+			bumpCourseWaitingListCount(queryClient, course.slug, 1);
 			onSuccess?.();
 		} catch (err) {
 			onError?.(
@@ -156,6 +173,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 		},
 		onSuccess: async () => {
 			setConfirmAction(null);
+			bumpCourseWaitingListCount(queryClient, course.slug, 1);
 			onSuccess?.();
 			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
 		},
@@ -169,6 +187,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 		},
 		onSuccess: async () => {
 			setConfirmAction(null);
+			bumpCourseWaitingListCount(queryClient, course.slug, -1);
 			onSuccess?.();
 			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
 		},

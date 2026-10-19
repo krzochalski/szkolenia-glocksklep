@@ -1,3 +1,4 @@
+import { DEFAULT_COURSE_SLOTS_MAX } from '@constants/courses';
 import { z } from 'zod';
 
 export const loginSchema = z.object({
@@ -9,7 +10,9 @@ export const registerSchema = z.object({
 	fullName: z.string().min(2, 'Imię i nazwisko jest wymagane'),
 	email: z.string().min(1, 'E-mail jest wymagany').email('Nieprawidłowy e-mail'),
 	phone: z.string().min(9, 'Numer telefonu jest wymagany'),
-	terms: z.boolean().refine((val) => val, { message: 'Musisz zaakceptować regulamin' }),
+	terms: z
+		.boolean()
+		.refine((val) => val, { message: 'Musisz zaakceptować regulamin i politykę prywatności' }),
 });
 
 export const profileSchema = z.object({
@@ -50,6 +53,11 @@ export const courseSchema = z.object({
 	hours: z.coerce
 		.number({ error: 'Podaj czas trwania' })
 		.positive('Liczba godzin musi być większa od 0'),
+	slotsMax: z.coerce
+		.number({ error: 'Podaj liczbę miejsc' })
+		.int('Liczba miejsc musi być liczbą całkowitą')
+		.positive('Liczba miejsc musi być większa od 0')
+		.default(DEFAULT_COURSE_SLOTS_MAX),
 	level: z.enum(['basic', 'intermediate', 'advanced'], { error: 'Wybierz poziom' }),
 	tags: z.array(z.string()).default([]),
 	thumbnail: z.string().optional().default(''),

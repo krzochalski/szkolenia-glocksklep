@@ -35,7 +35,7 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 								padding: '0 2rem',
 							}}
 							buttonText='Spoko'
-							declineButtonText='Nie zgadzam się'
+							declineButtonText='Odrzuć'
 							enableDeclineButton
 							declineButtonStyle={{
 								color: brand.ink,
@@ -62,10 +62,10 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 							Ta strona używa cookies. Możesz zaakceptować albo odrzucić — wybór zapisujemy w cookie,
 							żeby nie pytać przy każdej wizycie. Szczegóły:{' '}
 							<NextLink
-								href={Paths.politykaPrywatnosci}
+								href={Paths.politykaCookies}
 								style={{ color: brand.accentDark, textDecoration: 'underline' }}
 							>
-								polityka prywatności
+								polityka cookies
 							</NextLink>
 							.
 						</CookieConsent>

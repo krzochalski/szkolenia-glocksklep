@@ -89,4 +89,25 @@ describe('CourseDateRow', () => {
 		expect(screen.getByText('500 zł netto / 615 zł brutto')).toBeInTheDocument();
 		expect(screen.queryByRole('link', { name: 'Movement Fundamentals' })).toBeNull();
 	});
+
+	it('adds ostatnie miejsca when few seats remain', () => {
+		const scarce: CourseClass = {
+			...date,
+			slotsMax: 8,
+			participants: [
+				{ id: 'u1', name: 'A', email: 'a@b.c' },
+				{ id: 'u2', name: 'B', email: 'b@b.c' },
+				{ id: 'u3', name: 'C', email: 'c@b.c' },
+				{ id: 'u4', name: 'D', email: 'd@b.c' },
+				{ id: 'u5', name: 'E', email: 'e@b.c' },
+				{ id: 'u6', name: 'F', email: 'f@b.c' },
+			],
+		};
+		wrap(<CourseDateRow course={course} date={scarce} />);
+		expect(
+			screen.getByText(
+				'18 października 2026 · 10:00 · Strzelnica Czacz · wolne: 2 · ostatnie miejsca'
+			)
+		).toBeInTheDocument();
+	});
 });

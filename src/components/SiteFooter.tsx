@@ -53,6 +53,14 @@ export const SiteFooter = ({ sx }: SiteFooterProps) => (
 						>
 							Polityka prywatności
 						</Link>
+						<Link
+							component={NextLink}
+							href={Paths.politykaCookies}
+							underline='hover'
+							color='text.secondary'
+						>
+							Polityka cookies
+						</Link>
 						<Link component={NextLink} href={Paths.faq} underline='hover' color='text.secondary'>
 							FAQ
 						</Link>

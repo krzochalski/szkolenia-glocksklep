@@ -19,6 +19,8 @@ const nextConfig = {
 		'@mui/icons-material',
 		'@emotion/react',
 		'@emotion/styled',
+		'@uiw/react-md-editor',
+		'@uiw/react-markdown-preview',
 	],
 	typescript: {
 		ignoreBuildErrors: true,

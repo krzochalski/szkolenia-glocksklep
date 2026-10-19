@@ -3,7 +3,7 @@ import express from 'express';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+import { onDocumentCreated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
 import { onRequest } from 'firebase-functions/v2/https';
 import { z, ZodError } from 'zod';
 
@@ -17,6 +17,7 @@ import {
 	unenrollFromCourseTx,
 } from './enrollment';
 import { sendEnrollmentConfirmation } from './enrollmentMail';
+import { syncCourseWaitingListCount } from './waitingListCount';
 import { sendWaitingListConfirmation } from './waitingListMail';
 
 initializeApp();
@@ -253,11 +254,31 @@ export const onWaitingListCreated = onDocumentCreated(
 		const email = typeof data.email === 'string' ? data.email : '';
 		const courseName = typeof data.courseName === 'string' ? data.courseName : 'Szkolenie';
 		const courseSlug = typeof data.courseSlug === 'string' ? data.courseSlug : '';
-		if (!email || !courseSlug) return;
-		await sendWaitingListConfirmation({
-			courseName,
-			courseSlug,
-			recipientEmail: email,
-		});
+		const courseId = typeof data.courseId === 'string' ? data.courseId : '';
+		await Promise.all([
+			courseId ? syncCourseWaitingListCount(getFirestore(), courseId) : Promise.resolve(),
+			email && courseSlug
+				? sendWaitingListConfirmation({
+						courseName,
+						courseSlug,
+						recipientEmail: email,
+					})
+				: Promise.resolve(),
+		]);
+	}
+);
+
+export const onWaitingListDeleted = onDocumentDeleted(
+	{
+		document: 'courseWaitingList/{entryId}',
+		region: 'europe-west1',
+		memory: '256MiB',
+		timeoutSeconds: 60,
+	},
+	async (event) => {
+		const data = event.data?.data();
+		const courseId = typeof data?.courseId === 'string' ? data.courseId : '';
+		if (!courseId) return;
+		await syncCourseWaitingListCount(getFirestore(), courseId);
 	}
 );

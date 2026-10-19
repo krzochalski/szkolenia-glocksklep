@@ -1,5 +1,6 @@
 'use client';
 
+import { getCourseSlotsMax } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
 import { fillPath } from '@/utils/paths';
@@ -29,6 +30,7 @@ const EditInner = ({ courseId }: Props) => {
 				description: course.description,
 				price: course.price,
 				hours: course.hours,
+				slotsMax: getCourseSlotsMax(course),
 				level: course.level,
 				tags: course.tags ?? [],
 				thumbnail: course.thumbnail ?? '',

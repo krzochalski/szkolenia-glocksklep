@@ -21,6 +21,7 @@ export type StaticSeoPage =
 	| 'about'
 	| 'regulamin'
 	| 'privacyPolicy'
+	| 'cookiesPolicy'
 	| 'login'
 	| 'register'
 	| 'auth'
@@ -83,6 +84,11 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 		description: 'Polityka prywatności i informacje o przetwarzaniu danych osobowych.',
 		path: '/polityka-prywatnosci',
 	},
+	cookiesPolicy: {
+		title: 'Polityka cookies',
+		description: 'Informacje o plikach cookie i podobnych technologiach w Serwisie.',
+		path: '/polityka-cookies',
+	},
 	login: {
 		title: 'Logowanie',
 		description: 'Zaloguj się do panelu uczestnika.',
@@ -130,6 +136,7 @@ export const SITEMAP_STATIC_PATHS: readonly string[] = [
 	'/o-nas',
 	'/regulamin',
 	'/polityka-prywatnosci',
+	'/polityka-cookies',
 ];
 
 export const Links = {

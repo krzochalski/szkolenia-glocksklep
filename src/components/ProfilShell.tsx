@@ -18,6 +18,7 @@ import {
 import {
 	CalendarMonthIcon,
 	EventAvailableIcon,
+	FitnessCenter,
 	HowToRegIcon,
 	MilitaryTechIcon,
 	PersonOutlined,
@@ -50,6 +51,12 @@ const NAV = [
 		href: Paths.profilSciezkaRozwoju,
 		exact: true,
 		icon: MilitaryTechIcon,
+	},
+	{
+		label: 'Po szkoleniu',
+		href: Paths.profilDebriefing,
+		exact: false,
+		icon: FitnessCenter,
 	},
 	{
 		label: 'Harmonogram',

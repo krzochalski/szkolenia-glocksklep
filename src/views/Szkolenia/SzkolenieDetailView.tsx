@@ -48,6 +48,8 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 				hours: course.hours,
 				level: course.level,
 				tags: course.tags,
+				slotsMax: course.slotsMax,
+				courseSlug: course.slug,
 			}
 		: undefined;
 

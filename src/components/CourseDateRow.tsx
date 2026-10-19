@@ -5,7 +5,7 @@ import { Box, Link, Paper, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
-import { getSlotsLeft, isCourseClassCanceled } from '@/utils/courseDates';
+import { formatSlotsMeta, isCourseClassCanceled } from '@/utils/courseDates';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
@@ -49,7 +49,7 @@ export const CourseDateRow = ({
 		metaParts.push(`instruktor: ${date.instructor.name}`);
 	}
 	if (showSlots) {
-		metaParts.push(canceled ? 'odwołane' : `wolne: ${getSlotsLeft(date)}`);
+		metaParts.push(canceled ? 'odwołane' : formatSlotsMeta(date));
 	}
 
 	const meta = metaParts.join(' · ');

@@ -1,7 +1,7 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
-import { DEFAULT_COURSE_SLOTS_MAX, DEFAULT_COURSE_TIME_START } from '@constants/courses';
+import { DEFAULT_COURSE_TIME_START, getCourseSlotsMax } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getCourse, updateCourseDates } from '@services/courses';
@@ -12,7 +12,7 @@ import { Box, Button, CircularProgress, ContentSwap, MotionAlert, Paper, Typogra
 import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
 import { fillPath } from '@/utils/paths';
@@ -49,12 +49,17 @@ const NewDateInner = ({ courseId }: Props) => {
 		defaultValues: {
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
-			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			slotsMax: getCourseSlotsMax(null),
 			_instructorId: '',
 			_placeId: '',
 			customPrice: undefined,
 		},
 	});
+
+	useEffect(() => {
+		if (!course) return;
+		methods.setValue('slotsMax', getCourseSlotsMax(course));
+	}, [course, methods]);
 
 	const placeOptions = useMemo(() => places.map((p) => ({ value: p.id, label: p.name })), [places]);
 	const instructorOptions = useMemo(

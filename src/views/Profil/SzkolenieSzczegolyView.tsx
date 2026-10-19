@@ -108,8 +108,8 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 							hours: course.hours,
 							level: course.level,
 							tags: course.tags,
-							timeStart: date.timeStart,
 							slotsMax: date.slotsMax,
+							courseSlug: course.slug,
 						}}
 					/>
 

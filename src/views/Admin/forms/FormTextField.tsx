@@ -11,6 +11,7 @@ type FormTextFieldProps = {
 	readonly type?: string;
 	readonly multiline?: boolean;
 	readonly minRows?: number;
+	readonly helperText?: string;
 	readonly inputProps?: {
 		onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 	};
@@ -23,6 +24,7 @@ export const FormTextField = ({
 	type,
 	multiline,
 	minRows,
+	helperText,
 	inputProps,
 }: FormTextFieldProps) => {
 	const { control } = useFormContext();
@@ -43,7 +45,7 @@ export const FormTextField = ({
 					fullWidth
 					size='small'
 					error={Boolean(error)}
-					helperText={error?.message}
+					helperText={error?.message ?? helperText}
 					onChange={(e) => {
 						field.onChange(e);
 						inputProps?.onChange?.(e as ChangeEvent<HTMLInputElement>);

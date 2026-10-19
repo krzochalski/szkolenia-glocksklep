@@ -51,6 +51,13 @@ export {
 	getMyCourseCompletions,
 } from './courseCompletions';
 export {
+	adminGetCourseDebriefings,
+	deleteCourseDebriefing,
+	getCourseDebriefing,
+	getMyCourseDebriefings,
+	saveCourseDebriefing,
+} from './courseDebriefings';
+export {
 	adminAwardBadge,
 	adminGetUserAwardedBadges,
 	adminRemoveAwardedBadge,
@@ -135,6 +142,11 @@ export {
 	type ProformaBuyerInfo,
 } from './proformaInvoices';
 export { queryClient } from './queryClient';
+export {
+	getCookiesPolicy,
+	saveCookiesPolicy,
+	seedCookiesPolicyIfMissing,
+} from './cookiesPolicy';
 export {
 	getPrivacyPolicy,
 	savePrivacyPolicy,

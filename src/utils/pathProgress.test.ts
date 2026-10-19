@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { DevelopmentPathDocument } from '@/types/developmentPath';
-import { findNextPathStep } from './pathProgress';
+import {
+	findCoursePathPlacement,
+	findNextPathStep,
+	formatCoursePathPlacement,
+} from './pathProgress';
 
 const pathDoc: DevelopmentPathDocument = {
 	intro: '',
@@ -79,5 +83,35 @@ describe('findNextPathStep', () => {
 				new Set(['podstawy', 'ruch', 'zaawansowane', 'stres'])
 			)
 		).toBeNull();
+	});
+});
+
+describe('findCoursePathPlacement', () => {
+	it('returns null when course is missing from the path', () => {
+		expect(findCoursePathPlacement(pathDoc, 'nieistniejacy')).toBeNull();
+		expect(findCoursePathPlacement(null, 'podstawy')).toBeNull();
+	});
+
+	it('returns track title and 1-based ordinal within that track', () => {
+		expect(findCoursePathPlacement(pathDoc, 'ruch')).toEqual({
+			trackTitle: 'Techniczna',
+			stepIndex: 2,
+			stepTotal: 3,
+		});
+		expect(findCoursePathPlacement(pathDoc, 'stres')).toEqual({
+			trackTitle: 'Miękkie',
+			stepIndex: 1,
+			stepTotal: 1,
+		});
+	});
+
+	it('formats a compact fact label', () => {
+		expect(
+			formatCoursePathPlacement({
+				trackTitle: 'Umiejętności techniczne',
+				stepIndex: 2,
+				stepTotal: 4,
+			})
+		).toBe('02/04 · Umiejętności techniczne');
 	});
 });

@@ -1,13 +1,13 @@
 'use client';
 
-import {
-	COURSE_LEVEL_LABEL,
-	DEFAULT_COURSE_SLOTS_MAX,
-	DEFAULT_COURSE_TIME_START,
-} from '@constants/courses';
+import { COURSE_LEVEL_LABEL, getCourseSlotsMax } from '@constants/courses';
+import { getDevelopmentPath } from '@services/developmentPath';
 import { Box, Chip, Stack, Typography } from '@ui';
+import { useQuery } from '@tanstack/react-query';
+import { CoursePathGraph } from '@/components/CoursePathGraph';
 import { CoursePriceDisplay } from '@/components/CoursePriceDisplay';
 import type { Course } from '@/types/course';
+import { findCoursePathPlacement } from '@/utils/pathProgress';
 
 const chipSx = {
 	borderRadius: 0,
@@ -34,9 +34,9 @@ export type CourseFactsMeta = {
 	readonly hours: number;
 	readonly level: Course['level'];
 	readonly tags?: string[];
-	/** When set, show real term values instead of course defaults. */
-	readonly timeStart?: string;
 	readonly slotsMax?: number;
+	/** When set, looks up position on ścieżka rozwoju. */
+	readonly courseSlug?: string;
 };
 
 type CourseFactsProps = {
@@ -45,9 +45,19 @@ type CourseFactsProps = {
 
 export const CourseFacts = ({ meta }: CourseFactsProps) => {
 	const level = (COURSE_LEVEL_LABEL[meta.level] ?? meta.level).toUpperCase();
-	const timeStart = meta.timeStart ?? DEFAULT_COURSE_TIME_START;
-	const slotsMax = meta.slotsMax ?? DEFAULT_COURSE_SLOTS_MAX;
+	const slotsMax = getCourseSlotsMax({ slotsMax: meta.slotsMax });
 	const tags = meta.tags ?? [];
+
+	const { data: pathDoc } = useQuery({
+		queryKey: ['developmentPath'],
+		queryFn: getDevelopmentPath,
+		enabled: Boolean(meta.courseSlug),
+	});
+
+	const pathPlacement =
+		meta.courseSlug && pathDoc
+			? findCoursePathPlacement(pathDoc, meta.courseSlug)
+			: null;
 
 	return (
 		<Stack spacing={2} sx={{ mt: 3 }}>
@@ -56,12 +66,13 @@ export const CourseFacts = ({ meta }: CourseFactsProps) => {
 				sx={{
 					display: 'flex',
 					flexWrap: 'wrap',
+					alignItems: 'flex-start',
 					gap: { xs: 2, md: 3 },
 					rowGap: 1.5,
 				}}
 			>
 				<Fact label='Czas' value={`${meta.hours} h`} />
-				<Fact label='Start' value={timeStart} />
+				{pathPlacement ? <CoursePathGraph placement={pathPlacement} /> : null}
 				<Fact label='Maks. osób' value={String(slotsMax)} />
 			</Box>
 			<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
@@ -77,6 +88,8 @@ export const CourseFacts = ({ meta }: CourseFactsProps) => {
 const Fact = ({ label, value }: { label: string; value: string }) => (
 	<Box>
 		<Typography sx={factLabelSx}>{label}</Typography>
-		<Typography sx={{ fontWeight: 700, fontSize: '1rem', mt: 0.25 }}>{value}</Typography>
+		<Typography sx={{ fontWeight: 700, fontSize: '1rem', mt: 0.25, lineHeight: 1.3 }}>
+			{value}
+		</Typography>
 	</Box>
 );

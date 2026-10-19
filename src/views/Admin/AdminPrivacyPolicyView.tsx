@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
+import { DEFAULT_PRIVACY_POLICY_MD } from '@constants/legalMarkdown';
 import { Paths } from '@constants/paths';
 import {
 	getPrivacyPolicy,
@@ -21,11 +22,6 @@ import {
 import { OpenInNewIcon } from '@ui/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-
-const DEFAULT_MARKDOWN = `# Polityka prywatności
-
-Treść polityki prywatności zostanie uzupełniona.
-`;
 
 export const AdminPrivacyPolicyView = () => <PrivacyPolicyInner />;
 
@@ -141,7 +137,7 @@ const PrivacyPolicyInner = () => {
 						confirmColor='warning'
 						onCancel={() => setResetOpen(false)}
 						onConfirm={() => {
-							setContent(DEFAULT_MARKDOWN);
+							setContent(DEFAULT_PRIVACY_POLICY_MD);
 							setResetOpen(false);
 						}}
 					>
