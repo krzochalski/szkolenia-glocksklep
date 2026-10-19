@@ -1,11 +1,11 @@
 import { JsonLd } from '@components/JsonLd';
 import { ABOUT_CONTENT, ABOUT_PHOTO_SRC } from '@/data/aboutContent';
 import { personJsonLd } from '@seo/jsonLd';
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { ONasView } from '@views/ONas/ONasView';
 
 export const metadata = staticPageMetadata('about');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default function ONasPage() {
 	return (

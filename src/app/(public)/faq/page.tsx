@@ -1,12 +1,12 @@
 import { JsonLd } from '@components/JsonLd';
 import { faqPageJsonLd } from '@seo/jsonLd';
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getFaqItems } from '@services/faq';
 import { FaqView } from '@views/Faq/FaqView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('faq');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function FaqPage() {
 	const faqResult = await Promise.allSettled([getFaqItems()]);

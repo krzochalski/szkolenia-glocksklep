@@ -1,14 +1,14 @@
 import { JsonLd } from '@components/JsonLd';
 import { STATIC_SEO } from '@constants/seo';
 import { collectionJsonLd } from '@seo/jsonLd';
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
 import { SzkoleniaListView } from '@views/Szkolenia/SzkoleniaListView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('courses');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function SzkoleniaPage() {
 	const [coursesResult, descriptionsResult] = await Promise.allSettled([

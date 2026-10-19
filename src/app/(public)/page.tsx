@@ -1,13 +1,13 @@
 import { JsonLd } from '@components/JsonLd';
 import { homeJsonLd } from '@seo/jsonLd';
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getCourses } from '@services/courses';
 import { getHomepage } from '@services/homepage';
 import { HomeView } from '@views/Home/HomeView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('home');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function HomePage() {
 	const [homepageResult, coursesResult] = await Promise.allSettled([

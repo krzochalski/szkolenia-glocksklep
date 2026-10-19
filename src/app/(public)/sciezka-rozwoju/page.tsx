@@ -1,11 +1,11 @@
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getCourses } from '@services/courses';
 import { getDevelopmentPath } from '@services/developmentPath';
 import { SciezkaRozwojuView } from '@views/SciezkaRozwoju/SciezkaRozwojuView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('sciezkaRozwoju');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function SciezkaRozwojuPage() {
 	const [pathResult, coursesResult] = await Promise.allSettled([

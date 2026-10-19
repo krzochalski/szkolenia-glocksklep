@@ -3,7 +3,6 @@ import { Paths } from '@constants/paths';
 import { courseJsonLd } from '@seo/jsonLd';
 import { itemDescription, itemTitle } from '@seo/meta';
 import {
-	CATALOG_REVALIDATE_SECONDS,
 	courseItemMetadata,
 	staticPageMetadata,
 } from '@seo/pageMetadata';
@@ -12,7 +11,7 @@ import { getCourseBySlug } from '@services/courses';
 import { SzkolenieDetailView } from '@views/Szkolenia/SzkolenieDetailView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 type Props = {
 	params: Promise<{ slug: string }>;

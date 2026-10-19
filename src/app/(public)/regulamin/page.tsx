@@ -1,10 +1,10 @@
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getRegulamin } from '@services/regulamin';
 import { RegulaminView } from '@views/Regulamin/RegulaminView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('regulamin');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function RegulaminPage() {
 	const regulaminResult = await Promise.allSettled([getRegulamin()]);

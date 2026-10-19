@@ -1,10 +1,10 @@
-import { CATALOG_REVALIDATE_SECONDS, staticPageMetadata } from '@seo/pageMetadata';
+import { staticPageMetadata } from '@seo/pageMetadata';
 import { getPrivacyPolicy } from '@services/privacyPolicy';
 import { PolitykaPrywatnosciView } from '@views/PolitykaPrywatnosci/PolitykaPrywatnosciView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('privacyPolicy');
-export const revalidate = CATALOG_REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 export default async function PolitykaPrywatnosciPage() {
 	const privacyResult = await Promise.allSettled([getPrivacyPolicy()]);
