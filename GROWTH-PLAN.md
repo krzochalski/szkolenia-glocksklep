@@ -27,7 +27,7 @@ Based on a site review only (not traffic or sales data). Goal: turn visitors int
 
 12. **Free or cheap intro** — 1-hour assessment or 1:1 trial that ends with a clear “what to work on” — an easy first yes.
 13. **Club and team deals** — Put the dedicated-groups offer in front of local IPSC clubs.
-14. **Season-aware offer** — Autumn/winter: indoor dry-fire online sessions and winter 1:1s, not only waitlists when outdoor weather is a problem.
+14. **Season-aware offer** — Autumn/winter: indoor dry-fire online sessions and winter 1:1s, not only waitlists when outdoor weather is a problem. "Idzie zima" is the motto. Users can enroll for dryfire sessions. Need to create plans for manual training as well as some stage situational awareness exercises.
 
 ---
 
