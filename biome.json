@@ -17,7 +17,8 @@
 			"!pnpm-lock.yaml",
 			"!pnpm-workspace.yaml",
 			"!functions",
-			"!scripts"
+			"!scripts",
+			"!packages/ui/scripts"
 		]
 	},
 	"formatter": {
