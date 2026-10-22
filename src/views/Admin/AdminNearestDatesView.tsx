@@ -4,6 +4,7 @@ import { Paths } from '@constants/paths';
 import { getCourses, setCourseDateCanceled } from '@services/courses';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft, isFutureDate } from '@/utils/courseDates';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
@@ -39,9 +40,7 @@ const NearestInner = () => {
 	const [toClone, setToClone] = useState<DateTarget | null>(null);
 	const [toUncancel, setToUncancel] = useState<DateTarget | null>(null);
 
-	const invalidate = async () => {
-		await queryClient.invalidateQueries({ queryKey: ['courses'] });
-	};
+	const invalidate = () => invalidateCourseQueries(queryClient);
 
 	const clone = useMutation({
 		mutationFn: () => {

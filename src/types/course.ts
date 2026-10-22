@@ -20,11 +20,6 @@ export interface Course {
 	id: string;
 	/* Name of the class */
 	name: string;
-	/**
-	 * Short focus line under the name (e.g. "IDPA", "dry-fire: reset z kabury").
-	 * Optional on legacy docs; required in admin forms going forward.
-	 */
-	subtitle?: string;
 	/* Name of the class in slug format */
 	slug: string;
 	/* Short description of the class */
@@ -80,6 +75,11 @@ export interface CourseClass {
 	date: string;
 	/* Time in format HH:MM */
 	timeStart: string;
+	/**
+	 * Short focus line for this edition (e.g. "IDPA", "dry-fire: reset z kabury").
+	 * Optional; shown on date listings and enrollment detail.
+	 */
+	subtitle?: string;
 	/* Participants of the class */
 	participants: Participant[];
 	instructor: Instructor;

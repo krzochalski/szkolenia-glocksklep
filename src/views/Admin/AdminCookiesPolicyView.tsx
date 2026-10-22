@@ -1,7 +1,6 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { DEFAULT_COOKIES_POLICY_MD } from '@constants/legalMarkdown';
 import { Paths } from '@constants/paths';
 import {
@@ -56,7 +55,7 @@ const CookiesPolicyInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+				<Box sx={{ width: '100%' }}>
 					<Stack
 						direction={{ xs: 'column', sm: 'row' }}
 						sx={{ mb: 2, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}

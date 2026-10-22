@@ -21,7 +21,7 @@ type CourseLayoutProps = {
 	readonly data: CourseSchemaData;
 	readonly hero?: string;
 	readonly courseMeta?: CourseFactsMeta;
-	/** Catalog subtitle from `courses` (focus / format), shown under the headline */
+	/** Optional focus line under the headline (e.g. date edition subtitle). */
 	readonly subtitle?: string;
 	/** Practice: names of required completed courses */
 	readonly prerequisiteNames?: string[];
@@ -165,7 +165,6 @@ export const CourseLayout = ({
 								textTransform: 'uppercase',
 								color: 'primary.main',
 								mb: 2,
-								maxWidth: 720,
 							}}
 						>
 							{subtitle}
@@ -179,7 +178,6 @@ export const CourseLayout = ({
 								letterSpacing: '0.04em',
 								color: 'text.secondary',
 								mb: 2,
-								maxWidth: 720,
 							}}
 						>
 							Wymaga ukończenia: {prerequisiteNames.join(', ')}
@@ -190,7 +188,6 @@ export const CourseLayout = ({
 							color: 'text.secondary',
 							lineHeight: 1.8,
 							fontSize: { xs: '1rem', md: '1.125rem' },
-							maxWidth: 720,
 						}}
 					>
 						{description}
@@ -283,7 +280,7 @@ export const CourseLayout = ({
 						<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
 							{outcomesHeading || 'Co będziesz umiał'}
 						</Typography>
-						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
 							{outcomes?.map((item) => (
 								<ListItem
 									key={item}

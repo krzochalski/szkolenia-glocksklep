@@ -27,6 +27,7 @@ import {
 	compareCoursesByLegacyCatalogOrder,
 	coursesNeedOrderBackfill,
 } from '@/utils/courseOrder';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 import {
@@ -109,32 +110,25 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				</Tooltip>
 			</TableCell>
 			<TableCell>
-				<Stack spacing={0.25}>
-					<Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-						<Typography variant='body2' sx={{ fontWeight: 600 }}>
-							{course.name}
-						</Typography>
+				<Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+					<Typography variant='body2' sx={{ fontWeight: 600 }}>
+						{course.name}
+					</Typography>
+					<Chip
+						label={COURSE_KIND_LABEL[kind]}
+						size='small'
+						variant='outlined'
+						color={kind === 'practice' ? 'primary' : 'default'}
+					/>
+					{inactive ? (
 						<Chip
-							label={COURSE_KIND_LABEL[kind]}
+							label='NIEAKTYWNE'
 							size='small'
+							color='default'
 							variant='outlined'
-							color={kind === 'practice' ? 'primary' : 'default'}
+							data-inactive-badge
+							sx={{ color: 'text.secondary', borderColor: 'text.disabled' }}
 						/>
-						{inactive ? (
-							<Chip
-								label='NIEAKTYWNE'
-								size='small'
-								color='default'
-								variant='outlined'
-								data-inactive-badge
-								sx={{ color: 'text.secondary', borderColor: 'text.disabled' }}
-							/>
-						) : null}
-					</Stack>
-					{course.subtitle?.trim() ? (
-						<Typography variant='caption' color='text.secondary'>
-							{course.subtitle.trim()}
-						</Typography>
 					) : null}
 				</Stack>
 			</TableCell>
@@ -242,7 +236,7 @@ const AdminCoursesInner = () => {
 			.sort(compareCoursesByLegacyCatalogOrder)
 			.map((c) => c.id);
 		void reorderCourses(orderedIds)
-			.then(() => queryClient.invalidateQueries({ queryKey: ['courses'] }))
+			.then(() => invalidateCourseQueries(queryClient))
 			.catch(() => {
 				backfillStarted.current = false;
 			});
@@ -252,7 +246,7 @@ const AdminCoursesInner = () => {
 		mutationFn: deleteCourse,
 		onSuccess: async () => {
 			setToDelete(null);
-			await queryClient.invalidateQueries({ queryKey: ['courses'] });
+			await invalidateCourseQueries(queryClient);
 		},
 	});
 

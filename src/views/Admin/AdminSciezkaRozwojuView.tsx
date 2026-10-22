@@ -1,7 +1,6 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { getCourses } from '@services/courses';
 import {
@@ -210,7 +209,7 @@ const SciezkaInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+				<Box sx={{ width: '100%' }}>
 					<Stack
 						direction={{ xs: 'column', sm: 'row' }}
 						sx={{ mb: 2, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}

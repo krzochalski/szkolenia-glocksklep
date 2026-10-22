@@ -59,7 +59,6 @@ export const CourseCard = ({ course, imageSrc, prerequisiteNames = [] }: CourseC
 	const eyebrow =
 		kind === 'practice' ? `${COURSE_KIND_LABEL.practice.toUpperCase()} · ${level}` : level;
 	const showImage = Boolean(imageSrc) && !imageFailed;
-	const subtitle = course.subtitle?.trim();
 
 	return (
 		<CatalogCard
@@ -82,20 +81,6 @@ export const CourseCard = ({ course, imageSrc, prerequisiteNames = [] }: CourseC
 			title={course.name}
 			description={
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mt: 0.25 }}>
-					{subtitle ? (
-						<Typography
-							sx={{
-								fontFamily: '"Space Mono", monospace',
-								fontSize: '0.75rem',
-								fontWeight: 700,
-								letterSpacing: '0.04em',
-								color: 'primary.main',
-								lineHeight: 1.35,
-							}}
-						>
-							{subtitle}
-						</Typography>
-					) : null}
 					{prerequisiteNames.length > 0 ? (
 						<Typography
 							sx={{

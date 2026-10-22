@@ -13,7 +13,6 @@ import {
 	Button,
 	CircularProgress,
 	ContentSwap,
-	Grid,
 	HardShadow,
 	MonoText,
 	PathConnector,
@@ -201,84 +200,96 @@ export const ProfilSciezkaRozwojuView = () => {
 							<Typography variant='h6' component='h2' sx={{ mb: 2 }}>
 								Twoja ścieżka
 							</Typography>
-							<Grid container spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'stretch', mb: 4 }}>
+							<Box
+								sx={{
+									display: 'grid',
+									width: '100%',
+									mb: 4,
+									gridTemplateColumns: {
+										xs: '1fr',
+										md: 'repeat(2, minmax(0, 1fr))',
+									},
+									gap: { xs: 3, md: 4 },
+									alignItems: 'start',
+								}}
+							>
 								{tracks.map((track) => (
-									<Grid key={track.id} size={{ xs: 12, md: 6 }}>
-										<Box
+									<Box
+										key={track.id}
+										sx={{
+											minWidth: 0,
+											height: '100%',
+											borderLeft: '4px solid',
+											borderColor: 'primary.main',
+											pl: { xs: 2, sm: 2.5 },
+										}}
+									>
+										<MonoText
 											sx={{
-												height: '100%',
-												borderLeft: '4px solid',
-												borderColor: 'primary.main',
-												pl: { xs: 2, sm: 2.5 },
+												display: 'block',
+												fontSize: '0.6875rem',
+												color: 'primary.main',
+												letterSpacing: '0.14em',
+												mb: 0.75,
 											}}
 										>
-											<MonoText
-												sx={{
-													display: 'block',
-													fontSize: '0.6875rem',
-													color: 'primary.main',
-													letterSpacing: '0.14em',
-													mb: 0.75,
-												}}
-											>
-												{`Ścieżka ${String(track.trackIdx + 1).padStart(2, '0')}`}
-											</MonoText>
-											<Typography
-												variant='h2'
-												sx={{
-													fontSize: { xs: '1.05rem', sm: '1.15rem' },
-													fontWeight: 700,
-													textTransform: 'uppercase',
-													letterSpacing: '0.04em',
-													mb: 2.5,
-													pb: 1,
-													borderBottom: '2px solid',
-													borderColor: 'ink.main',
-												}}
-											>
-												{track.title}
-											</Typography>
-											<Stack spacing={0} sx={{ alignItems: 'stretch' }}>
-												{track.levels.map((lvl, levelIdx) => (
-													<Box key={lvl.id}>
-														<Stagger
-															sx={{
-																display: 'grid',
-																gridTemplateColumns:
-																	lvl.items.length > 1
-																		? {
-																				xs: '1fr',
-																				sm: `repeat(${Math.min(lvl.items.length, 2)}, 1fr)`,
-																			}
-																		: '1fr',
-																gap: 1.5,
-																alignItems: 'stretch',
-															}}
-														>
-															{lvl.items.map((item) => {
-																const course = courseBySlug.get(item.courseSlug);
-																const label = item.label?.trim() || course?.name || item.courseSlug;
-																return (
-																	<StaggerItem key={item.id}>
-																		<PathStep
-																			index={item.index}
-																			label={label}
-																			courseSlug={item.courseSlug}
-																			course={course}
-																			completed={completedSlugs.has(item.courseSlug)}
-																		/>
-																	</StaggerItem>
-																);
-															})}
-														</Stagger>
-														{levelIdx < track.levels.length - 1 ? <PathConnector /> : null}
-													</Box>
-												))}
-											</Stack>
-										</Box>
-									</Grid>
+											{`Ścieżka ${String(track.trackIdx + 1).padStart(2, '0')}`}
+										</MonoText>
+										<Typography
+											variant='h2'
+											sx={{
+												fontSize: { xs: '1.05rem', sm: '1.15rem' },
+												fontWeight: 700,
+												textTransform: 'uppercase',
+												letterSpacing: '0.04em',
+												mb: 2.5,
+												pb: 1,
+												borderBottom: '2px solid',
+												borderColor: 'ink.main',
+											}}
+										>
+											{track.title}
+										</Typography>
+										<Stack spacing={0} sx={{ alignItems: 'stretch' }}>
+											{track.levels.map((lvl, levelIdx) => (
+												<Box key={lvl.id}>
+													<Stagger
+														sx={{
+															display: 'grid',
+															gridTemplateColumns:
+																lvl.items.length > 1
+																	? {
+																			xs: '1fr',
+																			xl: `repeat(${Math.min(lvl.items.length, 2)}, minmax(0, 1fr))`,
+																		}
+																	: '1fr',
+															gap: 1.5,
+															alignItems: 'stretch',
+														}}
+													>
+														{lvl.items.map((item) => {
+															const course = courseBySlug.get(item.courseSlug);
+															const label = item.label?.trim() || course?.name || item.courseSlug;
+															return (
+																<StaggerItem key={item.id}>
+																	<PathStep
+																		index={item.index}
+																		label={label}
+																		courseSlug={item.courseSlug}
+																		course={course}
+																		completed={completedSlugs.has(item.courseSlug)}
+																	/>
+																</StaggerItem>
+															);
+														})}
+													</Stagger>
+													{levelIdx < track.levels.length - 1 ? <PathConnector /> : null}
+												</Box>
+											))}
+										</Stack>
+									</Box>
 								))}
-							</Grid>
+							</Box>
 						</>
 					) : null}
 

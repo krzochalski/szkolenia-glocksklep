@@ -32,6 +32,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import type { Participant } from '@/types/course';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
@@ -89,10 +90,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		);
 	}
 
-	const invalidate = async () => {
-		await queryClient.invalidateQueries({ queryKey: ['course', courseId] });
-		await queryClient.invalidateQueries({ queryKey: ['courses'] });
-	};
+	const invalidate = () => invalidateCourseQueries(queryClient);
 
 	const invalidateCompletions = async (uid: string) => {
 		await queryClient.invalidateQueries({ queryKey: ['adminUserCompletions', uid] });

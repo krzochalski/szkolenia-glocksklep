@@ -50,7 +50,15 @@ const withDateIds = (data: CourseFormValues) => {
 		thumbnail: normalizeImagePath(thumbnail),
 		hero: normalizeImagePath(hero),
 		...(inactive ? { inactive: true } : {}),
-		dates: (data.dates ?? []).map((d) => ({ ...d, id: uuid(), participants: [] })),
+		dates: (data.dates ?? []).map((d) => {
+			const subtitle = d.subtitle?.trim();
+			return {
+				...d,
+				id: uuid(),
+				participants: [],
+				...(subtitle ? { subtitle } : { subtitle: undefined }),
+			};
+		}),
 	});
 };
 
@@ -88,6 +96,8 @@ export const updateCourse = async (id: string, data: CourseFormValues): Promise<
 		thumbnail: thumbnailPath ?? deleteField(),
 		hero: heroPath ?? deleteField(),
 		inactive: inactive ? true : deleteField(),
+		/** Legacy course-level podtytuł — now lives on dates. */
+		subtitle: deleteField(),
 	});
 };
 

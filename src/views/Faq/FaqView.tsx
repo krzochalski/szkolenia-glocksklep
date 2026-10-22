@@ -27,7 +27,7 @@ export const FaqView = ({ initialItems }: Props) => {
 	const listState = isLoading ? 'loading' : items.length === 0 ? 'empty' : 'content';
 
 	return (
-		<Box sx={{ maxWidth: 800 }}>
+		<Box sx={{ width: '100%' }}>
 			<Typography variant='h4' component='h1' gutterBottom>
 				FAQ
 			</Typography>

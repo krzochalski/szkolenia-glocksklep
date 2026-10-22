@@ -69,6 +69,16 @@ describe('CourseDateRow', () => {
 		expect(screen.getByRole('link', { name: 'Proforma' })).toBeInTheDocument();
 	});
 
+	it('renders date subtitle when set', () => {
+		wrap(
+			<CourseDateRow
+				course={course}
+				date={{ ...date, subtitle: 'Orientacja IDPA' }}
+			/>
+		);
+		expect(screen.getByText('Orientacja IDPA')).toBeInTheDocument();
+	});
+
 	it('supports course-detail rows without title and with instructor', () => {
 		wrap(
 			<CourseDateRow

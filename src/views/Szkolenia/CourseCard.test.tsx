@@ -10,7 +10,6 @@ const wrap = (ui: ReactElement) => render(<UiProvider>{ui}</UiProvider>);
 const course: Course = {
 	id: 'c1',
 	name: 'Glockatto — podstawy',
-	subtitle: 'Orientacja IDPA',
 	slug: 'glockatto-podstawy',
 	description: 'Wprowadzenie do pistoletu.',
 	price: 850,
@@ -20,11 +19,10 @@ const course: Course = {
 };
 
 describe('CourseCard', () => {
-	it('renders list row with level, subtitle, program chips, dual price and details CTA', () => {
+	it('renders list row with level, program chips, dual price and details CTA', () => {
 		wrap(<CourseCard course={course} />);
 		expect(screen.getByText('PODSTAWOWY')).toBeInTheDocument();
 		expect(screen.getByText('Glockatto — podstawy')).toBeInTheDocument();
-		expect(screen.getByText('Orientacja IDPA')).toBeInTheDocument();
 		expect(screen.getByText('8 H')).toBeInTheDocument();
 		expect(screen.getByText('Glock')).toBeInTheDocument();
 		expect(screen.getByText('850 zł netto / 1045.50 zł brutto')).toBeInTheDocument();

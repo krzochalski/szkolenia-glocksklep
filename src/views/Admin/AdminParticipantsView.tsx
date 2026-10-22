@@ -16,6 +16,7 @@ import {
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { AdminCourseCompletionsDialog } from './forms/AdminCourseCompletionsDialog';
 import { AdminEnrollDialog } from './forms/AdminEnrollDialog';
 
@@ -59,7 +60,7 @@ const UsersInner = () => {
 				open={enrollOpen}
 				onClose={() => setEnrollOpen(false)}
 				onEnrolled={async () => {
-					await queryClient.invalidateQueries({ queryKey: ['courses'] });
+					await invalidateCourseQueries(queryClient);
 				}}
 			/>
 

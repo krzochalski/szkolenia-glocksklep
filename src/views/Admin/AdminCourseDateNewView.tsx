@@ -2,13 +2,12 @@
 
 import { AdminStickyActions } from '@components';
 import { DEFAULT_COURSE_TIME_START, getCourseSlotsMax } from '@constants/courses';
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getCourse, updateCourseDates } from '@services/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ContentSwap, MotionAlert, Paper, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
@@ -16,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import { cleanDateForFirestore } from './forms/cleanDateForFirestore';
 import { type DateEntryValues, dateEntrySchema } from './forms/dateEntrySchema';
@@ -34,6 +34,7 @@ export const AdminCourseDateNewView = ({ courseId }: Props) => <NewDateInner cou
 
 const NewDateInner = ({ courseId }: Props) => {
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { data: course, isLoading: courseLoading } = useQuery({
 		queryKey: ['course', courseId],
 		queryFn: () => getCourse(courseId),
@@ -51,6 +52,7 @@ const NewDateInner = ({ courseId }: Props) => {
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
 			slotsMax: getCourseSlotsMax(null),
+			subtitle: '',
 			_instructorId: '',
 			_placeId: '',
 			customPrice: undefined,
@@ -73,7 +75,7 @@ const NewDateInner = ({ courseId }: Props) => {
 			{courseLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+				<Box sx={{ width: '100%' }}>
 					<Button
 						component={NextLink}
 						href={fillPath(Paths.adminCourseAllDates, { courseId })}
@@ -99,6 +101,7 @@ const NewDateInner = ({ courseId }: Props) => {
 										if (!selectedPlace) throw new Error('Wybrane miejsce nie istnieje.');
 										if (!course) throw new Error('Kurs nie istnieje.');
 
+										const subtitle = data.subtitle?.trim();
 										const newDate = {
 											id: uuid(),
 											date: data.date,
@@ -119,10 +122,12 @@ const NewDateInner = ({ courseId }: Props) => {
 												googleMapsLink: selectedPlace.googleMapsLink,
 												...(selectedPlace.link ? { link: selectedPlace.link } : {}),
 											},
+											...(subtitle ? { subtitle } : {}),
 											...(data.customPrice ? { customPrice: data.customPrice } : {}),
 										};
 										const existingDates = (course.dates ?? []).map((d) => cleanDateForFirestore(d));
 										await updateCourseDates(courseId, [...existingDates, newDate]);
+										await invalidateCourseQueries(queryClient);
 										router.push(fillPath(Paths.adminCourseAllDates, { courseId }));
 									} catch (err) {
 										setError(err instanceof Error ? err.message : 'Błąd zapisu.');
@@ -150,6 +155,12 @@ const NewDateInner = ({ courseId }: Props) => {
 										<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 									</Box>
 								</Box>
+								<FormTextField
+									name='subtitle'
+									label='Podtytuł'
+									placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
+									helperText='Opcjonalnie — krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
+								/>
 								<Box
 									sx={{
 										display: 'grid',

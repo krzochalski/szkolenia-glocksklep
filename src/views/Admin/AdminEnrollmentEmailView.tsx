@@ -86,7 +86,7 @@ const EnrollmentEmailInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: 720 }}>
+				<Box sx={{ width: '100%' }}>
 					<Stack
 						direction={{ xs: 'column', sm: 'row' }}
 						spacing={1}

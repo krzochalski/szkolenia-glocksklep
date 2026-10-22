@@ -4,6 +4,7 @@ import { Paths } from '@constants/paths';
 import { getCourse, setCourseDateCanceled } from '@services/courses';
 import type { CourseClass } from '@/types/course';
 import { isFutureDate } from '@/utils/courseDates';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
@@ -40,10 +41,7 @@ const DatesInner = ({ courseId }: Props) => {
 	const [toClone, setToClone] = useState<CourseClass | null>(null);
 	const [toUncancel, setToUncancel] = useState<CourseClass | null>(null);
 
-	const invalidate = async () => {
-		await queryClient.invalidateQueries({ queryKey: ['course', courseId] });
-		await queryClient.invalidateQueries({ queryKey: ['courses'] });
-	};
+	const invalidate = () => invalidateCourseQueries(queryClient);
 
 	const clone = useMutation({
 		mutationFn: () => {

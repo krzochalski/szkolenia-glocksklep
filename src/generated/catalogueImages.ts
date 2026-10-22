@@ -3,6 +3,7 @@
  * Source: public/hero + public/thumbnails + public/badges + public/sessions (full-size .webp only).
  */
 export const HERO_CATALOGUE_IMAGES = [
+	'/hero/dryfire.webp',
 	'/hero/idpa_competition_front.webp',
 	'/hero/idpa_competition.webp',
 	'/hero/ipsc_class.webp',

@@ -1,6 +1,5 @@
 'use client';
 
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { signOut } from '@services/auth';
@@ -138,7 +137,6 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 					flex: 1,
 					minWidth: 0,
 					width: '100%',
-					maxWidth: PAGE_CONTENT_MAX_WIDTH,
 					pb: accountNavContentPb,
 				}}
 			>

@@ -20,7 +20,7 @@ export const PolitykaCookiesView = ({ initialCookiesPolicy }: Props) => {
 	});
 
 	return (
-		<Box sx={{ maxWidth: 800 }}>
+		<Box sx={{ width: '100%' }}>
 			<Typography variant='h4' component='h1' gutterBottom>
 				Polityka cookies
 			</Typography>

@@ -80,6 +80,13 @@ export const DateEntry = ({
 				/>
 			</Box>
 
+			<FormTextField
+				name={`dates.${index}.subtitle`}
+				label='Podtytuł'
+				placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
+				helperText='Opcjonalnie — krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
+			/>
+
 			<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
 				<FormSelect
 					name={`dates.${index}._instructorId`}

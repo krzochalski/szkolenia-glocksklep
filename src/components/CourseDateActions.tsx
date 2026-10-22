@@ -29,6 +29,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatBookingSummary } from '@/utils/formatEnrollment';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
@@ -131,8 +132,7 @@ export const CourseDateActions = ({
 			setConfirmAction(null);
 			onSuccess?.();
 			await Promise.all([
-				queryClient.invalidateQueries({ queryKey: ['courses'] }),
-				queryClient.invalidateQueries({ queryKey: ['course'] }),
+				invalidateCourseQueries(queryClient),
 				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
 			]);
 		},
@@ -156,8 +156,8 @@ export const CourseDateActions = ({
 			setConfirmAction(null);
 			onSuccess?.();
 			await Promise.all([
+				invalidateCourseQueries(queryClient),
 				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
-				queryClient.invalidateQueries({ queryKey: ['course', course.slug] }),
 			]);
 		},
 		onError: (err: Error) => onError?.(err.message),
@@ -172,8 +172,8 @@ export const CourseDateActions = ({
 			setConfirmAction(null);
 			onSuccess?.();
 			await Promise.all([
+				invalidateCourseQueries(queryClient),
 				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
-				queryClient.invalidateQueries({ queryKey: ['course', course.slug] }),
 			]);
 		},
 		onError: (err: Error) => onError?.(err.message),

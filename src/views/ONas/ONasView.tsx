@@ -9,7 +9,7 @@ export const ONasView = () => {
 		ABOUT_CONTENT;
 
 	return (
-		<Box sx={{ maxWidth: 880 }}>
+		<Box sx={{ width: '100%' }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
 				spacing={3}

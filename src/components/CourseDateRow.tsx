@@ -12,7 +12,7 @@ import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 export type CourseDateRowProps = {
-	readonly course: Pick<Course, 'name' | 'slug' | 'price' | 'subtitle' | 'kind'>;
+	readonly course: Pick<Course, 'name' | 'slug' | 'price' | 'kind'>;
 	readonly date: CourseClass;
 	/** Defaults to the public course page. Ignored when `showTitle` is false. */
 	readonly titleHref?: string;
@@ -106,7 +106,7 @@ export const CourseDateRow = ({
 					) : (
 						<Typography sx={{ fontWeight: 700 }}>{when}</Typography>
 					)}
-					{showTitle && course.subtitle?.trim() ? (
+					{date.subtitle?.trim() ? (
 						<Typography
 							variant='body2'
 							component='p'
@@ -119,7 +119,7 @@ export const CourseDateRow = ({
 								color: 'primary.main',
 							}}
 						>
-							{course.subtitle.trim()}
+							{date.subtitle.trim()}
 						</Typography>
 					) : null}
 					<Typography

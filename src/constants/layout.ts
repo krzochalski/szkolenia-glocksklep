@@ -1,5 +1,4 @@
 /**
- * Standard reading / form column inside `PageColumn` (`xl`).
- * Keep list and path pages on this width so they align across the app.
+ * @deprecated Content fills `PageColumn` (`xl`). Kept only for transitional imports.
  */
-export const PAGE_CONTENT_MAX_WIDTH = 960;
+export const PAGE_CONTENT_MAX_WIDTH = '100%' as const;

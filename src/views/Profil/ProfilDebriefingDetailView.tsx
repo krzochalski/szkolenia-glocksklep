@@ -44,7 +44,7 @@ export const ProfilDebriefingDetailView = ({ courseId }: Props) => {
 	const metaLabel = debriefing ? formatDebriefingMeta(debriefing) : null;
 
 	return (
-		<Box sx={{ maxWidth: 800 }}>
+		<Box sx={{ width: '100%' }}>
 			<Button
 				component={NextLink}
 				href={Paths.profilDebriefing}

@@ -45,6 +45,7 @@ export const CourseDateEditForm = ({
 			date: courseDate.date,
 			timeStart: courseDate.timeStart,
 			slotsMax: courseDate.slotsMax,
+			subtitle: courseDate.subtitle ?? '',
 			_instructorId: '',
 			_placeId: '',
 			customPrice: courseDate.customPrice ?? undefined,
@@ -89,6 +90,7 @@ export const CourseDateEditForm = ({
 
 			const dates = (course.dates ?? []).map((d) => {
 				if (d.id !== courseDate.id) return cleanDateForFirestore(d);
+				const subtitle = data.subtitle?.trim();
 				const updated: Record<string, unknown> = {
 					id: d.id,
 					date: data.date,
@@ -110,6 +112,7 @@ export const CourseDateEditForm = ({
 						...(selectedPlace.link ? { link: selectedPlace.link } : {}),
 					},
 				};
+				if (subtitle) updated.subtitle = subtitle;
 				if (data.customPrice) updated.customPrice = data.customPrice;
 				if (d.canceled) updated.canceled = true;
 				return updated;
@@ -151,6 +154,12 @@ export const CourseDateEditForm = ({
 							<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 						</Box>
 					</Box>
+					<FormTextField
+						name='subtitle'
+						label='Podtytuł'
+						placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
+						helperText='Opcjonalnie — krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
+					/>
 					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
 						<FormSelect name='_instructorId' label='Instruktor' options={instructorOptions} />
 						<FormSelect name='_placeId' label='Miejsce' options={placeOptions} />

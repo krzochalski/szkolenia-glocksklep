@@ -1,6 +1,6 @@
 'use client';
 
-import { AdminStickyActions } from '@components';
+import { AdminStickyActions, MarkdownWysiwygEditor } from '@components';
 import { HOMEPAGE_HERO_IMAGES, toHomepageHeroImage } from '@constants/homepageHeroImages';
 import { Paths } from '@constants/paths';
 import {
@@ -77,6 +77,10 @@ const HomepageInner = () => {
 				heroHeadline: data.heroHeadline,
 				heroSubline: data.heroSubline,
 				heroImage: data.heroImage,
+				introTitle: data.introTitle,
+				introSubline: data.introSubline,
+				introMarkdown: data.introMarkdown,
+				introBannerImage: data.introBannerImage,
 				missionTitle: data.missionTitle,
 				missionPoints: data.missionPoints,
 				missionBody: data.missionBody,
@@ -176,6 +180,11 @@ const HomepageInner = () => {
 			heroHeadline: form.heroHeadline.trim() || DEFAULT_HOMEPAGE.heroHeadline,
 			heroSubline: form.heroSubline.trim() || DEFAULT_HOMEPAGE.heroSubline,
 			heroImage: toHomepageHeroImage(form.heroImage) ?? DEFAULT_HOMEPAGE.heroImage,
+			introTitle: form.introTitle.trim() || DEFAULT_HOMEPAGE.introTitle,
+			introSubline: form.introSubline.trim() || DEFAULT_HOMEPAGE.introSubline,
+			introMarkdown: form.introMarkdown.trim() || DEFAULT_HOMEPAGE.introMarkdown,
+			introBannerImage:
+				toHomepageHeroImage(form.introBannerImage) ?? DEFAULT_HOMEPAGE.introBannerImage,
 			missionTitle: form.missionTitle.trim() || DEFAULT_HOMEPAGE.missionTitle,
 			missionPoints: resolvedPoints,
 			missionBody: joinMissionBody(resolvedPoints),
@@ -201,7 +210,7 @@ const HomepageInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box sx={{ maxWidth: 800 }}>
+		<Box sx={{ width: '100%' }}>
 			<Stack
 				direction={{ xs: 'column', sm: 'row' }}
 				spacing={1}
@@ -252,6 +261,53 @@ const HomepageInner = () => {
 						</MenuItem>
 					))}
 				</TextField>
+			</Stack>
+
+			<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
+				Sekcja pod hero
+			</Typography>
+			<Typography variant='body2' color='text.secondary' sx={{ mb: 1.5 }}>
+				Baner, tytuł, podtytuł oraz treść w Markdown — wyświetlane bezpośrednio pod hero.
+			</Typography>
+			<Stack spacing={2} sx={{ mb: 3 }}>
+				<TextField
+					label='Tytuł'
+					fullWidth
+					value={form.introTitle}
+					onChange={(e) => patch({ introTitle: e.target.value })}
+				/>
+				<TextField
+					label='Podtytuł'
+					fullWidth
+					multiline
+					minRows={2}
+					value={form.introSubline}
+					onChange={(e) => patch({ introSubline: e.target.value })}
+				/>
+				<TextField
+					select
+					label='Obraz banera'
+					fullWidth
+					value={form.introBannerImage}
+					onChange={(e) => patch({ introBannerImage: e.target.value })}
+					helperText='Katalog /hero — ten sam zestaw co hero'
+				>
+					{HOMEPAGE_HERO_IMAGES.map((src) => (
+						<MenuItem key={src} value={src}>
+							{src}
+						</MenuItem>
+					))}
+				</TextField>
+				<Box>
+					<Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
+						Treść (Markdown)
+					</Typography>
+					<MarkdownWysiwygEditor
+						value={form.introMarkdown}
+						onChange={(value) => patch({ introMarkdown: value })}
+						height={320}
+					/>
+				</Box>
 			</Stack>
 
 			<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>

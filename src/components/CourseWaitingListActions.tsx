@@ -10,6 +10,7 @@ import {
 } from '@services/courseWaitingList';
 import { getUserProfile } from '@services/users';
 import type { Course } from '@/types/course';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import {
 	type GuestWaitingListFormValues,
 	guestWaitingListSchema,
@@ -41,7 +42,7 @@ const bumpCourseWaitingListCount = (
 			waitingListCount: Math.max(0, (prev.waitingListCount ?? 0) + delta),
 		};
 	});
-	void queryClient.invalidateQueries({ queryKey: ['course', slug] });
+	void invalidateCourseQueries(queryClient);
 };
 
 const GuestWaitingListForm = ({

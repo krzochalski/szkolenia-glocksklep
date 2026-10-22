@@ -91,12 +91,6 @@ export const CourseForm = ({
 							<AutoSlugField name='slug' label='Slug' sourceName='name' />
 						</Box>
 						<FormTextField
-							name='subtitle'
-							label='Podtytuł'
-							placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
-							helperText='Krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
-						/>
-						<FormTextField
 							name='description'
 							label='Opis'
 							placeholder='Krótki opis szkolenia...'

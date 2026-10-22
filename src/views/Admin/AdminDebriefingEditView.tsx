@@ -2,7 +2,6 @@
 
 import { AdminStickyActions, MarkdownWysiwygEditor } from '@components';
 import { DEFAULT_COURSE_DEBRIEFING_MD } from '@constants/debriefingMarkdown';
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { getCourseDebriefing, saveCourseDebriefing } from '@services/courseDebriefings';
 import { getCourse } from '@services/courses';
@@ -81,7 +80,7 @@ const EditInner = ({ courseId }: Props) => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+				<Box sx={{ width: '100%' }}>
 					<Button
 						component={NextLink}
 						href={Paths.adminDebriefings}

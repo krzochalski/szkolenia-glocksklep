@@ -93,12 +93,6 @@ export const CourseDetailsForm = ({
 							<FormTextField name='name' label='Nazwa szkolenia' />
 							<AutoSlugField name='slug' label='Slug' sourceName='name' />
 						</Box>
-						<FormTextField
-							name='subtitle'
-							label='Podtytuł'
-							placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
-							helperText='Krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
-						/>
 						<FormTextField name='description' label='Opis' multiline minRows={3} />
 						<Box
 							sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}

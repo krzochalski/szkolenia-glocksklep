@@ -8,6 +8,11 @@ export type ResponsiveImage = {
 };
 
 export const responsiveImages: Readonly<Record<string, ResponsiveImage>> = {
+	'/hero/dryfire.webp': {
+		src: '/hero/dryfire.webp',
+		srcSet: '/hero/dryfire-640w.webp 640w, /hero/dryfire.webp 1024w',
+		sizes: '100vw',
+	},
 	'/hero/idpa_competition.webp': {
 		src: '/hero/idpa_competition.webp',
 		srcSet: '/hero/idpa_competition-640w.webp 640w, /hero/idpa_competition.webp 1024w',

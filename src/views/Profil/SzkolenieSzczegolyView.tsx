@@ -24,6 +24,7 @@ import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { mapParticipantDescription } from '@/utils/mapParticipantDescription';
 import { fillPath } from '@/utils/paths';
 
@@ -61,8 +62,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 		},
 		onSuccess: async () => {
 			setConfirmOpen(false);
-			await queryClient.invalidateQueries({ queryKey: ['courses'] });
-			await queryClient.invalidateQueries({ queryKey: ['course', slug] });
+			await invalidateCourseQueries(queryClient);
 		},
 	});
 
@@ -101,7 +101,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 					<Typography color='text.secondary' sx={{ mb: 1 }}>
 						{formatCourseDatePl(date.date)} · {date.timeStart} · {date.place?.name}
 					</Typography>
-					{course.subtitle?.trim() ? (
+					{date.subtitle?.trim() ? (
 						<Typography
 							sx={{
 								fontFamily: '"Space Mono", monospace',
@@ -113,7 +113,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 								mb: 1,
 							}}
 						>
-							{course.subtitle.trim()}
+							{date.subtitle.trim()}
 						</Typography>
 					) : null}
 					<Typography sx={{ mb: 1 }}>{course.description}</Typography>

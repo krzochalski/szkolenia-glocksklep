@@ -38,6 +38,8 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 		if (Object.keys(pl).length > 0) clean.place = pl;
 	}
 	if (d.customPrice != null) clean.customPrice = d.customPrice;
+	const subtitle = d.subtitle?.trim();
+	if (subtitle) clean.subtitle = subtitle;
 	if (d.canceled) clean.canceled = true;
 	return clean;
 };

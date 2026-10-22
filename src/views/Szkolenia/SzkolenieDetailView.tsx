@@ -89,7 +89,6 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 					data={mapDescriptionToSchema(description)}
 					hero={resolveCourseHeroFrom(course, description)}
 					courseMeta={courseMeta}
-					subtitle={course.subtitle}
 					kindLabel={kind === 'practice' ? COURSE_KIND_LABEL.practice : undefined}
 					prerequisiteNames={prerequisiteNames}
 				/>
@@ -105,7 +104,6 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 					}
 					hero={resolveCourseHeroFrom(course, null)}
 					courseMeta={courseMeta}
-					subtitle={course.subtitle}
 					kindLabel={kind === 'practice' ? COURSE_KIND_LABEL.practice : undefined}
 					prerequisiteNames={prerequisiteNames}
 				/>

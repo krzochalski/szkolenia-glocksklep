@@ -34,6 +34,7 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
 			slotsMax: getCourseSlotsMax({ slotsMax: courseSlotsMax }),
+			subtitle: '',
 			instructor: { name: '', slug: '' },
 			place: { name: '', link: '' },
 		});

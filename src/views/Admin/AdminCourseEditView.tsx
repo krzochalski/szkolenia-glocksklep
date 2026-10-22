@@ -1,14 +1,14 @@
 'use client';
 
 import { getCourseSlotsMax } from '@constants/courses';
-import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Button, CircularProgress, ContentSwap, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { getCourseKind } from '@/utils/courseKind';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import type { CourseFormValues } from '@/utils/schemas';
 import { CourseDetailsForm } from './forms/CourseDetailsForm';
@@ -20,6 +20,7 @@ type Props = {
 export const AdminCourseEditView = ({ courseId }: Props) => <EditInner courseId={courseId} />;
 
 const EditInner = ({ courseId }: Props) => {
+	const queryClient = useQueryClient();
 	const { data: course, isLoading } = useQuery({
 		queryKey: ['course', courseId],
 		queryFn: () => getCourse(courseId),
@@ -28,7 +29,6 @@ const EditInner = ({ courseId }: Props) => {
 	const initial: Partial<CourseFormValues> | null = course
 		? {
 				name: course.name,
-				subtitle: course.subtitle ?? '',
 				slug: course.slug,
 				description: course.description,
 				price: course.price,
@@ -51,7 +51,7 @@ const EditInner = ({ courseId }: Props) => {
 			) : !course || !initial ? (
 				<Typography>Nie znaleziono kursu.</Typography>
 			) : (
-				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+				<Box sx={{ width: '100%' }}>
 					<Button
 						component={NextLink}
 						href={fillPath(Paths.adminCourseAllDates, { courseId })}
@@ -68,6 +68,7 @@ const EditInner = ({ courseId }: Props) => {
 						excludeCourseId={courseId}
 						onSubmit={async (values) => {
 							await updateCourse(courseId, values);
+							await invalidateCourseQueries(queryClient);
 						}}
 					/>
 				</Box>

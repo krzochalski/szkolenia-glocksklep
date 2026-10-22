@@ -42,12 +42,14 @@ export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type ProfileFormValues = z.infer<typeof profileSchema>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 
+export const courseDateSubtitleSchema = z
+	.string()
+	.max(120, 'Podtytuł max. 120 znaków')
+	.optional()
+	.default('');
+
 export const courseSchema = z.object({
 	name: z.string().min(2, 'Nazwa jest wymagana (min. 2 znaki)'),
-	subtitle: z
-		.string()
-		.min(2, 'Podtytuł jest wymagany (min. 2 znaki)')
-		.max(120, 'Podtytuł max. 120 znaków'),
 	slug: z
 		.string()
 		.min(2, 'Slug jest wymagany')
@@ -81,6 +83,7 @@ export const courseSchema = z.object({
 					.string()
 					.min(1, 'Godzina jest wymagana')
 					.regex(/^\d{2}:\d{2}$/, 'Format godziny: HH:MM'),
+				subtitle: courseDateSubtitleSchema,
 				instructor: z.object({
 					name: z.string().min(2, 'Imię instruktora jest wymagane'),
 					slug: z

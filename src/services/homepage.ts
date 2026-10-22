@@ -38,6 +38,16 @@ export const DEFAULT_HOMEPAGE: HomepageWritable = {
 	heroSubline:
 		'Profesjonalne szkolenia strzeleckie — od podstaw pistoletu po dynamikę ruchu i soft skills zawodów.',
 	heroImage: HOMEPAGE_HERO_IMAGES[0],
+	introTitle: 'Sezon jesienny',
+	introSubline: 'Krótko o warunkach i zapisach',
+	introMarkdown: [
+		'Mamy już jesień, więc będzie szybko ciemno, będzie zimno i prawdopodobnie w każdy weekend będzie padać :)',
+		'',
+		'Gdy jest wolne miejsce — **zapisz się** na termin poniżej. Gdy termin jest pełny, zostaw kontakt na liście oczekujących.',
+		'',
+		'Można też wpaść na zajęcia indywidualne.',
+	].join('\n'),
+	introBannerImage: HOMEPAGE_HERO_IMAGES[0],
 	missionTitle: 'Sposób pracy',
 	missionPoints: DEFAULT_MISSION_POINTS,
 	missionBody: joinMissionBody(DEFAULT_MISSION_POINTS),
@@ -166,10 +176,19 @@ const normalizeDocument = (data: Record<string, unknown> | undefined): HomepageD
 		typeof data?.missionBody === 'string' ? data.missionBody.trim() : '';
 	const missionPoints = resolveMissionPoints(data?.missionPoints, missionBodyRaw);
 
+	const introBannerRaw =
+		typeof data?.introBannerImage === 'string' ? data.introBannerImage.trim() : '';
+	const introBannerImage =
+		toHomepageHeroImage(introBannerRaw) ?? DEFAULT_HOMEPAGE.introBannerImage;
+
 	return {
 		heroHeadline: asString(data?.heroHeadline, DEFAULT_HOMEPAGE.heroHeadline),
 		heroSubline: asString(data?.heroSubline, DEFAULT_HOMEPAGE.heroSubline),
 		heroImage,
+		introTitle: asString(data?.introTitle, DEFAULT_HOMEPAGE.introTitle),
+		introSubline: asString(data?.introSubline, DEFAULT_HOMEPAGE.introSubline),
+		introMarkdown: asString(data?.introMarkdown, DEFAULT_HOMEPAGE.introMarkdown),
+		introBannerImage,
 		missionTitle: asString(data?.missionTitle, DEFAULT_HOMEPAGE.missionTitle),
 		missionPoints,
 		missionBody: joinMissionBody(missionPoints),
