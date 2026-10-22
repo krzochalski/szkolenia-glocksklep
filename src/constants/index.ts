@@ -1,3 +1,8 @@
+export {
+	ADMIN_NAV,
+	ADMIN_NAV_IDS,
+	type AdminNavItem,
+} from './adminNav';
 export { PAGE_CONTENT_MAX_WIDTH } from './layout';
 export { isCurrentPath, type NavItem, navigationItems } from './nav';
 export { Paths } from './paths';

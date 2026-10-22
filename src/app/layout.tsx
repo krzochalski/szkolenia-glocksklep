@@ -8,6 +8,7 @@ import { staticPageMetadata } from '@seo/pageMetadata';
 import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, Space_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { faviconIcons } from '@ui';
 
 import { AppProviders } from './providers';
 
@@ -36,8 +37,11 @@ export const metadata: Metadata = {
 		template: `%s | ${SITE_NAME}`,
 	},
 	description: DEFAULT_DESCRIPTION,
-	icons: {
-		icon: [{ url: '/favicon.ico' }],
+	icons: faviconIcons,
+	appleWebApp: {
+		capable: true,
+		statusBarStyle: 'default',
+		title: SITE_NAME,
 	},
 	verification: gsc ? { google: gsc } : undefined,
 };

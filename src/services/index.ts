@@ -1,4 +1,4 @@
-export { isUserAdmin } from './admins';
+export { getAdminSettings, isUserAdmin, saveAdminMenuOrder } from './admins';
 export {
 	applyEmailActionCode,
 	auth,
@@ -103,9 +103,15 @@ export {
 	seedDevelopmentPathIfMissing,
 } from './developmentPath';
 export {
+	DEFAULT_COURSE_COMPLETION_THANK_YOU,
 	DEFAULT_ENROLLMENT_CONFIRMATION,
+	getEmailTemplate,
+	getEmailTemplateDefault,
 	getEnrollmentConfirmationTemplate,
+	saveEmailTemplate,
 	saveEnrollmentConfirmationTemplate,
+	seedAllEmailTemplatesIfMissing,
+	seedEmailTemplateIfMissing,
 	seedEnrollmentConfirmationTemplateIfMissing,
 } from './emailTemplates';
 export {

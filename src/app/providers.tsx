@@ -10,9 +10,12 @@ import NextLink from 'next/link';
 import { type ReactNode, useEffect } from 'react';
 import { CookieConsent } from 'react-cookie-consent';
 import { PriceModeProvider } from '@/hooks';
+import { initPwaInstallCapture, registerPwaServiceWorker } from '@/utils/pwaInstallPrompt';
 
 export const AppProviders = ({ children }: { readonly children: ReactNode }) => {
 	useEffect(() => {
+		initPwaInstallCapture();
+		registerPwaServiceWorker();
 		void completeGoogleRedirectSignIn().catch(() => {
 			/* ignore redirect noise */
 		});

@@ -416,7 +416,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					>
 						<Typography>
 							{completionTarget?.completed
-								? `Oznaczyć ${completionTarget.participant.name} jako absolwenta „${course.name}”? Odblokuje to debriefing i ścieżkę rozwoju. Data ukończenia: ${date.date}.`
+								? `Oznaczyć ${completionTarget.participant.name} jako absolwenta „${course.name}”? Odblokuje to debriefing i ścieżkę rozwoju oraz wyśle e-mail z podziękowaniem i dostępem do materiałów. Data ukończenia: ${date.date}.`
 								: `Usunąć oznaczenie ukończenia „${course.name}” dla ${completionTarget?.participant.name}?`}
 						</Typography>
 					</ConfirmDialog>

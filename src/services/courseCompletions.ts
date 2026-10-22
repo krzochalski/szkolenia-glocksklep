@@ -2,6 +2,7 @@ import {
 	collection,
 	deleteDoc,
 	doc,
+	getDoc,
 	getDocs,
 	setDoc,
 } from 'firebase/firestore';
@@ -42,6 +43,24 @@ export const adminGetUserCourseCompletions = async (
 	uid: string
 ): Promise<CourseCompletion[]> => listCompletions(uid);
 
+const notifyCourseCompletion = async (uid: string, courseId: string): Promise<void> => {
+	const admin = auth.currentUser;
+	if (!admin) return;
+	try {
+		const token = await admin.getIdToken();
+		await fetch('/api/notify-course-completion', {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ uid, courseId }),
+		});
+	} catch {
+		/* Completion already succeeded. */
+	}
+};
+
 export const adminSetCourseCompletion = async ({
 	uid,
 	course,
@@ -53,6 +72,10 @@ export const adminSetCourseCompletion = async ({
 }): Promise<void> => {
 	const admin = auth.currentUser;
 	if (!admin) throw new Error('Brak zalogowanego użytkownika.');
+	const ref = doc(db, 'users', uid, 'courseCompletions', course.id);
+	const existing = await getDoc(ref);
+	const isFirstCompletion = !existing.exists();
+
 	const now = new Date().toISOString();
 	const completedAtValue = completedAt?.trim()
 		? completedAt.trim().includes('T')
@@ -67,7 +90,11 @@ export const adminSetCourseCompletion = async ({
 		markedBy: admin.uid,
 		markedAt: now,
 	};
-	await setDoc(doc(db, 'users', uid, 'courseCompletions', course.id), payload);
+	await setDoc(ref, payload);
+
+	if (isFirstCompletion) {
+		await notifyCourseCompletion(uid, course.id);
+	}
 };
 
 export const adminRemoveCourseCompletion = async (

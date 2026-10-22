@@ -17,6 +17,7 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { ProfilPwaInstallSection } from './ProfilPwaInstallSection';
 
 export const ProfilView = () => {
 	const user = useAuthUser();
@@ -129,6 +130,7 @@ export const ProfilView = () => {
 							Zapisz
 						</Button>
 					</Stack>
+					<ProfilPwaInstallSection />
 				</Box>
 			)}
 		</ContentSwap>

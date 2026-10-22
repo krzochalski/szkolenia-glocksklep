@@ -16,6 +16,7 @@ import {
 	unenrollBodySchema,
 	unenrollFromCourseTx,
 } from './enrollment';
+import { sendCourseCompletionThankYou } from './courseCompletionMail';
 import { sendEnrollmentConfirmation } from './enrollmentMail';
 import { syncCourseWaitingListCount } from './waitingListCount';
 import { sendWaitingListConfirmation } from './waitingListMail';
@@ -55,6 +56,11 @@ const notifyEnrollmentBodySchema = z.object({
 		name: z.string().min(1),
 		email: z.string().email(),
 	}),
+});
+
+const notifyCourseCompletionBodySchema = z.object({
+	uid: z.string().min(1),
+	courseId: z.string().min(1),
 });
 
 /** Public: password reset email with action URL on szkolenia.glocksklep.pl */
@@ -141,6 +147,36 @@ app.post(['/api/notify-enrollment', '/notify-enrollment'], async (req, res) => {
 			courseId: body.courseId,
 			dateId: body.dateId,
 			participant: body.participant,
+		});
+		res.status(200).json({ ok: true });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowe dane.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać e-maila.' });
+	}
+});
+
+/** Admin-only: thank-you email after marking a course completion. */
+app.post(['/api/notify-course-completion', '/notify-course-completion'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const body = notifyCourseCompletionBodySchema.parse(req.body);
+		await sendCourseCompletionThankYou({
+			db: getFirestore(),
+			auth: getAuth(),
+			uid: body.uid,
+			courseId: body.courseId,
 		});
 		res.status(200).json({ ok: true });
 	} catch (err) {

@@ -1,41 +1,152 @@
 'use client';
 
-import { Paths } from '@constants/paths';
-import { signOut } from '@services/auth';
-import { Box, Button, ConfirmDialog, Link, Stack, Typography } from '@ui';
+import {
+	closestCenter,
+	DndContext,
+	type DragEndEvent,
+	KeyboardSensor,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core';
+import {
+	arrayMove,
+	SortableContext,
+	sortableKeyboardCoordinates,
+	useSortable,
+	verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { ADMIN_NAV, type AdminNavItem, Paths } from '@constants';
+import { useAuthUser } from '@hooks';
+import { getAdminSettings, saveAdminMenuOrder, signOut } from '@services';
+import { orderAdminNav } from '@/utils/adminMenuOrder';
+import {
+	Box,
+	Button,
+	ConfirmDialog,
+	IconButton,
+	Link,
+	Stack,
+	Tooltip,
+	Typography,
+} from '@ui';
+import { DragHandle } from '@ui/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type ReactNode, useState } from 'react';
-
-const NAV = [
-	{ label: 'Najbliższe terminy', href: Paths.adminNearestDates },
-	{ label: 'Szkolenia', href: Paths.adminCourses },
-	{ label: 'Uczestnicy', href: Paths.adminParticipants },
-	{ label: 'Lista oczekujących', href: Paths.adminWaitingList },
-	{ label: 'Zgłoszenia kontaktu', href: Paths.adminContactRequests },
-	{ label: 'Opisy szkoleń', href: Paths.adminCourseDescriptions },
-	{ label: 'Dane rozliczeniowe', href: Paths.adminBillingData },
-	{ label: 'FAQ', href: Paths.adminFaq },
-	{ label: 'Regulamin', href: Paths.adminRegulamin },
-	{ label: 'Polityka prywatności', href: Paths.adminPrivacyPolicy },
-	{ label: 'Polityka cookies', href: Paths.adminCookiesPolicy },
-	{ label: 'Strona główna', href: Paths.adminHomepage },
-	{ label: 'E-mail po zapisie', href: Paths.adminEnrollmentEmail },
-	{ label: 'Ścieżka rozwoju', href: Paths.adminSciezkaRozwoju },
-	{ label: 'Debriefing', href: Paths.adminDebriefings },
-	{ label: 'Odznaki', href: Paths.adminOdznaki },
-	{ label: 'Obiekty', href: Paths.adminPlaces },
-	{ label: 'Tagi', href: Paths.adminTags },
-] as const;
+import { type ReactNode, useMemo, useState } from 'react';
 
 type AdminShellProps = {
 	readonly children: ReactNode;
 };
 
+type SortableNavLinkProps = {
+	readonly item: AdminNavItem;
+	readonly active: boolean;
+};
+
+const SortableNavLink = ({ item, active }: SortableNavLinkProps) => {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: item.id,
+	});
+
+	return (
+		<Box
+			ref={setNodeRef}
+			sx={{
+				display: 'flex',
+				alignItems: 'center',
+				gap: 0.25,
+				transform: CSS.Transform.toString(transform),
+				transition,
+				opacity: isDragging ? 0.6 : 1,
+				borderRadius: 1,
+				bgcolor: active ? 'action.selected' : 'transparent',
+			}}
+		>
+			<Tooltip title='Przeciągnij, aby zmienić kolejność'>
+				<IconButton
+					size='small'
+					{...attributes}
+					{...listeners}
+					aria-label={`Zmień kolejność: ${item.label}`}
+					sx={{ cursor: 'grab', touchAction: 'none', flexShrink: 0 }}
+				>
+					<DragHandle fontSize='small' />
+				</IconButton>
+			</Tooltip>
+			<Link
+				component={NextLink}
+				href={item.href}
+				underline='none'
+				sx={{
+					flex: 1,
+					px: 1,
+					py: 1,
+					borderRadius: 1,
+					fontSize: '0.875rem',
+					fontWeight: active ? 700 : 500,
+					color: active ? 'primary.main' : 'text.secondary',
+				}}
+			>
+				{item.label}
+			</Link>
+		</Box>
+	);
+};
+
 export const AdminShell = ({ children }: AdminShellProps) => {
 	const pathname = usePathname();
+	const user = useAuthUser();
+	const queryClient = useQueryClient();
 	const [logoutOpen, setLogoutOpen] = useState(false);
 	const [loggingOut, setLoggingOut] = useState(false);
+
+	const settingsQueryKey = ['adminSettings', user?.uid] as const;
+
+	const { data: menuOrder } = useQuery({
+		queryKey: settingsQueryKey,
+		queryFn: async () => {
+			if (!user) return null;
+			const settings = await getAdminSettings(user.uid);
+			return settings.menuOrder ?? null;
+		},
+		enabled: Boolean(user?.uid),
+	});
+
+	const navItems = useMemo(() => orderAdminNav(ADMIN_NAV, menuOrder), [menuOrder]);
+
+	const persistOrder = useMutation({
+		mutationFn: saveAdminMenuOrder,
+		onMutate: async (nextOrder) => {
+			await queryClient.cancelQueries({ queryKey: settingsQueryKey });
+			const previous = queryClient.getQueryData<readonly string[] | null>(settingsQueryKey);
+			queryClient.setQueryData(settingsQueryKey, nextOrder);
+			return { previous };
+		},
+		onError: (_err, _next, context) => {
+			if (context) queryClient.setQueryData(settingsQueryKey, context.previous);
+		},
+		onSettled: () => {
+			void queryClient.invalidateQueries({ queryKey: settingsQueryKey });
+		},
+	});
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+	);
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event;
+		if (!over || active.id === over.id) return;
+		const oldIndex = navItems.findIndex((item) => item.id === active.id);
+		const newIndex = navItems.findIndex((item) => item.id === over.id);
+		if (oldIndex < 0 || newIndex < 0) return;
+		const next = arrayMove(navItems, oldIndex, newIndex).map((item) => item.id);
+		persistOrder.mutate(next);
+	};
 
 	return (
 		<Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
@@ -57,30 +168,20 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 				<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
 					Admin
 				</Typography>
-				<Stack component='nav' spacing={0.5} sx={{ flex: 1 }}>
-					{NAV.map((item) => {
-						const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-						return (
-							<Link
-								key={item.href}
-								component={NextLink}
-								href={item.href}
-								underline='none'
-								sx={{
-									px: 1.5,
-									py: 1,
-									borderRadius: 1,
-									fontSize: '0.875rem',
-									fontWeight: active ? 700 : 500,
-									color: active ? 'primary.main' : 'text.secondary',
-									bgcolor: active ? 'action.selected' : 'transparent',
-								}}
-							>
-								{item.label}
-							</Link>
-						);
-					})}
-				</Stack>
+				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+					<SortableContext
+						items={navItems.map((item) => item.id)}
+						strategy={verticalListSortingStrategy}
+					>
+						<Stack component='nav' spacing={0.5} sx={{ flex: 1 }} aria-label='Menu admina'>
+							{navItems.map((item) => {
+								const active =
+									pathname === item.href || pathname.startsWith(`${item.href}/`);
+								return <SortableNavLink key={item.id} item={item} active={active} />;
+							})}
+						</Stack>
+					</SortableContext>
+				</DndContext>
 				<Button component={NextLink} href={Paths.home} size='small' variant='outlined'>
 					Strona główna
 				</Button>

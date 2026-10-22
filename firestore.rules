@@ -18,7 +18,15 @@ service cloud.firestore {
 
     match /admins/{uid} {
       allow read: if isAuthenticated() && request.auth.uid == uid;
-      allow write: if false;
+      // Gate docs are created only via Admin SDK / bootstrap.
+      // Owner may update `settings` only (e.g. sidebar menuOrder).
+      allow create, delete: if false;
+      allow update: if isOwner(uid)
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['settings'])
+                      && request.resource.data.settings.keys().hasOnly(['menuOrder'])
+                      && request.resource.data.settings.menuOrder is list
+                      && request.resource.data.settings.menuOrder.size() <= 50;
     }
 
     match /users/{userId} {
