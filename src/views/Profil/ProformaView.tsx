@@ -8,6 +8,7 @@ import { getUserProfile } from '@services/users';
 import { useQuery } from '@tanstack/react-query';
 import {
 	Box,
+	Button,
 	brand,
 	Chip,
 	CircularProgress,
@@ -18,12 +19,15 @@ import {
 	Stack,
 	Typography,
 } from '@ui';
+import { Download } from '@ui/icons';
 import dayjs from 'dayjs';
 import type { ProformaInvoice } from '@/types/proformaInvoice';
+import { downloadProformaPdf } from '@/utils/downloadProformaPdf';
 import { formatMoney } from '@/utils/pricing';
 import 'dayjs/locale/pl';
 import Image from 'next/image';
-import type { ReactNode } from 'react';
+import { type ReactNode, type RefObject, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 type Props = {
 	readonly slug: string;
@@ -61,15 +65,32 @@ const MetaRow = ({ label, value }: { label: string; value: string }) => (
 	</Box>
 );
 
-const ProformaDocument = ({ invoice }: { invoice: ProformaInvoice }) => {
+const ProformaDocument = ({
+	invoice,
+	exporting,
+	documentRef,
+}: {
+	invoice: ProformaInvoice;
+	exporting: boolean;
+	documentRef: RefObject<HTMLDivElement | null>;
+}) => {
 	const paid = invoice.status === 'paid';
 
 	return (
 		<HardShadow
+			ref={documentRef}
 			sx={{
 				p: { xs: 2.5, sm: 4 },
 				maxWidth: 800,
 				bgcolor: 'background.paper',
+				...(exporting
+					? {
+							boxShadow: 'none',
+							width: '100%',
+							maxWidth: 800,
+							m: 0,
+						}
+					: null),
 				'@media print': {
 					boxShadow: 'none',
 					border: '1px solid',
@@ -387,6 +408,9 @@ const ProformaDocument = ({ invoice }: { invoice: ProformaInvoice }) => {
 
 export const ProformaView = ({ slug, dateId }: Props) => {
 	const user = useAuthUser();
+	const documentRef = useRef<HTMLDivElement | null>(null);
+	const [exporting, setExporting] = useState(false);
+	const [pdfError, setPdfError] = useState<string | null>(null);
 
 	const { data: course, isLoading: courseLoading } = useQuery({
 		queryKey: ['course', slug],
@@ -440,9 +464,54 @@ export const ProformaView = ({ slug, dateId }: Props) => {
 		paid: participant?.paid,
 	});
 
+	const handleDownloadPdf = async () => {
+		const el = documentRef.current;
+		if (!el || exporting) return;
+		setPdfError(null);
+		flushSync(() => {
+			setExporting(true);
+		});
+		try {
+			await downloadProformaPdf(el, invoice.number);
+		} catch {
+			setPdfError('Nie udało się wygenerować PDF. Spróbuj ponownie.');
+		} finally {
+			setExporting(false);
+		}
+	};
+
 	return (
 		<ContentSwap state='content'>
-			<ProformaDocument invoice={invoice} />
+			<Stack spacing={2} sx={{ maxWidth: 800 }}>
+				<Box
+					sx={{
+						display: 'flex',
+						flexWrap: 'wrap',
+						alignItems: 'center',
+						justifyContent: 'space-between',
+						gap: 1.5,
+						'@media print': { display: 'none' },
+					}}
+				>
+					<Typography variant='h6' component='h1' sx={{ fontWeight: 800 }}>
+						Proforma
+					</Typography>
+					<Button
+						variant='contained'
+						startIcon={exporting ? <CircularProgress size={18} color='inherit' /> : <Download />}
+						disabled={exporting}
+						onClick={() => void handleDownloadPdf()}
+					>
+						{exporting ? 'Generowanie…' : 'Pobierz PDF'}
+					</Button>
+				</Box>
+				{pdfError ? (
+					<Typography color='error' variant='body2'>
+						{pdfError}
+					</Typography>
+				) : null}
+				<ProformaDocument invoice={invoice} exporting={exporting} documentRef={documentRef} />
+			</Stack>
 		</ContentSwap>
 	);
 };
