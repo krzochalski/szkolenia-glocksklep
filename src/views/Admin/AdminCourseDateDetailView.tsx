@@ -13,8 +13,7 @@ import {
 	toggleParticipantPaid,
 	unenrollFromCourse,
 } from '@services/courses';
-import type { Participant } from '@/types/course';
-import { fillPath } from '@/utils/paths';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	Box,
 	Button,
@@ -29,10 +28,12 @@ import {
 	Typography,
 } from '@ui';
 import { ArrowBack } from '@ui/icons';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import type { Participant } from '@/types/course';
+import { fillPath } from '@/utils/paths';
+import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
 import { removeCourseDate } from './forms/dateMutations';
 
@@ -230,6 +231,8 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 						{participants.map((p) => {
 							const isCompleted = completedByUid.get(p.id) ?? false;
+							const overdue = isParticipantPaymentOverdue(p.paid, date.date);
+							const rowBg = p.paid ? 'success.light' : overdue ? 'error.light' : undefined;
 							return (
 								<StaggerItem key={p.id}>
 									<Stack
@@ -238,8 +241,11 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 										sx={{
 											borderBottom: 1,
 											borderColor: 'divider',
-											pb: 1,
+											px: 1.5,
+											py: 1,
+											mx: -1.5,
 											alignItems: { sm: 'center' },
+											bgcolor: rowBg,
 										}}
 									>
 										<Box sx={{ flex: 1 }}>
@@ -250,10 +256,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 										</Box>
 										<FormControlLabel
 											control={
-												<Switch
-													checked={Boolean(p.paid)}
-													onChange={() => setPaidTarget(p)}
-												/>
+												<Switch checked={Boolean(p.paid)} onChange={() => setPaidTarget(p)} />
 											}
 											label='Opłacone'
 										/>
@@ -312,15 +315,10 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						onConfirm={() => toggleCanceled.mutate(true)}
 					>
 						<Typography>
-							Czy na pewno chcesz anulować termin <strong>{date.date}</strong>? Termin
-							pozostanie widoczny w panelu admina, ale uczestnicy nie będą mogli się na
-							niego zapisać.
+							Czy na pewno chcesz anulować termin <strong>{date.date}</strong>? Termin pozostanie
+							widoczny w panelu admina, ale uczestnicy nie będą mogli się na niego zapisać.
 							{participants.length > 0 ? (
-								<Typography
-									component='span'
-									color='warning.main'
-									sx={{ display: 'block', mt: 1 }}
-								>
+								<Typography component='span' color='warning.main' sx={{ display: 'block', mt: 1 }}>
 									Ten termin ma {participants.length} zapisanych uczestników.
 								</Typography>
 							) : null}
@@ -354,11 +352,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						<Typography>
 							Czy na pewno chcesz usunąć ten termin?
 							{participants.length > 0 ? (
-								<Typography
-									component='span'
-									color='error'
-									sx={{ display: 'block', mt: 1 }}
-								>
+								<Typography component='span' color='error' sx={{ display: 'block', mt: 1 }}>
 									Ten termin ma {participants.length} zapisanych uczestników!
 								</Typography>
 							) : null}
@@ -439,8 +433,8 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						}}
 					>
 						<Typography>
-							Czy na pewno chcesz usunąć uczestnika <strong>{removeTarget?.name}</strong> z
-							tego terminu? Tej operacji nie można cofnąć.
+							Czy na pewno chcesz usunąć uczestnika <strong>{removeTarget?.name}</strong> z tego
+							terminu? Tej operacji nie można cofnąć.
 						</Typography>
 					</ConfirmDialog>
 				</Box>

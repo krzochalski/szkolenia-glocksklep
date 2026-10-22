@@ -17,7 +17,7 @@ If the change affects any of the topics below, **update `DEFAULT_REGULAMIN_MD` i
 | Enroll / capacity / canceled / inactive | `functions/src/enrollment.ts`, `/api/enroll` | V zapis |
 | Unenroll (who, when) | `/api/unenroll` | VIII rezygnacja |
 | Waitlist (course-level, guest e-mail, no auto-seat) | `courseWaitingList.ts` | V lista oczekujących |
-| Prices / VAT / proforma due (date − 3 days) | `pricing.ts`, `proformaInvoices.ts` | VI płatności |
+| Prices / VAT / proforma due (date − 5 days) | `pricing.ts`, `proformaInvoices.ts`, `proformaDue.ts` | VI płatności |
 | Paid / cash only via admin | `courses.ts` toggles | VI |
 | Registration fields / terms checkbox | `schemas.ts`, `RegisterView` | IV konto |
 | Auth methods (e-mail, Google, magic link) | `auth.ts` | IV |

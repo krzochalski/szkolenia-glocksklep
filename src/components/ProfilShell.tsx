@@ -3,7 +3,6 @@
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
 import { signOut } from '@services/auth';
-import { withRedirectQuery } from '@/utils/paths';
 import {
 	Box,
 	Button,
@@ -25,13 +24,8 @@ import {
 } from '@ui/icons';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-	type ReactNode,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-} from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { withRedirectQuery } from '@/utils/paths';
 
 const NAV = [
 	{
@@ -155,12 +149,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 				<Typography variant='caption' color='text.secondary' sx={{ mb: 2 }}>
 					{user.email}
 				</Typography>
-				<Stack
-					ref={navRef}
-					component='nav'
-					spacing={0.5}
-					sx={{ flex: 1, position: 'relative' }}
-				>
+				<Stack ref={navRef} component='nav' spacing={0.5} sx={{ flex: 1, position: 'relative' }}>
 					{indicatorReady ? (
 						<Box
 							component={m.div}
@@ -174,7 +163,8 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 								width: 3,
 								top: 0,
 								bgcolor: 'primary.main',
-								zIndex: 0,
+								// Above link hover backgrounds so the active rail stays visible.
+								zIndex: 2,
 								pointerEvents: 'none',
 							}}
 						/>

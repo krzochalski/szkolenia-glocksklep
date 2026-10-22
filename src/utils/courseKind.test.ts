@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Course } from '@/types/course';
 import {
+	formatProformaServiceName,
 	getCourseKind,
 	getPrerequisiteCourseIds,
 	isEligibleForCourse,
@@ -67,5 +68,14 @@ describe('courseKind', () => {
 				{ ...base, id: 'b', name: 'Kurs B' },
 			])
 		).toEqual(['Kurs A', 'missing']);
+	});
+
+	it('formats proforma service titles by kind', () => {
+		expect(formatProformaServiceName({ name: 'Movement Fundamentals' })).toBe(
+			'Szkolenie strzeleckie: Movement Fundamentals'
+		);
+		expect(formatProformaServiceName({ kind: 'practice', name: 'Dry-fire reset' })).toBe(
+			'Trening strzelecki: Dry-fire reset'
+		);
 	});
 });

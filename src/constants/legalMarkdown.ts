@@ -72,7 +72,7 @@ Użyte w Regulaminie pojęcia oznaczają:
 2. Po zapisie Uczestnik otrzymuje dostęp do **Proformy** z danymi sprzedawcy, rachunkiem bankowym i kwotą w sekcji „Moje szkolenia” / Proforma (oraz ewentualnie w wiadomości e-mail). Proforma jest dokumentem informacyjnym do zapłaty; status „opłacone” w Serwisie ustawia Organizator po potwierdzeniu wpływu lub uzgodnieniu gotówki.
 3. Akceptowane metody płatności: **przelew bankowy** na rachunek wskazany w Proformie oraz — za uzgodnieniem z Organizatorem — **gotówka** (oznaczenie w systemie przez Organizatora).
 4. Serwis **nie** obsługuje bramek płatności online (np. BLIK, karty, Przelewy24). Użytkownik nie opłaca Terminu w trakcie zapisu w Serwisie.
-5. Termin zapłaty wynika z Proformy i wynosi zasadniczo **do 3 dni przed** datą Terminu (data Terminu minus 3 dni), chyba że Organizator wskaże inaczej. Brak wpłaty w terminie może skutkować skreśleniem z listy Uczestników bez obowiązku świadczenia usługi, z zastrzeżeniem sekcji VIII w zakresie już dokonanych wpłat.
+5. Termin zapłaty wynika z Proformy i wynosi zasadniczo **do 5 dni przed** datą Terminu (data Terminu minus 5 dni), chyba że Organizator wskaże inaczej. Brak wpłaty w terminie może skutkować skreśleniem z listy Uczestników bez obowiązku świadczenia usługi, z zastrzeżeniem sekcji VIII w zakresie już dokonanych wpłat.
 6. Na życzenie Uczestnika (w tym po podaniu NIP w profilu) Organizator może wystawić fakturę zgodnie z obowiązującymi przepisami (wystawienie faktury VAT może odbywać się poza Serwisem).
 
 ## VII. Wymogi uczestnictwa w szkoleniu strzeleckim
