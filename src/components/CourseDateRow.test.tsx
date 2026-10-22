@@ -100,6 +100,27 @@ describe('CourseDateRow', () => {
 		expect(screen.queryByRole('link', { name: 'Movement Fundamentals' })).toBeNull();
 	});
 
+	it('links place name to Google Maps when a URL is set', () => {
+		wrap(
+			<CourseDateRow
+				course={course}
+				date={{
+					...date,
+					place: {
+						...date.place,
+						googleMapsLink: 'https://maps.google.com/?q=Czacz',
+					},
+				}}
+				showTitle={false}
+			/>
+		);
+
+		expect(screen.getByRole('link', { name: 'Strzelnica Czacz' })).toHaveAttribute(
+			'href',
+			'https://maps.google.com/?q=Czacz'
+		);
+	});
+
 	it('adds ostatnie miejsca when few seats remain', () => {
 		const scarce: CourseClass = {
 			...date,

@@ -33,8 +33,10 @@ export const DateEntry = ({
 	const handlePlaceChange = (placeId: string) => {
 		const p = places.find((x) => x.id === placeId);
 		if (p) {
+			const maps = p.googleMapsLink ?? p.link ?? '';
 			setValue(`dates.${index}.place.name`, p.name);
-			setValue(`dates.${index}.place.link`, p.googleMapsLink ?? p.link ?? '');
+			setValue(`dates.${index}.place.googleMapsLink`, maps);
+			setValue(`dates.${index}.place.link`, maps);
 		}
 	};
 
@@ -116,7 +118,7 @@ export const DateEntry = ({
 			</Box>
 
 			<FormTextField
-				name={`dates.${index}.place.link`}
+				name={`dates.${index}.place.googleMapsLink`}
 				label='Link Google Maps (opcjonalnie)'
 				placeholder='https://maps.google.com/...'
 			/>

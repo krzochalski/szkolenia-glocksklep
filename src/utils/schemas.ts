@@ -93,6 +93,12 @@ export const courseSchema = z.object({
 				}),
 				place: z.object({
 					name: z.string().min(1, 'Nazwa miejsca jest wymagana'),
+					googleMapsLink: z
+						.string()
+						.url('Podaj prawidłowy link Google Maps')
+						.or(z.literal(''))
+						.optional()
+						.default(''),
 					link: z.string().url('Podaj prawidłowy link Google Maps').or(z.literal('')).optional(),
 				}),
 				customPrice: z.coerce

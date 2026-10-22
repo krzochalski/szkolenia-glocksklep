@@ -5,6 +5,7 @@ export { MarkdownContent } from './MarkdownContent';
 export { MarkdownWysiwygEditor } from './MarkdownWysiwygEditor';
 export { OptimizedImage } from './OptimizedImage';
 export { PageHeading } from './PageHeading';
+export { PlaceNameLink } from './PlaceNameLink';
 export { ProfilShell } from './ProfilShell';
 export { SiteFooter } from './SiteFooter';
 export { SiteHeader } from './SiteHeader';

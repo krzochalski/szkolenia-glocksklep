@@ -1,11 +1,13 @@
 'use client';
 
+import { PlaceNameLink } from '@components/PlaceNameLink';
 import { getCourseBySlug } from '@services/courses';
 import { Box, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { formatBookingSummary } from '@/utils/formatEnrollment';
+import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { courseSlugFromRedirect } from '@/utils/paths';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 /** Compact “Zapisujesz się na…” banner when auth was entered from a course date. */
 export const AuthEnrollmentSummary = () => {
@@ -25,13 +27,7 @@ export const AuthEnrollmentSummary = () => {
 	const date = course.dates?.find((d) => d.id === termin);
 	if (!date) return null;
 
-	const summary = formatBookingSummary({
-		name: course.name,
-		date: date.date,
-		timeStart: date.timeStart,
-		place: date.place?.name,
-		price: date.customPrice ?? course.price,
-	});
+	const priceLabel = formatPlnNettoBrutto(date.customPrice ?? course.price);
 
 	return (
 		<Box
@@ -44,7 +40,8 @@ export const AuthEnrollmentSummary = () => {
 			}}
 		>
 			<Typography variant='body2' sx={{ fontWeight: 600 }}>
-				Zapisujesz się na: {summary}
+				Zapisujesz się na: {course.name}, {formatCourseDatePl(date.date)}, {date.timeStart},{' '}
+				<PlaceNameLink place={date.place} />, {priceLabel}
 			</Typography>
 		</Box>
 	);

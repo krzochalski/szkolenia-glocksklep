@@ -23,6 +23,7 @@ import { CourseFacts } from '@/components/CourseFacts';
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { mapParticipantDescription } from '@/utils/mapParticipantDescription';
@@ -99,7 +100,8 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 						{course.name}
 					</Typography>
 					<Typography color='text.secondary' sx={{ mb: 1 }}>
-						{formatCourseDatePl(date.date)} · {date.timeStart} · {date.place?.name}
+						{formatCourseDatePl(date.date)} · {date.timeStart} ·{' '}
+						<PlaceNameLink place={date.place} />
 					</Typography>
 					{date.subtitle?.trim() ? (
 						<Typography

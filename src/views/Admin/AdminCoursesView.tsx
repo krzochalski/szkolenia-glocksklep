@@ -27,6 +27,7 @@ import {
 	compareCoursesByLegacyCatalogOrder,
 	coursesNeedOrderBackfill,
 } from '@/utils/courseOrder';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
@@ -166,7 +167,12 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				{next ? (
 					<Typography variant='caption' color='text.secondary'>
 						Następny: {next.date} {next.timeStart}
-						{next.place?.name ? ` · ${next.place.name}` : ''}
+						{next.place ? (
+							<>
+								{' '}
+								· <PlaceNameLink place={next.place} />
+							</>
+						) : null}
 					</Typography>
 				) : (
 					<Typography variant='caption' color='text.secondary'>

@@ -33,8 +33,11 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 		if (d.place.id) pl.id = d.place.id;
 		if (d.place.name) pl.name = d.place.name;
 		if (d.place.slug) pl.slug = d.place.slug;
-		if (d.place.googleMapsLink) pl.googleMapsLink = d.place.googleMapsLink;
-		if (d.place.link) pl.link = d.place.link;
+		const maps = (d.place.googleMapsLink ?? d.place.link ?? '').trim();
+		if (maps) {
+			pl.googleMapsLink = maps;
+			pl.link = maps;
+		}
 		if (Object.keys(pl).length > 0) clean.place = pl;
 	}
 	if (d.customPrice != null) clean.customPrice = d.customPrice;

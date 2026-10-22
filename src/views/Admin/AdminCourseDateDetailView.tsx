@@ -31,6 +31,7 @@ import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Participant } from '@/types/course';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
@@ -188,7 +189,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						{course.name} — {date.date} {date.timeStart}
 					</Typography>
 					<Typography color='text.secondary'>
-						{date.place?.name} · {date.instructor?.name}
+						<PlaceNameLink place={date.place} /> · {date.instructor?.name}
 					</Typography>
 
 					<CourseDateEditForm courseId={courseId} courseDate={date} onSaved={invalidate} />

@@ -19,6 +19,7 @@ import {
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
@@ -119,7 +120,8 @@ const NearestInner = () => {
 									{course.name} — {date.date} {date.timeStart}
 								</Typography>
 								<Typography variant='body2' color='text.secondary'>
-									{date.place?.name} · {getSlotsLeft(date)} wolnych / {date.slotsMax}
+									<PlaceNameLink place={date.place} /> · {getSlotsLeft(date)} wolnych /{' '}
+									{date.slotsMax}
 									{date.canceled ? ' · ODWOŁANY' : ''}
 								</Typography>
 							</Box>

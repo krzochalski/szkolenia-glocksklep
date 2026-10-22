@@ -1,5 +1,6 @@
 'use client';
 
+import { PlaceNameLink } from '@components/PlaceNameLink';
 import { Paths } from '@constants/paths';
 import { Box, Link, Paper, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
@@ -40,21 +41,9 @@ export const CourseDateRow = ({
 }: CourseDateRowProps) => {
 	const href = titleHref ?? fillPath(Paths.coursePage, { slug: course.slug });
 	const canceled = isCourseClassCanceled(date);
-	const place = date.place?.name ?? '—';
 	const when = `${formatCourseDatePl(date.date)} · ${date.timeStart}`;
 	const priceLabel = formatPlnNettoBrutto(date.customPrice ?? course.price);
 	const kind = getCourseKind(course);
-
-	const metaParts = showTitle ? [when, place] : [place];
-
-	if (showInstructor && date.instructor?.name) {
-		metaParts.push(`instruktor: ${date.instructor.name}`);
-	}
-	if (showSlots) {
-		metaParts.push(canceled ? 'odwołane' : formatSlotsMeta(date));
-	}
-
-	const meta = metaParts.join(' · ');
 
 	return (
 		<Paper
@@ -128,7 +117,12 @@ export const CourseDateRow = ({
 						color='text.secondary'
 						sx={{ m: 0, display: 'block' }}
 					>
-						{meta}
+						{showTitle ? <>{when} · </> : null}
+						<PlaceNameLink place={date.place} />
+						{showInstructor && date.instructor?.name ? (
+							<> · instruktor: {date.instructor.name}</>
+						) : null}
+						{showSlots ? <> · {canceled ? 'odwołane' : formatSlotsMeta(date)}</> : null}
 					</Typography>
 					{!canceled ? (
 						<Typography

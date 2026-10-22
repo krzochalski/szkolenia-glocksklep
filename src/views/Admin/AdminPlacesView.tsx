@@ -15,6 +15,7 @@ import {
 	Typography,
 } from '@ui';
 import { useState } from 'react';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Place } from '@/types/course';
 import { PlaceFormDialog } from './forms/PlaceFormDialog';
 
@@ -70,7 +71,9 @@ const PlacesInner = () => {
 				{places.map((place) => (
 					<StaggerItem key={place.id}>
 					<Paper variant='outlined' sx={{ p: 2 }}>
-						<Typography sx={{ fontWeight: 600 }}>{place.name}</Typography>
+						<Typography sx={{ fontWeight: 600 }}>
+							<PlaceNameLink place={place} />
+						</Typography>
 						<Typography variant='body2' color='text.secondary'>
 							/{place.slug}
 						</Typography>

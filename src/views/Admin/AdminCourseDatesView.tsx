@@ -21,6 +21,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
@@ -267,7 +268,8 @@ const DateGroup = ({
 									{date.date} · {date.timeStart}
 								</Typography>
 								<Typography variant='body2' color='text.secondary'>
-									{date.place?.name} · {date.participants?.length ?? 0}/{date.slotsMax}
+									<PlaceNameLink place={date.place} /> · {date.participants?.length ?? 0}/
+									{date.slotsMax}
 									{date.canceled ? ' · ODWOŁANY' : ''}
 								</Typography>
 							</Box>

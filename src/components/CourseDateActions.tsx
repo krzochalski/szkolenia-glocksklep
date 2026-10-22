@@ -26,9 +26,10 @@ import {
 } from '@ui';
 import NextLink from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
-import { formatBookingSummary } from '@/utils/formatEnrollment';
+import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
@@ -76,14 +77,13 @@ export const CourseDateActions = ({
 	});
 
 	const bookingPrice = date.customPrice ?? course.price;
-	const bookingSummary = formatBookingSummary({
-		name: course.name,
-		date: date.date,
-		timeStart: date.timeStart,
-		place: date.place?.name,
-		price: bookingPrice,
-	});
 	const priceLabel = formatPlnNettoBrutto(bookingPrice);
+	const bookingSummary = (
+		<>
+			{course.name}, {formatCourseDatePl(date.date)}, {date.timeStart},{' '}
+			<PlaceNameLink place={date.place} />, {priceLabel}
+		</>
+	);
 
 	useEffect(() => {
 		if (

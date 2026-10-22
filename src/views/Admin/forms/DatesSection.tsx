@@ -36,7 +36,7 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 			slotsMax: getCourseSlotsMax({ slotsMax: courseSlotsMax }),
 			subtitle: '',
 			instructor: { name: '', slug: '' },
-			place: { name: '', link: '' },
+			place: { name: '', googleMapsLink: '', link: '' },
 		});
 
 	const cloneDate = (index: number) => {
