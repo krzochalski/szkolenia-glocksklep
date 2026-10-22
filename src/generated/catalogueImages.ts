@@ -25,3 +25,4 @@ export const BADGE_CATALOGUE_IMAGES = [
 export const SESSION_CATALOGUE_IMAGES = [
 
 ] as const;
+
