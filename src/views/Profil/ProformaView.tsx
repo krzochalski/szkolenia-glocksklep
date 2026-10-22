@@ -125,7 +125,7 @@ const ProformaDocument = ({
 						}}
 					>
 						<Image
-							src='/brand/glocksklep-mark.png'
+							src='/brand/glocksklep-mark.webp'
 							alt='Glocksklep'
 							width={56}
 							height={56}
