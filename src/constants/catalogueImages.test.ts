@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
 	badgeImageSelectOptions,
 	catalogueSelectOptions,
+	HERO_CATALOGUE_IMAGES,
+	sessionImageSelectOptions,
 	THUMBNAIL_CATALOGUE_IMAGES,
 	toHeroCatalogueImage,
 } from './catalogueImages';
@@ -35,5 +37,15 @@ describe('badgeImageSelectOptions', () => {
 		const options = badgeImageSelectOptions('');
 		expect(options.length).toBeGreaterThan(0);
 		expect(options).toEqual(expect.arrayContaining([...THUMBNAIL_CATALOGUE_IMAGES]));
+	});
+});
+
+describe('sessionImageSelectOptions', () => {
+	it('falls back to heroes and thumbnails when sessions catalogue is empty', () => {
+		const options = sessionImageSelectOptions('');
+		expect(options.length).toBeGreaterThan(0);
+		expect(options).toEqual(
+			expect.arrayContaining([...HERO_CATALOGUE_IMAGES, ...THUMBNAIL_CATALOGUE_IMAGES])
+		);
 	});
 });

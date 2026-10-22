@@ -15,14 +15,17 @@ const DOC_ID = 'content';
 const DEFAULT_MISSION_POINTS: HomepageMissionPoint[] = [
 	{
 		id: 'small-groups',
+		title: 'Małe grupy',
 		body: 'Zajęcia odbywają się w małych grupach do 6 osób, aby każdy uczestnik otrzymał dostateczną ilość porad i sugestii poprawek.',
 	},
 	{
 		id: 'reps',
+		title: 'Powtórzenia na głośno',
 		body: 'Wykonujemy sporą ilość powtórzeń „na głośno”, aby każdy miał szansę dostatecznie przećwiczyć nowe zagadnienia, a nie tylko dowiedzieć się o ich istnieniu.',
 	},
 	{
 		id: 'practical',
+		title: 'Wzorce praktyczne',
 		body: 'Zajęcia są oparte o najnowsze wzorce stosowane w strzelectwie praktycznym. Techniki działające na wideo lub w wyobraźni zostały tutaj odfiltrowane.',
 	},
 ];
@@ -98,13 +101,17 @@ const normalizeWay = (raw: unknown): HomepageWayOfWorking | null => {
 	return { id, title, description };
 };
 
+const DEFAULT_MISSION_BY_ID = new Map(DEFAULT_MISSION_POINTS.map((p) => [p.id, p]));
+
 const normalizeMissionPoint = (raw: unknown): HomepageMissionPoint | null => {
 	if (!raw || typeof raw !== 'object') return null;
 	const entry = raw as Record<string, unknown>;
 	const body = typeof entry.body === 'string' ? entry.body.trim() : '';
 	if (!body) return null;
 	const id = typeof entry.id === 'string' && entry.id.trim() ? entry.id.trim() : uuid();
-	return { id, body };
+	const titleRaw = typeof entry.title === 'string' ? entry.title.trim() : '';
+	const title = titleRaw || DEFAULT_MISSION_BY_ID.get(id)?.title || '';
+	return { id, title, body };
 };
 
 const pointsFromMissionBody = (body: string): HomepageMissionPoint[] => {
@@ -113,10 +120,14 @@ const pointsFromMissionBody = (body: string): HomepageMissionPoint[] => {
 		.map((p) => p.trim())
 		.filter(Boolean);
 	if (parts.length === 0) return DEFAULT_MISSION_POINTS;
-	return parts.map((text, index) => ({
-		id: DEFAULT_MISSION_POINT_IDS[index] ?? `mission-${index + 1}`,
-		body: text,
-	}));
+	return parts.map((text, index) => {
+		const id = DEFAULT_MISSION_POINT_IDS[index] ?? `mission-${index + 1}`;
+		return {
+			id,
+			title: DEFAULT_MISSION_BY_ID.get(id)?.title ?? '',
+			body: text,
+		};
+	});
 };
 
 const resolveMissionPoints = (
@@ -192,7 +203,7 @@ export const getHomepage = async (): Promise<HomepageDocument> => {
 
 export const saveHomepage = async (docData: HomepageWritable): Promise<void> => {
 	const missionPoints = docData.missionPoints
-		.map((p) => ({ id: p.id, body: p.body.trim() }))
+		.map((p) => ({ id: p.id, title: p.title.trim(), body: p.body.trim() }))
 		.filter((p) => p.body);
 	await setDoc(
 		doc(db, COLLECTION, DOC_ID),

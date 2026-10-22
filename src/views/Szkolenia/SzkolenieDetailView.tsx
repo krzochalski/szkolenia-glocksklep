@@ -2,13 +2,15 @@
 
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
-import { getCourseBySlug } from '@services/courses';
+import { getCourseBySlug, getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
+import { useMemo } from 'react';
 import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/CourseLayout';
 import type { Course } from '@/types/course';
 import type { CourseDescription } from '@/types/courseDescription';
 import { isCourseInactive } from '@/utils/courseDates';
+import { COURSE_KIND_LABEL, getCourseKind, resolvePrerequisiteNames } from '@/utils/courseKind';
 import { resolveCourseHeroFrom } from '@/utils/courseImages';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
 
@@ -32,7 +34,19 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 		...(initialDescription !== undefined ? { initialData: initialDescription } : {}),
 	});
 
+	const { data: catalog = [] } = useQuery({
+		queryKey: ['courses'],
+		queryFn: getCourses,
+		enabled: Boolean(course && getCourseKind(course) === 'practice'),
+	});
+
 	const isLoading = courseLoading || descriptionLoading;
+
+	const kind = course ? getCourseKind(course) : 'course';
+	const prerequisiteNames = useMemo(
+		() => (course ? resolvePrerequisiteNames(course, catalog) : []),
+		[catalog, course]
+	);
 
 	const swapState = isLoading
 		? 'loading'
@@ -75,6 +89,9 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 					data={mapDescriptionToSchema(description)}
 					hero={resolveCourseHeroFrom(course, description)}
 					courseMeta={courseMeta}
+					subtitle={course.subtitle}
+					kindLabel={kind === 'practice' ? COURSE_KIND_LABEL.practice : undefined}
+					prerequisiteNames={prerequisiteNames}
 				/>
 			) : (
 				<CourseLayout
@@ -88,6 +105,9 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 					}
 					hero={resolveCourseHeroFrom(course, null)}
 					courseMeta={courseMeta}
+					subtitle={course.subtitle}
+					kindLabel={kind === 'practice' ? COURSE_KIND_LABEL.practice : undefined}
+					prerequisiteNames={prerequisiteNames}
 				/>
 			)}
 		</ContentSwap>

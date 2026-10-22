@@ -9,6 +9,8 @@ import { Suspense, useState } from 'react';
 import { CourseFacts, type CourseFactsMeta } from '@/components/CourseFacts';
 import { CourseDatesSection } from '@/components/CourseLayout/CourseDatesSection';
 import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.types';
+import { CourseRequirementsStrip } from '@/components/CourseLayout/CourseRequirementsStrip';
+import { CourseSessionMedia } from '@/components/CourseLayout/CourseSessionMedia';
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
@@ -19,9 +21,22 @@ type CourseLayoutProps = {
 	readonly data: CourseSchemaData;
 	readonly hero?: string;
 	readonly courseMeta?: CourseFactsMeta;
+	/** Catalog subtitle from `courses` (focus / format), shown under the headline */
+	readonly subtitle?: string;
+	/** Practice: names of required completed courses */
+	readonly prerequisiteNames?: string[];
+	/** Catalog kind label for eyebrow prefix (e.g. Trening) */
+	readonly kindLabel?: string;
 };
 
-export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
+export const CourseLayout = ({
+	data,
+	hero,
+	courseMeta,
+	subtitle,
+	prerequisiteNames = [],
+	kindLabel,
+}: CourseLayoutProps) => {
 	const {
 		eyebrow,
 		headline,
@@ -36,11 +51,18 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 		bringHeading,
 		dontBring,
 		dontBringHeading,
+		outcomes,
+		outcomesHeading,
+		requirements,
+		gallery,
+		sessionVideoUrl,
 	} = data;
 
 	const [imageFailed, setImageFailed] = useState(false);
 	const hasForWhomSection = Boolean(forWhom?.length || notExpect?.length);
 	const hasBringSection = Boolean(bring?.length || dontBring?.length);
+	const hasOutcomes = Boolean(outcomes?.length);
+	const hasSessionMedia = Boolean(gallery?.length || sessionVideoUrl);
 	const showHero = Boolean(hero) && !imageFailed;
 
 	return (
@@ -112,7 +134,7 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 							mb: 2,
 						}}
 					>
-						{eyebrow}
+						{kindLabel ? `${kindLabel} · ${eyebrow}` : eyebrow}
 					</Typography>
 					<Typography
 						variant='h1'
@@ -120,7 +142,7 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 							fontSize: { xs: '2rem', md: '3.25rem' },
 							lineHeight: 0.95,
 							textTransform: 'uppercase',
-							mb: 2,
+							mb: subtitle ? 1 : 2,
 						}}
 					>
 						{headline[0]}
@@ -133,6 +155,36 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 							</>
 						) : null}
 					</Typography>
+					{subtitle ? (
+						<Typography
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontSize: { xs: '0.8125rem', md: '0.9375rem' },
+								fontWeight: 700,
+								letterSpacing: '0.06em',
+								textTransform: 'uppercase',
+								color: 'primary.main',
+								mb: 2,
+								maxWidth: 720,
+							}}
+						>
+							{subtitle}
+						</Typography>
+					) : null}
+					{prerequisiteNames.length > 0 ? (
+						<Typography
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontSize: '0.75rem',
+								letterSpacing: '0.04em',
+								color: 'text.secondary',
+								mb: 2,
+								maxWidth: 720,
+							}}
+						>
+							Wymaga ukończenia: {prerequisiteNames.join(', ')}
+						</Typography>
+					) : null}
 					<Typography
 						sx={{
 							color: 'text.secondary',
@@ -146,6 +198,8 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 					{courseMeta ? <CourseFacts meta={courseMeta} /> : null}
 				</Box>
 			</HardShadow>
+
+			{requirements ? <CourseRequirementsStrip requirements={requirements} /> : null}
 
 			{modules?.length ? (
 				<Box sx={{ mb: 6 }}>
@@ -221,6 +275,28 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 				</>
 			) : null}
 
+			{hasOutcomes ? (
+				<>
+					<Divider sx={{ mb: 6 }} />
+					<Box sx={{ mb: 6 }}>
+						<SectionLabel>Efekty</SectionLabel>
+						<Typography variant='h2' sx={{ fontSize: { xs: '1.5rem', md: '2rem' }, mb: 3 }}>
+							{outcomesHeading || 'Co będziesz umiał'}
+						</Typography>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 720 }}>
+							{outcomes?.map((item) => (
+								<ListItem
+									key={item}
+									icon={<CheckCircle sx={{ fontSize: 18 }} />}
+									text={item}
+									color='primary.main'
+								/>
+							))}
+						</Box>
+					</Box>
+				</>
+			) : null}
+
 			{hasBringSection ? (
 				<>
 					<Divider sx={{ mb: 6 }} />
@@ -269,6 +345,13 @@ export const CourseLayout = ({ data, hero, courseMeta }: CourseLayoutProps) => {
 							</Box>
 						) : null}
 					</Box>
+				</>
+			) : null}
+
+			{hasSessionMedia ? (
+				<>
+					<Divider sx={{ mb: 6 }} />
+					<CourseSessionMedia gallery={gallery} sessionVideoUrl={sessionVideoUrl} />
 				</>
 			) : null}
 

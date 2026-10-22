@@ -51,6 +51,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 	const participant = date?.participants?.find((p) => p.id === user?.uid);
 	const panel = description ? mapParticipantDescription(description) : null;
 	const hasForWhomSection = Boolean(panel?.forWhom?.length || panel?.notExpect?.length);
+	const hasOutcomes = Boolean(panel?.outcomes?.length);
 	const hasBringSection = Boolean(panel?.bring?.length || panel?.dontBring?.length);
 
 	const unenroll = useMutation({
@@ -100,6 +101,21 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 					<Typography color='text.secondary' sx={{ mb: 1 }}>
 						{formatCourseDatePl(date.date)} · {date.timeStart} · {date.place?.name}
 					</Typography>
+					{course.subtitle?.trim() ? (
+						<Typography
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontSize: '0.8125rem',
+								fontWeight: 700,
+								letterSpacing: '0.06em',
+								textTransform: 'uppercase',
+								color: 'primary.main',
+								mb: 1,
+							}}
+						>
+							{course.subtitle.trim()}
+						</Typography>
+					) : null}
 					<Typography sx={{ mb: 1 }}>{course.description}</Typography>
 
 					<CourseFacts
@@ -189,6 +205,31 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 										</Box>
 									</Box>
 								) : null}
+							</Box>
+						</>
+					) : null}
+
+					{hasOutcomes ? (
+						<>
+							<Divider sx={{ my: 4 }} />
+							<Box sx={{ mb: 4 }}>
+								<SectionLabel>Efekty</SectionLabel>
+								<Typography
+									variant='h2'
+									sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, mb: 2 }}
+								>
+									{panel?.outcomesHeading || 'Co będziesz umiał'}
+								</Typography>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+									{panel?.outcomes?.map((item) => (
+										<ListItem
+											key={item}
+											icon={<CheckCircle sx={{ fontSize: 18 }} />}
+											text={item}
+											color='primary.main'
+										/>
+									))}
+								</Box>
 							</Box>
 						</>
 					) : null}

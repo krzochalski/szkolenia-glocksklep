@@ -1,7 +1,7 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { useAuthUser } from '@hooks';
+import { useAuthUser, useCourseEligibility } from '@hooks';
 import {
 	addGuestToWaitingList,
 	addToWaitingList,
@@ -48,10 +48,11 @@ const GuestWaitingListForm = ({
 	course,
 	onError,
 	onSuccess,
-}: Props) => {
+	blocked,
+	blockMessage,
+}: Props & { readonly blocked?: boolean; readonly blockMessage?: string }) => {
 	const queryClient = useQueryClient();
 	const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
-
 	const {
 		control,
 		handleSubmit,
@@ -60,6 +61,15 @@ const GuestWaitingListForm = ({
 		resolver: zodResolver(guestWaitingListSchema),
 		defaultValues: { email: '' },
 	});
+
+	if (blocked) {
+		return (
+			<Typography color='text.secondary' sx={{ fontSize: '0.875rem' }}>
+				{blockMessage ??
+					'Ten trening wymaga ukończenia wcześniejszego kursu. Zaloguj się na konto z ukończonym szkoleniem.'}
+			</Typography>
+		);
+	}
 
 	const onSubmit = async (values: GuestWaitingListFormValues) => {
 		try {
@@ -144,6 +154,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
 	const uid = user?.uid;
+	const eligibility = useCourseEligibility(course);
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 
 	const { data: waitingEntries = [] } = useQuery({
@@ -224,8 +235,32 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 			</ConfirmDialog>
 		) : null;
 
+	if (user && eligibility.hasPrerequisites && !eligibility.loading && !eligibility.eligible) {
+		const missing =
+			eligibility.missingNames.length > 0
+				? eligibility.missingNames.join(', ')
+				: eligibility.prerequisiteNames.join(', ');
+		return (
+			<Typography color='text.secondary' sx={{ fontSize: '0.875rem' }}>
+				Wymaga ukończenia: {missing}
+			</Typography>
+		);
+	}
+
 	if (!user) {
-		return <GuestWaitingListForm course={course} onError={onError} onSuccess={onSuccess} />;
+		return (
+			<GuestWaitingListForm
+				course={course}
+				onError={onError}
+				onSuccess={onSuccess}
+				blocked={eligibility.hasPrerequisites}
+				blockMessage={
+					eligibility.prerequisiteNames.length > 0
+						? `Ten trening wymaga ukończenia: ${eligibility.prerequisiteNames.join(', ')}. Zaloguj się na konto z ukończonym szkoleniem.`
+						: undefined
+				}
+			/>
+		);
 	}
 
 	if (onWaitingList) {
@@ -254,7 +289,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 		<>
 			<Button
 				variant='outlined'
-				disabled={pending}
+				disabled={pending || eligibility.loading}
 				onClick={() => setConfirmAction('join')}
 			>
 				Dołącz do listy oczekujących

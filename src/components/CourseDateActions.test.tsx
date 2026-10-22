@@ -6,17 +6,32 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Course, CourseClass } from '@/types/course';
 import { CourseDateActions } from './CourseDateActions';
 
+const authUserMock = vi.fn(() => null as { uid: string } | null);
+const eligibilityMock = vi.fn(() => ({
+	hasPrerequisites: false,
+	eligible: true,
+	loading: false,
+	prerequisiteNames: [] as string[],
+	missingNames: [] as string[],
+}));
+
 vi.mock('@hooks', () => ({
-	useAuthUser: () => null,
+	useAuthUser: () => authUserMock(),
+	useCourseEligibility: () => eligibilityMock(),
 }));
 
 vi.mock('@services/courses', () => ({
 	enrollInCourse: vi.fn(),
+	getCourses: vi.fn(async () => []),
+}));
+
+vi.mock('@services/courseCompletions', () => ({
+	getMyCourseCompletions: vi.fn(async () => []),
 }));
 
 vi.mock('@services/courseWaitingList', () => ({
 	addToWaitingList: vi.fn(),
-	getUserWaitingListEntries: vi.fn(),
+	getUserWaitingListEntries: vi.fn(async () => []),
 	removeFromWaitingList: vi.fn(),
 }));
 
@@ -63,6 +78,14 @@ const wrap = (ui: ReactElement) => {
 
 describe('CourseDateActions', () => {
 	it('passes redirect and termin on auth gate login/register links', () => {
+		authUserMock.mockReturnValue(null);
+		eligibilityMock.mockReturnValue({
+			hasPrerequisites: false,
+			eligible: true,
+			loading: false,
+			prerequisiteNames: [],
+			missingNames: [],
+		});
 		wrap(<CourseDateActions course={course} date={date} />);
 
 		fireEvent.click(screen.getByRole('button', { name: 'Zapisz się' }));
@@ -80,5 +103,29 @@ describe('CourseDateActions', () => {
 				/Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł netto \/ 615 zł brutto/
 			)
 		).toBeInTheDocument();
+	});
+
+	it('shows prerequisite lock instead of enroll when logged in but ineligible', () => {
+		authUserMock.mockReturnValue({ uid: 'u1' });
+		eligibilityMock.mockReturnValue({
+			hasPrerequisites: true,
+			eligible: false,
+			loading: false,
+			prerequisiteNames: ['Pistolet podstawowy'],
+			missingNames: ['Pistolet podstawowy'],
+		});
+		wrap(
+			<CourseDateActions
+				course={{
+					...course,
+					kind: 'practice',
+					prerequisiteCourseIds: ['prereq-1'],
+				}}
+				date={date}
+			/>
+		);
+
+		expect(screen.getByText(/Wymaga ukończenia: Pistolet podstawowy/)).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Zapisz się' })).not.toBeInTheDocument();
 	});
 });

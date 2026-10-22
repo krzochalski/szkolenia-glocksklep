@@ -1,7 +1,8 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { useAuthUser } from '@hooks';
+import { WAITLIST_SECTION_ID } from '@constants/waitlist';
+import { useAuthUser, useCourseEligibility } from '@hooks';
 import { enrollInCourse } from '@services/courses';
 import {
 	addToWaitingList,
@@ -29,7 +30,6 @@ import type { Course, CourseClass } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatBookingSummary } from '@/utils/formatEnrollment';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
-import { WAITLIST_SECTION_ID } from '@constants/waitlist';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 type Props = {
@@ -59,6 +59,7 @@ export const CourseDateActions = ({
 	const slots = getSlotsLeft(date);
 	const enrolled = date.participants?.some((p) => p.id === user?.uid) ?? false;
 	const uid = user?.uid;
+	const eligibility = useCourseEligibility(course);
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 	const [authGateOpen, setAuthGateOpen] = useState(false);
 	const autoPromptedRef = useRef(false);
@@ -84,10 +85,20 @@ export const CourseDateActions = ({
 	const priceLabel = formatPlnNettoBrutto(bookingPrice);
 
 	useEffect(() => {
-		if (!autoPromptEnroll || autoPromptedRef.current || !user || enrolled || slots <= 0) return;
+		if (
+			!autoPromptEnroll ||
+			autoPromptedRef.current ||
+			!user ||
+			enrolled ||
+			slots <= 0 ||
+			!eligibility.eligible ||
+			eligibility.loading
+		) {
+			return;
+		}
 		autoPromptedRef.current = true;
 		setConfirmAction('enroll');
-	}, [autoPromptEnroll, user, enrolled, slots]);
+	}, [autoPromptEnroll, user, enrolled, slots, eligibility.eligible, eligibility.loading]);
 
 	const { data: waitingEntries = [] } = useQuery({
 		queryKey: ['waitingList', uid],
@@ -289,6 +300,18 @@ export const CourseDateActions = ({
 		);
 	}
 
+	if (user && eligibility.hasPrerequisites && !eligibility.loading && !eligibility.eligible) {
+		const missing =
+			eligibility.missingNames.length > 0
+				? eligibility.missingNames.join(', ')
+				: eligibility.prerequisiteNames.join(', ');
+		return (
+			<Typography color='text.secondary' sx={{ fontSize: '0.8125rem', maxWidth: 280 }}>
+				Wymaga ukończenia: {missing}
+			</Typography>
+		);
+	}
+
 	if (!user) {
 		if (slots <= 0) {
 			return (
@@ -319,7 +342,7 @@ export const CourseDateActions = ({
 				<Button
 					variant='contained'
 					size={size}
-					disabled={pending}
+					disabled={pending || eligibility.loading}
 					onClick={() => setConfirmAction('enroll')}
 				>
 					Zapisz się
@@ -356,7 +379,7 @@ export const CourseDateActions = ({
 			<Button
 				variant='outlined'
 				size={size}
-				disabled={pending}
+				disabled={pending || eligibility.loading}
 				onClick={() => setConfirmAction('joinWaitlist')}
 			>
 				Lista oczekujących

@@ -1,5 +1,5 @@
 /** Public contact for marketing pages (footer, O nas). */
-export const PUBLIC_CONTACT_EMAIL = 'szkolenia@glocksklep.pl';
+export const PUBLIC_CONTACT_EMAIL = 'zamowienia@glocksklep.pl';
 
 export const PUBLIC_CONTACT_MAILTO = `mailto:${PUBLIC_CONTACT_EMAIL}`;
 

@@ -1,5 +1,6 @@
 export type HomepageMissionPoint = {
 	id: string;
+	title: string;
 	body: string;
 };
 

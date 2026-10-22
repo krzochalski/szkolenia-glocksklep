@@ -6,12 +6,13 @@ import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
 import { formatSlotsMeta, isCourseClassCanceled } from '@/utils/courseDates';
+import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 export type CourseDateRowProps = {
-	readonly course: Pick<Course, 'name' | 'slug' | 'price'>;
+	readonly course: Pick<Course, 'name' | 'slug' | 'price' | 'subtitle' | 'kind'>;
 	readonly date: CourseClass;
 	/** Defaults to the public course page. Ignored when `showTitle` is false. */
 	readonly titleHref?: string;
@@ -42,6 +43,7 @@ export const CourseDateRow = ({
 	const place = date.place?.name ?? '—';
 	const when = `${formatCourseDatePl(date.date)} · ${date.timeStart}`;
 	const priceLabel = formatPlnNettoBrutto(date.customPrice ?? course.price);
+	const kind = getCourseKind(course);
 
 	const metaParts = showTitle ? [when, place] : [place];
 
@@ -77,6 +79,20 @@ export const CourseDateRow = ({
 				}}
 			>
 				<Stack spacing={0.5} sx={{ minWidth: 0, flex: 1 }}>
+					{showTitle && kind === 'practice' ? (
+						<Typography
+							variant='caption'
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontWeight: 700,
+								letterSpacing: '0.12em',
+								textTransform: 'uppercase',
+								color: 'primary.main',
+							}}
+						>
+							{COURSE_KIND_LABEL.practice}
+						</Typography>
+					) : null}
 					{showTitle ? (
 						<Link
 							component={NextLink}
@@ -90,6 +106,22 @@ export const CourseDateRow = ({
 					) : (
 						<Typography sx={{ fontWeight: 700 }}>{when}</Typography>
 					)}
+					{showTitle && course.subtitle?.trim() ? (
+						<Typography
+							variant='body2'
+							component='p'
+							sx={{
+								m: 0,
+								fontFamily: '"Space Mono", monospace',
+								fontSize: '0.75rem',
+								fontWeight: 700,
+								letterSpacing: '0.04em',
+								color: 'primary.main',
+							}}
+						>
+							{course.subtitle.trim()}
+						</Typography>
+					) : null}
 					<Typography
 						variant='body2'
 						component='p'

@@ -3,6 +3,7 @@
 import { getCourseSlotsMax } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
+import { getCourseKind } from '@/utils/courseKind';
 import { fillPath } from '@/utils/paths';
 import type { CourseFormValues } from '@/utils/schemas';
 import { Box, Button, CircularProgress, ContentSwap, Typography } from '@ui';
@@ -26,12 +27,15 @@ const EditInner = ({ courseId }: Props) => {
 	const initial: Partial<CourseFormValues> | null = course
 		? {
 				name: course.name,
+				subtitle: course.subtitle ?? '',
 				slug: course.slug,
 				description: course.description,
 				price: course.price,
 				hours: course.hours,
 				slotsMax: getCourseSlotsMax(course),
 				level: course.level,
+				kind: getCourseKind(course),
+				prerequisiteCourseIds: course.prerequisiteCourseIds ?? [],
 				tags: course.tags ?? [],
 				thumbnail: course.thumbnail ?? '',
 				hero: course.hero ?? '',
@@ -60,6 +64,7 @@ const EditInner = ({ courseId }: Props) => {
 			</Typography>
 			<CourseDetailsForm
 				defaultValues={initial}
+				excludeCourseId={courseId}
 				onSubmit={async (values) => {
 					await updateCourse(courseId, values);
 				}}

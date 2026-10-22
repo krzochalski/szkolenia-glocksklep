@@ -37,11 +37,24 @@ type CourseDate = {
 
 type CourseDoc = {
 	inactive?: boolean;
+	kind?: string;
+	prerequisiteCourseIds?: unknown;
 	dates?: CourseDate[];
 };
 
+export const PREREQUISITE_ENROLL_ERROR =
+	'To szkolenie wymaga ukończenia wcześniejszego kursu.';
+
 const matchDate = (d: CourseDate, dateId: string): boolean =>
 	d.id === dateId || d.date === dateId;
+
+const getPrerequisiteIds = (course: CourseDoc): string[] => {
+	if (course.kind !== 'practice') return [];
+	if (!Array.isArray(course.prerequisiteCourseIds)) return [];
+	return course.prerequisiteCourseIds.filter(
+		(id): id is string => typeof id === 'string' && id.length > 0
+	);
+};
 
 export const enrollInCourseTx = async (
 	db: Firestore,
@@ -59,6 +72,19 @@ export const enrollInCourseTx = async (
 		if (!snap.exists) throw new Error('Kurs nie istnieje.');
 		const course = snap.data() as CourseDoc;
 		if (course.inactive) throw new Error('To szkolenie nie jest obecnie dostępne.');
+
+		const prereqs = getPrerequisiteIds(course);
+		if (prereqs.length > 0) {
+			const completionSnaps = await Promise.all(
+				prereqs.map((courseId) =>
+					tx.get(db.collection('users').doc(uid).collection('courseCompletions').doc(courseId))
+				)
+			);
+			if (completionSnaps.some((s) => !s.exists)) {
+				throw new Error(PREREQUISITE_ENROLL_ERROR);
+			}
+		}
+
 		const dates = [...(course.dates ?? [])];
 		const idx = dates.findIndex((d) => matchDate(d, input.dateId));
 		if (idx < 0) throw new Error('Termin nie istnieje.');

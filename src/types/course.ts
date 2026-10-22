@@ -13,10 +13,18 @@ export interface Participant {
 	paysByCash?: boolean;
 }
 
+/** Catalog offer type: full course vs practice/training session. */
+export type CourseKind = 'course' | 'practice';
+
 export interface Course {
 	id: string;
 	/* Name of the class */
 	name: string;
+	/**
+	 * Short focus line under the name (e.g. "IDPA", "dry-fire: reset z kabury").
+	 * Optional on legacy docs; required in admin forms going forward.
+	 */
+	subtitle?: string;
 	/* Name of the class in slug format */
 	slug: string;
 	/* Short description of the class */
@@ -34,6 +42,17 @@ export interface Course {
 	tags: string[];
 	/* Level of proficiency for this date */
 	level: 'basic' | 'intermediate' | 'advanced';
+	/**
+	 * Catalog kind. Legacy docs without `kind` are treated as `'course'`.
+	 * `'practice'` = trening (may require completed prerequisite courses).
+	 */
+	kind?: CourseKind;
+	/**
+	 * When `kind === 'practice'`, user must have completed all listed course ids
+	 * (`users/{uid}/courseCompletions/{id}`) to enroll or join the waitlist.
+	 * Empty = open to everyone. Ignored for `kind === 'course'`.
+	 */
+	prerequisiteCourseIds?: string[];
 	/** List-card thumbnail under `public/thumbnails/` (e.g. `/thumbnails/….webp`) */
 	thumbnail?: string;
 	/** Detail-page hero under `public/hero/` (e.g. `/hero/….webp`) */

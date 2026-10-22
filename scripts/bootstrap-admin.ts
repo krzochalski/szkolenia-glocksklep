@@ -5,7 +5,7 @@
  *   pnpm exec tsx scripts/bootstrap-admin.ts
  *
  * Env:
- *   ADMIN_EMAIL (default szkolenia@glocksklep.pl)
+ *   ADMIN_EMAIL (default zamowienia@glocksklep.pl)
  *   ADMIN_TEMP_PASSWORD (optional; random if omitted — user resets via email)
  */
 import { randomBytes } from 'node:crypto';
@@ -14,7 +14,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
 
 const PROJECT_ID = process.env.GCLOUD_PROJECT ?? process.env.GOOGLE_CLOUD_PROJECT ?? 'szkolenia-glocksklep';
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? 'szkolenia@glocksklep.pl').trim().toLowerCase();
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? 'zamowienia@glocksklep.pl').trim().toLowerCase();
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'https://szkolenia.glocksklep.pl';
 const ACTION_HANDLER = `${SITE_ORIGIN}/auth/action`;
 

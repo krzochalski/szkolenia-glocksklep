@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { CourseRequirements } from '@/types/courseDescription';
 
 export type CourseModule = {
 	icon: ReactNode;
@@ -33,4 +34,14 @@ export type CourseSchemaData = {
 	dontBring?: string[];
 	/** Custom heading for dontBring section */
 	dontBringHeading?: string;
+	/** What you will be able to do afterwards */
+	outcomes?: string[];
+	/** Custom heading for outcomes section */
+	outcomesHeading?: string;
+	/** Structured requirements strip */
+	requirements?: CourseRequirements;
+	/** Session gallery paths (2–3) */
+	gallery?: string[];
+	/** Optional YouTube session clip URL */
+	sessionVideoUrl?: string;
 };

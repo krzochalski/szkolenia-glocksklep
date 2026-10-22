@@ -22,6 +22,7 @@ import { Paths } from '@constants/paths';
 import { deleteCourse, getCourses, reorderCourses } from '@services/courses';
 import type { Course } from '@/types/course';
 import { isFutureDate, isCourseClassCanceled, isCourseInactive } from '@/utils/courseDates';
+import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import {
 	compareCoursesByLegacyCatalogOrder,
 	coursesNeedOrderBackfill,
@@ -71,6 +72,7 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 	const next = upcoming[0];
 	const totalDates = course.dates?.length ?? 0;
 	const levelLabel = COURSE_LEVEL_LABEL[course.level] ?? course.level;
+	const kind = getCourseKind(course);
 	const inactive = isCourseInactive(course);
 
 	return (
@@ -107,19 +109,32 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				</Tooltip>
 			</TableCell>
 			<TableCell>
-				<Stack direction='row' spacing={1} sx={{ alignItems: 'center' }}>
-					<Typography variant='body2' sx={{ fontWeight: 600 }}>
-						{course.name}
-					</Typography>
-					{inactive ? (
+				<Stack spacing={0.25}>
+					<Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+						<Typography variant='body2' sx={{ fontWeight: 600 }}>
+							{course.name}
+						</Typography>
 						<Chip
-							label='NIEAKTYWNE'
+							label={COURSE_KIND_LABEL[kind]}
 							size='small'
-							color='default'
 							variant='outlined'
-							data-inactive-badge
-							sx={{ color: 'text.secondary', borderColor: 'text.disabled' }}
+							color={kind === 'practice' ? 'primary' : 'default'}
 						/>
+						{inactive ? (
+							<Chip
+								label='NIEAKTYWNE'
+								size='small'
+								color='default'
+								variant='outlined'
+								data-inactive-badge
+								sx={{ color: 'text.secondary', borderColor: 'text.disabled' }}
+							/>
+						) : null}
+					</Stack>
+					{course.subtitle?.trim() ? (
+						<Typography variant='caption' color='text.secondary'>
+							{course.subtitle.trim()}
+						</Typography>
 					) : null}
 				</Stack>
 			</TableCell>

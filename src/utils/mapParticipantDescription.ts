@@ -19,6 +19,8 @@ export const mapParticipantDescription = (
 	| 'bringHeading'
 	| 'dontBring'
 	| 'dontBringHeading'
+	| 'outcomes'
+	| 'outcomesHeading'
 > => {
 	const full = mapDescriptionToSchema(desc);
 	const visible = new Set<CourseDescriptionSectionKey>(desc.visibleInParticipantPanel ?? []);
@@ -33,5 +35,7 @@ export const mapParticipantDescription = (
 		bringHeading: visible.has('bring') ? full.bringHeading : undefined,
 		dontBring: visible.has('dontBring') ? full.dontBring : undefined,
 		dontBringHeading: visible.has('dontBring') ? full.dontBringHeading : undefined,
+		outcomes: visible.has('outcomes') ? full.outcomes : undefined,
+		outcomesHeading: visible.has('outcomes') ? full.outcomesHeading : undefined,
 	};
 };

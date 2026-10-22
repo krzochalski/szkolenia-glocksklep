@@ -12,8 +12,9 @@ import {
 	writeBatch,
 } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
-import type { Course, Participant } from '@/types/course';
+import type { Course, CourseKind, Participant } from '@/types/course';
 import { stripUndefined } from '@/utils/common';
+import { getCourseKind } from '@/utils/courseKind';
 import { sortCoursesByOrder } from '@/utils/courseOrder';
 import { toOptimizedImagePath } from '@/utils/optimizedImagePath';
 import type { CourseFormValues } from '@/utils/schemas';
@@ -25,10 +26,27 @@ const normalizeImagePath = (value: string | undefined): string | undefined => {
 	return trimmed ? toOptimizedImagePath(trimmed) : undefined;
 };
 
+const mapCourseDoc = (id: string, data: Record<string, unknown>): Course => {
+	const kind: CourseKind = data.kind === 'practice' ? 'practice' : 'course';
+	const rawPrereqs = Array.isArray(data.prerequisiteCourseIds)
+		? data.prerequisiteCourseIds.filter((x): x is string => typeof x === 'string' && x.length > 0)
+		: [];
+	const { kind: _k, prerequisiteCourseIds: _p, ...rest } = data;
+	return {
+		...(rest as Omit<Course, 'id' | 'kind' | 'prerequisiteCourseIds'>),
+		id,
+		kind,
+		prerequisiteCourseIds: kind === 'practice' ? rawPrereqs : [],
+	};
+};
+
 const withDateIds = (data: CourseFormValues) => {
-	const { thumbnail, hero, inactive, ...rest } = data;
+	const { thumbnail, hero, inactive, kind, prerequisiteCourseIds, ...rest } = data;
+	const resolvedKind = getCourseKind({ kind });
 	return stripUndefined({
 		...rest,
+		kind: resolvedKind,
+		prerequisiteCourseIds: resolvedKind === 'practice' ? (prerequisiteCourseIds ?? []) : [],
 		thumbnail: normalizeImagePath(thumbnail),
 		hero: normalizeImagePath(hero),
 		...(inactive ? { inactive: true } : {}),
@@ -56,11 +74,17 @@ export const updateCourse = async (id: string, data: CourseFormValues): Promise<
 					participants: existing?.dates?.[i]?.participants ?? [],
 				}))
 			: (existing?.dates ?? []);
-	const { dates: _dates, thumbnail, hero, inactive, ...rest } = data;
+	const { dates: _dates, thumbnail, hero, inactive, kind, prerequisiteCourseIds, ...rest } = data;
+	const resolvedKind = getCourseKind({ kind });
 	const thumbnailPath = normalizeImagePath(thumbnail);
 	const heroPath = normalizeImagePath(hero);
 	await updateDoc(doc(db, 'courses', id), {
-		...stripUndefined({ ...rest, dates }),
+		...stripUndefined({
+			...rest,
+			kind: resolvedKind,
+			prerequisiteCourseIds: resolvedKind === 'practice' ? (prerequisiteCourseIds ?? []) : [],
+			dates,
+		}),
 		thumbnail: thumbnailPath ?? deleteField(),
 		hero: heroPath ?? deleteField(),
 		inactive: inactive ? true : deleteField(),
@@ -69,9 +93,7 @@ export const updateCourse = async (id: string, data: CourseFormValues): Promise<
 
 export const getCourses = async (): Promise<Course[]> => {
 	const snap = await getDocs(collection(db, 'courses'));
-	return sortCoursesByOrder(
-		snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Course)
-	);
+	return sortCoursesByOrder(snap.docs.map((d) => mapCourseDoc(d.id, d.data())));
 };
 
 /** Writes contiguous `order` values (0..n-1) for the given course ids. */
@@ -87,7 +109,7 @@ export const reorderCourses = async (orderedIds: string[]): Promise<void> => {
 export const getCourse = async (id: string): Promise<Course | null> => {
 	const snap = await getDoc(doc(db, 'courses', id));
 	if (!snap.exists()) return null;
-	return { id: snap.id, ...snap.data() } as Course;
+	return mapCourseDoc(snap.id, snap.data());
 };
 
 export const getCourseBySlug = async (slug: string): Promise<Course | null> => {
@@ -95,7 +117,7 @@ export const getCourseBySlug = async (slug: string): Promise<Course | null> => {
 	const snap = await getDocs(q);
 	if (snap.empty) return null;
 	const d = snap.docs[0];
-	return { id: d.id, ...d.data() } as Course;
+	return mapCourseDoc(d.id, d.data());
 };
 
 export const deleteCourse = async (id: string): Promise<void> => {

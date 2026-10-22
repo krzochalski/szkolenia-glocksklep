@@ -116,7 +116,7 @@ If the Console rejects the change (`EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`), the app
 
 This routes password-reset / verify-email links into the app (`/auth/action` → `/reset-hasla`).
 
-Bootstrap admin (`szkolenia@glocksklep.pl`) after `firebase login` / ADC:
+Bootstrap admin (`zamowienia@glocksklep.pl`) after `firebase login` / ADC:
 
 ```bash
 pnpm bootstrap:admin

@@ -45,6 +45,7 @@ const emptyWay = (): HomepageWayOfWorking => ({
 
 const emptyMissionPoint = (): HomepageMissionPoint => ({
 	id: uuid(),
+	title: '',
 	body: '',
 });
 
@@ -104,10 +105,10 @@ const HomepageInner = () => {
 		}));
 	};
 
-	const updateMissionPoint = (id: string, body: string) => {
+	const updateMissionPoint = (id: string, partial: Partial<HomepageMissionPoint>) => {
 		setForm((prev) => ({
 			...prev,
-			missionPoints: prev.missionPoints.map((p) => (p.id === id ? { ...p, body } : p)),
+			missionPoints: prev.missionPoints.map((p) => (p.id === id ? { ...p, ...partial } : p)),
 		}));
 	};
 
@@ -167,7 +168,7 @@ const HomepageInner = () => {
 
 	const buildPayload = (): HomepageWritable => {
 		const missionPoints = form.missionPoints
-			.map((p) => ({ id: p.id, body: p.body.trim() }))
+			.map((p) => ({ id: p.id, title: p.title.trim(), body: p.body.trim() }))
 			.filter((p) => p.body);
 		const resolvedPoints =
 			missionPoints.length > 0 ? missionPoints : DEFAULT_HOMEPAGE.missionPoints;
@@ -314,12 +315,18 @@ const HomepageInner = () => {
 									}
 								/>
 								<TextField
+									label='Tytuł'
+									fullWidth
+									value={point.title}
+									onChange={(e) => updateMissionPoint(point.id, { title: e.target.value })}
+								/>
+								<TextField
 									label='Tekst'
 									fullWidth
 									multiline
 									minRows={2}
 									value={point.body}
-									onChange={(e) => updateMissionPoint(point.id, e.target.value)}
+									onChange={(e) => updateMissionPoint(point.id, { body: e.target.value })}
 								/>
 							</Stack>
 						</Paper>

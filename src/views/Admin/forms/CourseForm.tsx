@@ -20,6 +20,7 @@ import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { AutoSlugField, LEVEL_OPTIONS } from './AutoSlugField';
 import { CourseImageFields } from './CourseImageFields';
 import { CourseInactiveField } from './CourseInactiveField';
+import { CourseKindFields } from './CourseKindFields';
 import { DatesSection } from './DatesSection';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
@@ -45,6 +46,8 @@ export const CourseForm = ({
 			dates: [],
 			tags: [],
 			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			kind: 'course',
+			prerequisiteCourseIds: [],
 			...defaultValues,
 		},
 	});
@@ -88,6 +91,12 @@ export const CourseForm = ({
 							<AutoSlugField name='slug' label='Slug' sourceName='name' />
 						</Box>
 						<FormTextField
+							name='subtitle'
+							label='Podtytuł'
+							placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
+							helperText='Krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
+						/>
+						<FormTextField
 							name='description'
 							label='Opis'
 							placeholder='Krótki opis szkolenia...'
@@ -108,6 +117,7 @@ export const CourseForm = ({
 								)}
 							/>
 						</Box>
+						<CourseKindFields />
 						<CourseImageFields />
 						<CourseInactiveField />
 					</Box>

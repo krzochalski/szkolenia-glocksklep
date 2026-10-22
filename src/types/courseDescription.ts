@@ -9,6 +9,16 @@ export interface CourseDescriptionSection {
 	items: string[];
 }
 
+/** Structured gear / ammo requirements shown as a scannable strip. */
+export interface CourseRequirements {
+	/** Participant must bring their own firearm */
+	ownGun: boolean;
+	/** Participant must bring a holster */
+	holster: boolean;
+	/** Recommended round count (omit when not applicable) */
+	roundCount?: number;
+}
+
 /**
  * Keys of sections that can be toggled visible/hidden
  * on the participant panel (SzkolenieSzczegoly).
@@ -18,7 +28,8 @@ export type CourseDescriptionSectionKey =
 	| 'forWhom'
 	| 'notExpect'
 	| 'bring'
-	| 'dontBring';
+	| 'dontBring'
+	| 'outcomes';
 
 export interface CourseDescription {
 	id: string;
@@ -48,6 +59,14 @@ export interface CourseDescription {
 	bring?: CourseDescriptionSection;
 	/** What NOT to bring — with optional heading */
 	dontBring?: CourseDescriptionSection;
+	/** What you will be able to do afterwards */
+	outcomes?: CourseDescriptionSection;
+	/** Scannable requirements: own gun, holster, round count */
+	requirements?: CourseRequirements;
+	/** 2–3 session stills under `public/sessions/` */
+	gallery?: string[];
+	/** Optional YouTube URL of a real session clip */
+	sessionVideoUrl?: string;
 	/**
 	 * Sections visible on the participant panel (SzkolenieSzczegoly).
 	 * If undefined/empty, no sections are shown to participants.

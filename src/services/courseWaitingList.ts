@@ -9,7 +9,13 @@ import {
 	setDoc,
 	where,
 } from 'firebase/firestore';
+import type { Course } from '@/types/course';
 import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
+import {
+	getPrerequisiteCourseIds,
+	isEligibleForCourse,
+	PREREQUISITE_ENROLL_ERROR,
+} from '@/utils/courseKind';
 import { db } from './firestore';
 
 const COLLECTION = 'courseWaitingList';
@@ -22,6 +28,35 @@ export const getWaitingListEntryId = (courseId: string, userId: string): string 
 export const getGuestWaitingListEntryId = (courseId: string, email: string): string =>
 	`${courseId}_guest_${normalizeWaitingListEmail(email)}`;
 
+const loadCourseForGate = async (courseId: string): Promise<Course> => {
+	const snap = await getDoc(doc(db, 'courses', courseId));
+	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
+	const data = snap.data();
+	const kind = data.kind === 'practice' ? 'practice' : 'course';
+	const prerequisiteCourseIds = Array.isArray(data.prerequisiteCourseIds)
+		? data.prerequisiteCourseIds.filter((x): x is string => typeof x === 'string' && x.length > 0)
+		: [];
+	return {
+		id: snap.id,
+		...(data as Omit<Course, 'id' | 'kind' | 'prerequisiteCourseIds'>),
+		kind,
+		prerequisiteCourseIds: kind === 'practice' ? prerequisiteCourseIds : [],
+	};
+};
+
+const assertUserEligibleForWaitlist = async (courseId: string, userId: string): Promise<void> => {
+	const course = await loadCourseForGate(courseId);
+	const prereqs = getPrerequisiteCourseIds(course);
+	if (prereqs.length === 0) return;
+	const snaps = await Promise.all(
+		prereqs.map((id) => getDoc(doc(db, 'users', userId, 'courseCompletions', id)))
+	);
+	const completedIds = new Set(snaps.filter((s) => s.exists()).map((s) => s.id));
+	if (!isEligibleForCourse(course, completedIds)) {
+		throw new Error(PREREQUISITE_ENROLL_ERROR);
+	}
+};
+
 export const addToWaitingList = async (params: {
 	courseId: string;
 	courseName: string;
@@ -31,6 +66,7 @@ export const addToWaitingList = async (params: {
 	email: string;
 	phoneNumber?: string;
 }): Promise<void> => {
+	await assertUserEligibleForWaitlist(params.courseId, params.userId);
 	const id = getWaitingListEntryId(params.courseId, params.userId);
 	const email = normalizeWaitingListEmail(params.email);
 	const entry: Omit<CourseWaitingListEntry, 'id'> = {
@@ -54,6 +90,12 @@ export const addGuestToWaitingList = async (params: {
 	courseSlug: string;
 	email: string;
 }): Promise<void> => {
+	const course = await loadCourseForGate(params.courseId);
+	if (getPrerequisiteCourseIds(course).length > 0) {
+		throw new Error(
+			'Ten trening wymaga ukończenia wcześniejszego kursu. Zaloguj się na konto z ukończonym szkoleniem.'
+		);
+	}
 	const email = normalizeWaitingListEmail(params.email);
 	const id = getGuestWaitingListEntryId(params.courseId, email);
 	const entry: Omit<CourseWaitingListEntry, 'id' | 'userId' | 'phoneNumber'> = {

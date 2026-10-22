@@ -3,17 +3,20 @@
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { OptimizedImage } from '@components';
-import { Box, Button, CatalogCard, Chip } from '@ui';
+import { Box, Button, CatalogCard, Chip, Typography } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import type { Course } from '@/types/course';
+import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { fillPath } from '@/utils/paths';
 import { formatPlnNettoBrutto } from '@/utils/pricing';
 
 type CourseCardProps = {
 	readonly course: Course;
 	readonly imageSrc?: string;
+	/** Resolved names of prerequisite courses (practice only). */
+	readonly prerequisiteNames?: string[];
 };
 
 const LIST_THUMB_SIZES = '(max-width: 600px) 72px, 96px';
@@ -48,16 +51,20 @@ const chipSx = {
 	height: 24,
 } as const;
 
-export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
+export const CourseCard = ({ course, imageSrc, prerequisiteNames = [] }: CourseCardProps) => {
 	const [imageFailed, setImageFailed] = useState(false);
 	const tags = course.tags ?? [];
+	const kind = getCourseKind(course);
 	const level = (COURSE_LEVEL_LABEL[course.level] ?? course.level).toUpperCase();
+	const eyebrow =
+		kind === 'practice' ? `${COURSE_KIND_LABEL.practice.toUpperCase()} · ${level}` : level;
 	const showImage = Boolean(imageSrc) && !imageFailed;
+	const subtitle = course.subtitle?.trim();
 
 	return (
 		<CatalogCard
 			layout='list'
-			eyebrow={level}
+			eyebrow={eyebrow}
 			image={
 				showImage && imageSrc ? (
 					<OptimizedImage
@@ -74,11 +81,40 @@ export const CourseCard = ({ course, imageSrc }: CourseCardProps) => {
 			}
 			title={course.name}
 			description={
-				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 0.25 }}>
-					<Chip label={`${course.hours} H`} size='small' variant='outlined' sx={chipSx} />
-					{tags.map((tag) => (
-						<Chip key={tag} label={tag} size='small' variant='outlined' sx={chipSx} />
-					))}
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mt: 0.25 }}>
+					{subtitle ? (
+						<Typography
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontSize: '0.75rem',
+								fontWeight: 700,
+								letterSpacing: '0.04em',
+								color: 'primary.main',
+								lineHeight: 1.35,
+							}}
+						>
+							{subtitle}
+						</Typography>
+					) : null}
+					{prerequisiteNames.length > 0 ? (
+						<Typography
+							sx={{
+								fontFamily: '"Space Mono", monospace',
+								fontSize: '0.6875rem',
+								letterSpacing: '0.02em',
+								color: 'text.secondary',
+								lineHeight: 1.4,
+							}}
+						>
+							Wymaga ukończenia: {prerequisiteNames.join(', ')}
+						</Typography>
+					) : null}
+					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+						<Chip label={`${course.hours} H`} size='small' variant='outlined' sx={chipSx} />
+						{tags.map((tag) => (
+							<Chip key={tag} label={tag} size='small' variant='outlined' sx={chipSx} />
+						))}
+					</Box>
 				</Box>
 			}
 			price={formatPlnNettoBrutto(course.price)}

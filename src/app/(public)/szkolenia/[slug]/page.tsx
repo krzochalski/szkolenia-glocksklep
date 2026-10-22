@@ -22,9 +22,12 @@ export async function generateMetadata({ params }: Props) {
 	try {
 		const course = await getCourseBySlug(slug);
 		if (!course) return staticPageMetadata('notFound', `${Paths.courses}/${slug}`);
+		const subtitle = course.subtitle?.trim();
 		return courseItemMetadata({
-			title: itemTitle(course.name),
-			description: itemDescription(course.description),
+			title: itemTitle(subtitle ? `${course.name} — ${subtitle}` : course.name),
+			description: itemDescription(
+				subtitle ? `${subtitle}. ${course.description}` : course.description
+			),
 			path: `${Paths.courses}/${course.slug}`,
 		});
 	} catch {

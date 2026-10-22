@@ -1,19 +1,34 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
-import { Box, Button, Divider, Paper, TextField, Typography } from '@ui';
+import {
+	Box,
+	Button,
+	Checkbox,
+	Divider,
+	FormControlLabel,
+	Paper,
+	TextField,
+	Typography,
+} from '@ui';
 import { useState } from 'react';
 import type {
 	CourseDescription,
 	CourseDescriptionSection,
 	CourseDescriptionSectionKey,
 	CourseModuleData,
+	CourseRequirements,
 } from '@/types/courseDescription';
+import { extractYoutubeId } from '@/utils/youtube';
 import {
 	ListSectionEditor,
 	ModulesEditor,
 	SectionTitleWithCheckbox,
 } from './CourseDescriptionFormEditors';
+import {
+	CourseSessionMediaFields,
+	normalizeGalleryForSave,
+} from './CourseSessionMediaFields';
 import { SectionTitle } from './SectionTitle';
 
 type CourseDescriptionFormProps = {
@@ -23,6 +38,14 @@ type CourseDescriptionFormProps = {
 };
 
 const emptySection = (): CourseDescriptionSection => ({ items: [] });
+
+const emptyRequirements = (): CourseRequirements => ({
+	ownGun: false,
+	holster: false,
+});
+
+const hasRequirementsToSave = (req: CourseRequirements): boolean =>
+	req.ownGun || req.holster || (typeof req.roundCount === 'number' && req.roundCount > 0);
 
 export const CourseDescriptionForm = ({
 	slug,
@@ -46,6 +69,15 @@ export const CourseDescriptionForm = ({
 	const [dontBring, setDontBring] = useState<CourseDescriptionSection>(
 		defaultValues?.dontBring ?? emptySection()
 	);
+	const [outcomes, setOutcomes] = useState<CourseDescriptionSection>(
+		defaultValues?.outcomes ?? emptySection()
+	);
+	const [requirements, setRequirements] = useState<CourseRequirements>(
+		defaultValues?.requirements ?? emptyRequirements()
+	);
+	const [gallery, setGallery] = useState<string[]>(defaultValues?.gallery ?? []);
+	const [sessionVideoUrl, setSessionVideoUrl] = useState(defaultValues?.sessionVideoUrl ?? '');
+	const [videoError, setVideoError] = useState<string | undefined>();
 	const [visibleInParticipantPanel, setVisibleInParticipantPanel] = useState<
 		CourseDescriptionSectionKey[]
 	>(defaultValues?.visibleInParticipantPanel ?? []);
@@ -58,8 +90,15 @@ export const CourseDescriptionForm = ({
 	};
 
 	const handleSubmit = async () => {
+		const trimmedVideo = sessionVideoUrl.trim();
+		if (trimmedVideo && !extractYoutubeId(trimmedVideo)) {
+			setVideoError('Podaj prawidłowy link YouTube');
+			return;
+		}
+		setVideoError(undefined);
 		setSubmitting(true);
 		try {
+			const galleryPaths = normalizeGalleryForSave(gallery);
 			const data: Omit<CourseDescription, 'id'> = {
 				slug,
 				eyebrow,
@@ -74,6 +113,21 @@ export const CourseDescriptionForm = ({
 				...(notExpect.items.length > 0 ? { notExpect } : {}),
 				...(bring.items.length > 0 ? { bring } : {}),
 				...(dontBring.items.length > 0 ? { dontBring } : {}),
+				...(outcomes.items.length > 0 ? { outcomes } : {}),
+				...(hasRequirementsToSave(requirements)
+					? {
+							requirements: {
+								ownGun: requirements.ownGun,
+								holster: requirements.holster,
+								...(typeof requirements.roundCount === 'number' &&
+								requirements.roundCount > 0
+									? { roundCount: requirements.roundCount }
+									: {}),
+							},
+						}
+					: {}),
+				...(galleryPaths.length > 0 ? { gallery: galleryPaths } : {}),
+				...(trimmedVideo ? { sessionVideoUrl: trimmedVideo } : {}),
 				visibleInParticipantPanel,
 			};
 			await onSubmit(data);
@@ -81,6 +135,11 @@ export const CourseDescriptionForm = ({
 			setSubmitting(false);
 		}
 	};
+
+	const roundCountValue =
+		typeof requirements.roundCount === 'number' && requirements.roundCount > 0
+			? String(requirements.roundCount)
+			: '';
 
 	return (
 		<Paper variant='outlined' sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -110,6 +169,59 @@ export const CourseDescriptionForm = ({
 					multiline
 					minRows={3}
 				/>
+			</Box>
+
+			<Divider />
+			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+				<SectionTitle>Wymagania</SectionTitle>
+				<Typography variant='body2' color='text.secondary'>
+					Szybki skan na stronie szkolenia: własna broń, kabura, liczba naboi.
+				</Typography>
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+					<FormControlLabel
+						control={
+							<Checkbox
+								checked={requirements.ownGun}
+								onChange={(e) =>
+									setRequirements((prev) => ({ ...prev, ownGun: e.target.checked }))
+								}
+							/>
+						}
+						label='Własna broń'
+					/>
+					<FormControlLabel
+						control={
+							<Checkbox
+								checked={requirements.holster}
+								onChange={(e) =>
+									setRequirements((prev) => ({ ...prev, holster: e.target.checked }))
+								}
+							/>
+						}
+						label='Kabura'
+					/>
+					<TextField
+						label='Amunicja (szt.)'
+						type='number'
+						size='small'
+						value={roundCountValue}
+						onChange={(e) => {
+							const raw = e.target.value.trim();
+							if (!raw) {
+								setRequirements((prev) => {
+									const { roundCount: _, ...rest } = prev;
+									return rest;
+								});
+								return;
+							}
+							const n = Number.parseInt(raw, 10);
+							if (!Number.isFinite(n) || n <= 0) return;
+							setRequirements((prev) => ({ ...prev, roundCount: n }));
+						}}
+						slotProps={{ htmlInput: { min: 1, step: 1 } }}
+						sx={{ width: 160 }}
+					/>
+				</Box>
 			</Box>
 
 			<Divider />
@@ -152,6 +264,21 @@ export const CourseDescriptionForm = ({
 			<Divider />
 			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 				<SectionTitleWithCheckbox
+					title='Co będziesz umiał'
+					sectionKey='outcomes'
+					checked={visibleInParticipantPanel.includes('outcomes')}
+					onToggle={togglePanelSection}
+				/>
+				<ListSectionEditor
+					label='Efekty po szkoleniu'
+					value={outcomes}
+					onChange={setOutcomes}
+				/>
+			</Box>
+
+			<Divider />
+			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+				<SectionTitleWithCheckbox
 					title='Co zabrać'
 					sectionKey='bring'
 					checked={visibleInParticipantPanel.includes('bring')}
@@ -169,6 +296,21 @@ export const CourseDescriptionForm = ({
 					onToggle={togglePanelSection}
 				/>
 				<ListSectionEditor label='Zostaw w domu' value={dontBring} onChange={setDontBring} />
+			</Box>
+
+			<Divider />
+			<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+				<SectionTitle>Z zajęć</SectionTitle>
+				<CourseSessionMediaFields
+					gallery={gallery}
+					onGalleryChange={setGallery}
+					sessionVideoUrl={sessionVideoUrl}
+					onSessionVideoUrlChange={(url) => {
+						setSessionVideoUrl(url);
+						if (videoError) setVideoError(undefined);
+					}}
+					videoError={videoError}
+				/>
 			</Box>
 
 			<Divider />

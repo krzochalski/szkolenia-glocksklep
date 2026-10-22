@@ -4,12 +4,13 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '15-10-2026';
+const EFFECTIVE_FROM = '22-10-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
 const REGON = '367849550';
-const EMAIL_PUBLIC = 'szkolenia@glocksklep.pl';
+const ADDRESS = 'Łaska 75/79, 98-220 Zduńska Wola';
+const EMAIL_PUBLIC = 'zamowienia@glocksklep.pl';
 const EMAIL_ORDERS = 'zamowienia@glocksklep.pl';
 const PHONE = '530 556 523';
 
@@ -20,7 +21,7 @@ export const DEFAULT_REGULAMIN_MD = `# Regulamin Serwisu GLOCKSKLEP Szkolenia
 ## I. Postanowienia ogólne
 
 1. Niniejszy regulamin (dalej „Regulamin”) określa zasady korzystania z serwisu internetowego GLOCKSKLEP Szkolenia dostępnego pod adresem ${SITE_URL} (dalej „Serwis”) oraz zasady zawierania i wykonywania umów o udział w szkoleniach strzeleckich oferowanych za pośrednictwem Serwisu.
-2. Organizatorem Serwisu i stroną umów o udział w szkoleniach jest Piotr Krzoska, przedsiębiorca prowadzący działalność gospodarczą pod firmą ${FIRM}, wpisany do Centralnej Ewidencji i Informacji o Działalności Gospodarczej, NIP: ${NIP}, REGON: ${REGON} (dalej „Organizator”).
+2. Organizatorem Serwisu i stroną umów o udział w szkoleniach jest Piotr Krzoska, przedsiębiorca prowadzący działalność gospodarczą pod firmą ${FIRM}, wpisany do Centralnej Ewidencji i Informacji o Działalności Gospodarczej, NIP: ${NIP}, REGON: ${REGON}, adres: ${ADDRESS} (dalej „Organizator”).
 3. Kontakt z Organizatorem:
    - e-mail: ${EMAIL_PUBLIC} (sprawy ogólne) oraz ${EMAIL_ORDERS} (zapisy, płatności, reklamacje);
    - telefon: ${PHONE}.
@@ -36,8 +37,9 @@ Użyte w Regulaminie pojęcia oznaczają:
 - **Serwis** — strona internetowa ${SITE_URL} wraz z funkcjami Konta, zapisów na szkolenia, listy oczekujących i dokumentów pro forma.
 - **Konto** — indywidualne konto użytkownika w Serwisie, powiązane z adresem e-mail.
 - **Użytkownik** — osoba korzystająca z Serwisu, w tym posiadacz Konta.
-- **Szkolenie** — usługa szkolenia strzeleckiego prezentowana w Serwisie (opis, cena, wymagania).
-- **Termin** — konkretna data (oraz ewentualnie miejsce i godziny) realizacji Szkolenia, na którą możliwy jest zapis.
+- **Szkolenie** — usługa szkolenia strzeleckiego prezentowana w Serwisie jako program szkoleniowy (opis, cena, wymagania).
+- **Trening** — oferta w Serwisie oznaczona jako trening (ćwiczenia / utrwalanie umiejętności), mogąca wymagać uprzedniego ukończenia wskazanych Szkoleń.
+- **Termin** — konkretna data (oraz ewentualnie miejsce i godziny) realizacji Szkolenia lub Treningu, na którą możliwy jest zapis.
 - **Uczestnik** — Użytkownik zapisany na dany Termin.
 - **Proforma** — dokument zawierający dane do przelewu i kwotę należności za udział w Terminie, generowany w Serwisie po zapisie.
 - **Konsument** — osoba fizyczna zawierająca z Organizatorem umowę niezwiązaną bezpośrednio z jej działalnością gospodarczą lub zawodową.
@@ -57,19 +59,21 @@ Użyte w Regulaminie pojęcia oznaczają:
 ## V. Zapis na Termin i lista oczekujących
 
 1. Informacje o Szkoleniach i Terminach w Serwisie stanowią zaproszenie do zawarcia umowy w rozumieniu art. 71 Kodeksu cywilnego, na warunkach Regulaminu.
-2. Zapis na Termin wymaga zalogowanego Konta oraz potwierdzenia zapisu w Serwisie. Zapis realizowany jest poprzez system Serwisu (w tym endpoint zapisu po stronie Organizatora).
-3. Do zawarcia umowy o udział w danym Terminie dochodzi z chwilą skutecznego zapisu Użytkownika na Termin (potwierdzenie w Serwisie oraz — w miarę możliwości — wiadomość e-mail z potwierdzeniem).
-4. Liczba miejsc na Terminie jest ograniczona. W przypadku braku wolnych miejsc Użytkownik może zapisać się na **listę oczekujących** (Konto: dane z profilu; gość: co najmniej adres e-mail). Lista oczekujących nie gwarantuje miejsca; Organizator może poinformować o zwolnieniu miejsca według własnej procedury.
-5. Organizator może odmówić zapisu lub anulować udział Uczestnika, jeżeli Termin został odwołany, dane Użytkownika są nieprawidłowe albo Użytkownik nie spełnia wymogów uczestnictwa opisanych w Regulaminie lub na stronie Szkolenia — z odpowiednim rozliczeniem wpłat według sekcji VIII.
+2. Zapis na Termin wymaga zalogowanego Konta oraz potwierdzenia zapisu w Serwisie. Użytkownik może zapisać **wyłącznie siebie** (dane uczestnika odpowiadają Kontu). Zapis realizowany jest poprzez system Serwisu po stronie Organizatora.
+3. Do zawarcia umowy o udział w danym Terminie dochodzi z chwilą skutecznego zapisu Użytkownika na Termin (potwierdzenie w Serwisie oraz — w miarę możliwości — wiadomość e-mail z potwierdzeniem). Zapis nie wymaga wcześniejszej płatności online.
+4. Nie można zapisać się na Termin anulowany ani na Szkolenie lub Trening oznaczony jako niedostępny. Liczba miejsc na Terminie jest ograniczona; przy braku wolnych miejsc zapis jest niemożliwy.
+5. Niektóre Treningi wymagają **ukończenia wskazanych Szkoleń** (oznaczenie w Serwisie: „Wymaga ukończenia…”). Ukończenie jest rejestrowane w Koncie przez Organizatora. Bez spełnienia tych wymagań Serwis **blokuje** zapis na Termin oraz dołączenie do listy oczekujących; gość nie może zapisać się na listę oczekujących takiego Treningu — wymagane jest zalogowane Konto z ukończonymi szkoleniami. Organizator może zapisać Uczestnika ręcznie (np. telefonicznie) z pominięciem tej blokady.
+6. W przypadku braku wolnych miejsc lub braku dogodnego Terminu Użytkownik może zapisać się na **listę oczekujących danego Szkolenia lub Treningu** (poziom oferty, nie pojedynczego Terminu), o ile spełnia wymagania z pkt 5. Zalogowany Użytkownik: dane z profilu Konta. Gość: co najmniej adres e-mail (tylko gdy Trening nie wymaga ukończenia wcześniejszych Szkoleń). Lista oczekujących **nie gwarantuje** miejsca i **nie** przydziela automatycznie miejsca po wypisie innego Uczestnika; Organizator może poinformować o nowym Terminie lub zwolnieniu miejsca według własnej procedury (w tym e-mail). Skuteczny zapis na Termin usuwa wpis Użytkownika z listy oczekujących tego Szkolenia lub Treningu.
+7. Organizator może odmówić zapisu lub anulować udział Uczestnika, jeżeli Termin został odwołany, dane Użytkownika są nieprawidłowe albo Użytkownik nie spełnia wymogów uczestnictwa opisanych w Regulaminie lub na stronie Szkolenia / Treningu — z odpowiednim rozliczeniem wpłat według sekcji VIII.
 
 ## VI. Ceny i płatności
 
-1. Ceny Szkolenia w systemie Serwisu są podawane w złotych polskich (PLN) jako kwoty **netto**. Podatek VAT wynosi zasadniczo **23%**, o ile przepisy lub oznaczenie przy danym Terminie nie stanowią inaczej. Przełącznik netto/brutto w interfejsie służy wyłącznie prezentacji i nie zmienia podstawy rozliczenia.
-2. Po zapisie Uczestnik otrzymuje dostęp do **Proformy** z danymi do przelewu w sekcji „Moje szkolenia” (oraz ewentualnie w wiadomości e-mail).
+1. Ceny Szkolenia w systemie Serwisu są podawane w złotych polskich (PLN) jako kwoty **netto**. Podatek VAT wynosi zasadniczo **23%**, o ile przepisy lub oznaczenie przy danym Terminie nie stanowią inaczej. Przełącznik netto/brutto w interfejsie służy wyłącznie prezentacji i nie zmienia podstawy rozliczenia. Dla konkretnego Terminu może obowiązywać cena indywidualna wskazana przy Terminie.
+2. Po zapisie Uczestnik otrzymuje dostęp do **Proformy** z danymi sprzedawcy, rachunkiem bankowym i kwotą w sekcji „Moje szkolenia” / Proforma (oraz ewentualnie w wiadomości e-mail). Proforma jest dokumentem informacyjnym do zapłaty; status „opłacone” w Serwisie ustawia Organizator po potwierdzeniu wpływu lub uzgodnieniu gotówki.
 3. Akceptowane metody płatności: **przelew bankowy** na rachunek wskazany w Proformie oraz — za uzgodnieniem z Organizatorem — **gotówka** (oznaczenie w systemie przez Organizatora).
-4. Serwis **nie** obsługuje bramek płatności online (np. BLIK, karty, Przelewy24).
+4. Serwis **nie** obsługuje bramek płatności online (np. BLIK, karty, Przelewy24). Użytkownik nie opłaca Terminu w trakcie zapisu w Serwisie.
 5. Termin zapłaty wynika z Proformy i wynosi zasadniczo **do 3 dni przed** datą Terminu (data Terminu minus 3 dni), chyba że Organizator wskaże inaczej. Brak wpłaty w terminie może skutkować skreśleniem z listy Uczestników bez obowiązku świadczenia usługi, z zastrzeżeniem sekcji VIII w zakresie już dokonanych wpłat.
-6. Na życzenie Uczestnika (w tym po podaniu NIP w profilu) Organizator może wystawić fakturę zgodnie z obowiązującymi przepisami.
+6. Na życzenie Uczestnika (w tym po podaniu NIP w profilu) Organizator może wystawić fakturę zgodnie z obowiązującymi przepisami (wystawienie faktury VAT może odbywać się poza Serwisem).
 
 ## VII. Wymogi uczestnictwa w szkoleniu strzeleckim
 
@@ -79,13 +83,13 @@ Użyte w Regulaminie pojęcia oznaczają:
 
 ## VIII. Rezygnacja, odwołanie Terminu i zwroty
 
-1. Uczestnik może wypisać się z Terminu w Serwisie (funkcja wypisu) w dowolnym momencie przed rozpoczęciem Terminu, o ile funkcja jest dostępna.
+1. Uczestnik może wypisać się z Terminu w Serwisie (funkcja wypisu) — wypis usuwa go z listy Uczestników danego Terminu. Serwis nie blokuje wypisu ze względu na liczbę dni do Terminu; skutki finansowe określa pkt 2–4 poniżej.
 2. **Zwrot wpłaty:**
    - przy rezygnacji Uczestnika złożonej **co najmniej 3 dni przed** datą Terminu — zwrot **100%** wpłaconej kwoty;
    - przy rezygnacji **później niż 3 dni przed** datą Terminu (tj. w okresie krótszym niż 3 pełne dni przed datą Terminu) — **brak zwrotu** wpłaconej kwoty;
    - przy **odwołaniu Terminu przez Organizatora** — zwrot **100%** wpłaconej kwoty albo — za zgodą Uczestnika — przeniesienie zapisu na inny Termin.
 3. Zwrot dokonywany jest przelewem na rachunek, z którego dokonano płatności, lub inny wskazany przez Uczestnika, w rozsądnym terminie (co do zasady do 14 dni od skutecznego ustalenia podstawy zwrotu).
-4. Wypis z Terminu w Serwisie nie jest tożsamy z automatycznym zwrotem — Uczestnik powinien skontaktować się w sprawie zwrotu na ${EMAIL_ORDERS}, podając dane umożliwiające identyfikację zapisu i płatności.
+4. Wypis z Terminu w Serwisie **nie** uruchamia automatycznego zwrotu ani zmiany statusu płatności — Uczestnik powinien skontaktować się w sprawie zwrotu na ${EMAIL_ORDERS}, podając dane umożliwiające identyfikację zapisu i płatności.
 
 ## IX. Prawo odstąpienia od umowy zawartej na odległość
 
@@ -119,7 +123,7 @@ export const DEFAULT_PRIVACY_POLICY_MD = `# Polityka prywatności
 
 ## 2. Administrator danych
 
-1. Administratorem danych osobowych jest Piotr Krzoska, przedsiębiorca prowadzący działalność gospodarczą pod firmą ${FIRM}, NIP: ${NIP}, REGON: ${REGON} (dalej „Administrator” lub „Organizator”).
+1. Administratorem danych osobowych jest Piotr Krzoska, przedsiębiorca prowadzący działalność gospodarczą pod firmą ${FIRM}, NIP: ${NIP}, REGON: ${REGON}, adres: ${ADDRESS} (dalej „Administrator” lub „Organizator”).
 2. Administrator nie wyznaczył Inspektora Ochrony Danych (IOD).
 3. W sprawach dotyczących ochrony danych osobowych można kontaktować się:
    - e-mail: ${EMAIL_PUBLIC} lub ${EMAIL_ORDERS};
@@ -137,7 +141,7 @@ Administrator przetwarza dane wyłącznie w zakresie niezbędnym do poniższych 
 
 1. **Założenie i prowadzenie Konta, uwierzytelnianie (Firebase Authentication)** — art. 6 ust. 1 lit. b RODO. Zakres: adres e-mail, hasło (w formie obsługiwanej przez dostawcę Auth — Administrator nie przechowuje haseł w postaci jawnej), identyfikator użytkownika, imię i nazwisko / nazwa wyświetlana, numer telefonu, opcjonalnie NIP w profilu, dane logowania Google (jeśli wybrano tę metodę).
 2. **Zawarcie i wykonanie umowy o udział w szkoleniu** (zapis na Termin, komunikacja, Proforma, potwierdzenia e-mail, status płatności / gotówki) — art. 6 ust. 1 lit. b RODO. Zakres: dane z Konta oraz dane uczestnika na Terminie (imię/nazwa, e-mail, telefon, status opłacenia).
-3. **Lista oczekujących** — art. 6 ust. 1 lit. b RODO (gdy dotyczy zamiaru zawarcia umowy) lub lit. f RODO (prawnie uzasadniony interes: obsługa kolejki na zwolnione miejsca). Zakres: e-mail, opcjonalnie imię/nazwa i telefon, identyfikator kursu/Terminu.
+3. **Lista oczekujących** (na poziomie Szkolenia / kursu) — art. 6 ust. 1 lit. b RODO (gdy dotyczy zamiaru zawarcia umowy) lub lit. f RODO (prawnie uzasadniony interes: obsługa kolejki przy nowych Terminach lub zwolnionych miejscach). Zakres: e-mail, opcjonalnie imię/nazwa i telefon, identyfikator kursu; wpis jest usuwany przy skutecznym zapisie na Termin tego Szkolenia.
 4. **Wystawianie i przechowywanie dokumentów sprzedaży oraz obowiązki rachunkowe i podatkowe** — art. 6 ust. 1 lit. c RODO. Zakres: dane identyfikacyjne i transakcyjne (w tym NIP, jeśli podano).
 5. **Reklamacje, roszczenia, obrona przed roszczeniami** — art. 6 ust. 1 lit. b oraz lit. f RODO.
 6. **Obsługa zapytań i formularza kontaktowego** — art. 6 ust. 1 lit. f RODO (komunikacja) lub lit. b, jeśli kontakt dotyczy umowy.
@@ -230,7 +234,7 @@ export const DEFAULT_COOKIES_POLICY_MD = `# Polityka cookies
 
 1. Niniejsza Polityka cookies wyjaśnia, w jaki sposób serwis GLOCKSKLEP Szkolenia (${SITE_URL}, dalej „Serwis”) wykorzystuje pliki cookie oraz podobne technologie.
 2. Polityka uzupełnia Politykę prywatności (${SITE_URL}/polityka-prywatnosci) i powinna być czytana łącznie z nią.
-3. Administratorem Serwisu oraz — w zakresie, w jakim cookies wiążą się z danymi osobowymi — administratorem danych jest Piotr Krzoska, ${FIRM}, NIP: ${NIP}, REGON: ${REGON}. Kontakt: ${EMAIL_PUBLIC}, ${EMAIL_ORDERS}, tel. ${PHONE}.
+3. Administratorem Serwisu oraz — w zakresie, w jakim cookies wiążą się z danymi osobowymi — administratorem danych jest Piotr Krzoska, ${FIRM}, NIP: ${NIP}, REGON: ${REGON}, adres: ${ADDRESS}. Kontakt: ${EMAIL_PUBLIC}, ${EMAIL_ORDERS}, tel. ${PHONE}.
 
 ## 2. Czym są pliki cookie i podobne technologie
 

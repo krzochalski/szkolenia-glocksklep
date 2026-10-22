@@ -44,6 +44,10 @@ export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 
 export const courseSchema = z.object({
 	name: z.string().min(2, 'Nazwa jest wymagana (min. 2 znaki)'),
+	subtitle: z
+		.string()
+		.min(2, 'Podtytuł jest wymagany (min. 2 znaki)')
+		.max(120, 'Podtytuł max. 120 znaków'),
 	slug: z
 		.string()
 		.min(2, 'Slug jest wymagany')
@@ -59,6 +63,8 @@ export const courseSchema = z.object({
 		.positive('Liczba miejsc musi być większa od 0')
 		.default(DEFAULT_COURSE_SLOTS_MAX),
 	level: z.enum(['basic', 'intermediate', 'advanced'], { error: 'Wybierz poziom' }),
+	kind: z.enum(['course', 'practice']).default('course'),
+	prerequisiteCourseIds: z.array(z.string()).default([]),
 	tags: z.array(z.string()).default([]),
 	thumbnail: z.string().optional().default(''),
 	hero: z.string().optional().default(''),

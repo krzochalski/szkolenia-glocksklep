@@ -22,4 +22,5 @@ When writing or migrating screens, read those files first. Skill: `.cursor/skill
 - Browser `/api/*` is proxied by Next (`src/app/api/[...path]`) with a Google ID token; Firebase Bearer is forwarded as `X-Firebase-Authorization` (org Domain Restricted Sharing blocks public Cloud Run invoker)
 - Admin = existence of `admins/{uid}` (Console / bootstrap CF only)
 - Paths: `src/constants/paths.ts`
+- Legal defaults (`/regulamin`, privacy, cookies): `src/constants/legalMarkdown.ts` — keep in sync with enroll/waitlist/payment/auth behaviour (see `.cursor/rules/regulamin-sync.mdc`)
 - End tasks with `pnpm verify`

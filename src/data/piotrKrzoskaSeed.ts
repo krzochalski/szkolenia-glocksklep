@@ -6,7 +6,7 @@ export const PIOTR_INSTRUCTOR_SEED = {
 	name: 'PIOTR "GLOCKACCI" KRZOSKA',
 	slug: 'piotr-krzoska',
 	bio: 'Zdobywca wielu krajowych i regionalnych tytułów IPSC, IDPA, PiRO.',
-	email: 'szkolenia@glocksklep.pl',
+	email: 'zamowienia@glocksklep.pl',
 } as const;
 
 export const PIOTR_BILLING_SEED = {

@@ -21,7 +21,7 @@
 			"emailPassword": true,
 			"googleSignIn": {
 				"oAuthBrandDisplayName": "Szkolenia Glocksklep",
-				"supportEmail": "szkolenia@glocksklep.pl",
+				"supportEmail": "zamowienia@glocksklep.pl",
 				"authorizedRedirectUris": [
 					"https://szkolenia.glocksklep.pl",
 					"https://szkolenia.glocksklep.pl/__/auth/handler",

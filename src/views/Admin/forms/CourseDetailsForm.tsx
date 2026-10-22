@@ -21,6 +21,7 @@ import { FormProvider, type Resolver, useForm } from 'react-hook-form';
 import { AutoSlugField, LEVEL_OPTIONS } from './AutoSlugField';
 import { CourseImageFields } from './CourseImageFields';
 import { CourseInactiveField } from './CourseInactiveField';
+import { CourseKindFields } from './CourseKindFields';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
 import { SectionTitle } from './SectionTitle';
@@ -30,18 +31,22 @@ type CourseDetailsFormProps = {
 	readonly defaultValues?: Partial<CourseFormValues>;
 	readonly onSubmit: (data: CourseFormValues) => Promise<void>;
 	readonly submitLabel?: string;
+	readonly excludeCourseId?: string;
 };
 
 export const CourseDetailsForm = ({
 	defaultValues,
 	onSubmit,
 	submitLabel = 'ZAPISZ',
+	excludeCourseId,
 }: CourseDetailsFormProps) => {
 	const methods = useForm<CourseFormValues>({
 		resolver: zodResolver(courseSchema) as Resolver<CourseFormValues>,
 		defaultValues: {
 			tags: [],
 			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			kind: 'course',
+			prerequisiteCourseIds: [],
 			...defaultValues,
 			dates: [],
 		},
@@ -88,6 +93,12 @@ export const CourseDetailsForm = ({
 							<FormTextField name='name' label='Nazwa szkolenia' />
 							<AutoSlugField name='slug' label='Slug' sourceName='name' />
 						</Box>
+						<FormTextField
+							name='subtitle'
+							label='Podtytuł'
+							placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
+							helperText='Krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
+						/>
 						<FormTextField name='description' label='Opis' multiline minRows={3} />
 						<Box
 							sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}
@@ -103,6 +114,7 @@ export const CourseDetailsForm = ({
 								)}
 							/>
 						</Box>
+						<CourseKindFields excludeCourseId={excludeCourseId} />
 						<CourseImageFields />
 						<CourseInactiveField />
 					</Box>

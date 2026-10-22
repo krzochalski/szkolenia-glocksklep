@@ -1,0 +1,39 @@
+---
+description: Keep /regulamin (and related legal MD) in sync with product rules
+globs: src/constants/legalMarkdown.ts,src/services/regulamin.ts,src/services/privacyPolicy.ts,src/services/cookiesPolicy.ts,src/services/auth.ts,src/services/courses.ts,src/services/courseWaitingList.ts,src/services/proformaInvoices.ts,src/services/billingData.ts,src/utils/schemas.ts,functions/src/enrollment.ts,functions/src/index.ts,functions/src/**/waitingList*.ts
+alwaysApply: false
+---
+
+# Regulamin ↔ app logic sync
+
+Public legal copy lives in `src/constants/legalMarkdown.ts` (`DEFAULT_REGULAMIN_MD`, privacy, cookies). Firestore CMS (`regulamin/content`, etc.) is seeded/fallback from those strings; admin can overwrite. **Product facts must stay true in the defaults** — lawyers may edit CMS wording later, but agents must not leave defaults that contradict code.
+
+## When you change product behaviour
+
+If the change affects any of the topics below, **update `DEFAULT_REGULAMIN_MD` in the same task** (and privacy/cookies defaults when processing/cookies change). Bump `EFFECTIVE_FROM` in `legalMarkdown.ts` when the published rules change.
+
+| Topic | Code anchors | Regulamin sections (typical) |
+|-------|--------------|------------------------------|
+| Enroll / capacity / canceled / inactive | `functions/src/enrollment.ts`, `/api/enroll` | V zapis |
+| Unenroll (who, when) | `/api/unenroll` | VIII rezygnacja |
+| Waitlist (course-level, guest e-mail, no auto-seat) | `courseWaitingList.ts` | V lista oczekujących |
+| Prices / VAT / proforma due (date − 3 days) | `pricing.ts`, `proformaInvoices.ts` | VI płatności |
+| Paid / cash only via admin | `courses.ts` toggles | VI |
+| Registration fields / terms checkbox | `schemas.ts`, `RegisterView` | IV konto |
+| Auth methods (e-mail, Google, magic link) | `auth.ts` | IV |
+| Course gear/permit requirements UX | course description `requirements` | VII |
+| Billing identity (NIP, address, bank) | `billingData.ts` FALLBACK | I, VI |
+| Cookies / analytics | cookie banner, Firebase Analytics | cookies + privacy |
+
+## Rules of drafting
+
+- Mirror **what the app actually does**. Do not invent automatic refunds, payment gateways, age checks, or FIFO waitlist assignment unless implemented.
+- Policy that is legal-only (e.g. refund % by day, art. 38 odstąpienie) may stay as drafted defaults — label remains “draft for lawyer review” in the file header.
+- After editing defaults: remind that **already published** Firestore content is not overwritten until admin uses „Przywróć domyślny” + Zapisz (or manual edit).
+- Cross-link privacy/cookies URLs when changing those docs too.
+
+## Do not
+
+- Skip updating `legalMarkdown.ts` because “CMS already has text”.
+- Put live secrets or full IBAN in UI copy beyond what proforma/billing already exposes.
+- Soften safety/permit obligations when adding softer product UX.
