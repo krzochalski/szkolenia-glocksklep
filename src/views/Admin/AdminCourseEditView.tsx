@@ -1,15 +1,16 @@
 'use client';
 
 import { getCourseSlotsMax } from '@constants/courses';
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
+import { useQuery } from '@tanstack/react-query';
+import { Box, Button, CircularProgress, ContentSwap, Typography } from '@ui';
+import { ArrowBack } from '@ui/icons';
+import NextLink from 'next/link';
 import { getCourseKind } from '@/utils/courseKind';
 import { fillPath } from '@/utils/paths';
 import type { CourseFormValues } from '@/utils/schemas';
-import { Box, Button, CircularProgress, ContentSwap, Typography } from '@ui';
-import { ArrowBack } from '@ui/icons';
-import { useQuery } from '@tanstack/react-query';
-import NextLink from 'next/link';
 import { CourseDetailsForm } from './forms/CourseDetailsForm';
 
 type Props = {
@@ -50,26 +51,26 @@ const EditInner = ({ courseId }: Props) => {
 			) : !course || !initial ? (
 				<Typography>Nie znaleziono kursu.</Typography>
 			) : (
-		<Box sx={{ maxWidth: 960 }}>
-			<Button
-				component={NextLink}
-				href={fillPath(Paths.adminCourseAllDates, { courseId })}
-				startIcon={<ArrowBack />}
-				sx={{ mb: 2 }}
-			>
-				Terminy
-			</Button>
-			<Typography variant='h5' gutterBottom>
-				Edycja: {course.name}
-			</Typography>
-			<CourseDetailsForm
-				defaultValues={initial}
-				excludeCourseId={courseId}
-				onSubmit={async (values) => {
-					await updateCourse(courseId, values);
-				}}
-			/>
-		</Box>
+				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+					<Button
+						component={NextLink}
+						href={fillPath(Paths.adminCourseAllDates, { courseId })}
+						startIcon={<ArrowBack />}
+						sx={{ mb: 2 }}
+					>
+						Terminy
+					</Button>
+					<Typography variant='h5' gutterBottom>
+						Edycja: {course.name}
+					</Typography>
+					<CourseDetailsForm
+						defaultValues={initial}
+						excludeCourseId={courseId}
+						onSubmit={async (values) => {
+							await updateCourse(courseId, values);
+						}}
+					/>
+				</Box>
 			)}
 		</ContentSwap>
 	);

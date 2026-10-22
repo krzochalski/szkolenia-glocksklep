@@ -1,5 +1,6 @@
 'use client';
 
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { getCourses } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -42,7 +43,7 @@ export const NajblizszeSzkoleniaView = ({ initialCourses }: Props) => {
 					<CircularProgress />
 				</Box>
 			) : (
-				<Box sx={{ maxWidth: 960 }}>
+				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH, width: '100%' }}>
 					<Typography variant='h4' component='h1' gutterBottom>
 						Najbliższe szkolenia
 					</Typography>

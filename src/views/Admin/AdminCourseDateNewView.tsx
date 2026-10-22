@@ -2,6 +2,7 @@
 
 import { AdminStickyActions } from '@components';
 import { DEFAULT_COURSE_TIME_START, getCourseSlotsMax } from '@constants/courses';
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getCourse, updateCourseDates } from '@services/courses';
@@ -72,7 +73,7 @@ const NewDateInner = ({ courseId }: Props) => {
 			{courseLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: 960 }}>
+				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
 					<Button
 						component={NextLink}
 						href={fillPath(Paths.adminCourseAllDates, { courseId })}

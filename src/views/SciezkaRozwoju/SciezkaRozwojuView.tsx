@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeading } from '@components';
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { getCourses } from '@services/courses';
 import { getDevelopmentPath } from '@services/developmentPath';
 import { useQuery } from '@tanstack/react-query';
@@ -84,7 +85,7 @@ export const SciezkaRozwojuView = ({ initialPath, initialCourses }: Props) => {
 					: 'content';
 
 	return (
-		<>
+		<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH, width: '100%' }}>
 			<PageHeading title='Ścieżka rozwoju' description={pathDoc?.intro} />
 
 			<ContentSwap state={pathState}>
@@ -189,6 +190,6 @@ export const SciezkaRozwojuView = ({ initialPath, initialCourses }: Props) => {
 					</Grid>
 				)}
 			</ContentSwap>
-		</>
+		</Box>
 	);
 };

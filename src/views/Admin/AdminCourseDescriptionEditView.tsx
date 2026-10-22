@@ -1,11 +1,9 @@
 'use client';
 
-import {
-	getCourseDescriptionBySlug,
-	saveCourseDescription,
-} from '@services/courseDescriptions';
-import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
+import { getCourseDescriptionBySlug, saveCourseDescription } from '@services/courseDescriptions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { CourseDescriptionForm } from './forms/CourseDescriptionForm';
 
 type Props = {
@@ -26,21 +24,21 @@ const EditInner = ({ slug }: Props) => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box sx={{ maxWidth: 960 }}>
-			<Typography variant='h5' gutterBottom>
-				Opis: /{slug}
-			</Typography>
-			<CourseDescriptionForm
-				key={data?.id ?? `new-${slug}`}
-				slug={slug}
-				defaultValues={data ?? null}
-				onSubmit={async (payload) => {
-					await saveCourseDescription(payload);
-					await queryClient.invalidateQueries({ queryKey: ['courseDescription', slug] });
-					await queryClient.invalidateQueries({ queryKey: ['courseDescriptions'] });
-				}}
-			/>
-		</Box>
+				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
+					<Typography variant='h5' gutterBottom>
+						Opis: /{slug}
+					</Typography>
+					<CourseDescriptionForm
+						key={data?.id ?? `new-${slug}`}
+						slug={slug}
+						defaultValues={data ?? null}
+						onSubmit={async (payload) => {
+							await saveCourseDescription(payload);
+							await queryClient.invalidateQueries({ queryKey: ['courseDescription', slug] });
+							await queryClient.invalidateQueries({ queryKey: ['courseDescriptions'] });
+						}}
+					/>
+				</Box>
 			)}
 		</ContentSwap>
 	);

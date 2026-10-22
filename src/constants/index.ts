@@ -1,3 +1,4 @@
+export { PAGE_CONTENT_MAX_WIDTH } from './layout';
 export { isCurrentPath, type NavItem, navigationItems } from './nav';
 export { Paths } from './paths';
 export {

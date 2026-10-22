@@ -1,5 +1,6 @@
 'use client';
 
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { Paths } from '@constants/paths';
 import { createCourse } from '@services/courses';
 import { Box, Button, Typography } from '@ui';
@@ -9,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { CourseForm } from './forms/CourseForm';
 
 export const AdminCourseNewView = () => (
-	<Box sx={{ maxWidth: 960 }}>
+	<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
 		<Button component={NextLink} href={Paths.adminCourses} startIcon={<ArrowBack />} sx={{ mb: 2 }}>
 			Powrót
 		</Button>

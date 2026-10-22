@@ -1,6 +1,7 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
+import { PAGE_CONTENT_MAX_WIDTH } from '@constants/layout';
 import { DEFAULT_COOKIES_POLICY_MD } from '@constants/legalMarkdown';
 import { Paths } from '@constants/paths';
 import {
@@ -8,6 +9,7 @@ import {
 	saveCookiesPolicy,
 	seedCookiesPolicyIfMissing,
 } from '@services/cookiesPolicy';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	Box,
 	Button,
@@ -20,7 +22,6 @@ import {
 	Typography,
 } from '@ui';
 import { OpenInNewIcon } from '@ui/icons';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
 export const AdminCookiesPolicyView = () => <CookiesPolicyInner />;
@@ -55,7 +56,7 @@ const CookiesPolicyInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box sx={{ maxWidth: 960 }}>
+				<Box sx={{ maxWidth: PAGE_CONTENT_MAX_WIDTH }}>
 					<Stack
 						direction={{ xs: 'column', sm: 'row' }}
 						sx={{ mb: 2, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}
@@ -96,11 +97,7 @@ const CookiesPolicyInner = () => {
 						>
 							Zapisz
 						</Button>
-						<Button
-							variant='outlined'
-							onClick={() => setResetOpen(true)}
-							disabled={saving}
-						>
+						<Button variant='outlined' onClick={() => setResetOpen(true)} disabled={saving}>
 							Przywróć domyślny
 						</Button>
 					</AdminStickyActions>
