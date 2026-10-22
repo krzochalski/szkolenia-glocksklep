@@ -5,7 +5,8 @@ import { WAITLIST_SECTION_ID } from '@constants/waitlist';
 import { useAuthUser } from '@hooks';
 import type { Course, CourseClass } from '@/types/course';
 import { formatWaitingListDemand } from '@/utils/courseDates';
-import { Box, MotionAlert, Typography } from '@ui';
+import { Box, HardShadow, MotionAlert, Typography } from '@ui';
+import { CalendarMonthIcon } from '@ui/icons';
 import { useEffect, useState } from 'react';
 
 type CourseWaitingListSectionProps = {
@@ -55,32 +56,64 @@ export const CourseWaitingListSection = ({
 		: 'Zapisz się na listę oczekujących — powiadomimy Cię, gdy pojawi się nowy termin tego szkolenia.';
 
 	return (
-		<Box
+		<HardShadow
 			id={WAITLIST_SECTION_ID}
 			sx={{
 				mt: 4,
 				p: { xs: 3, md: 4 },
-				border: '2px solid',
-				borderColor: 'ink.main',
-				bgcolor: 'background.paper',
+				bgcolor: noUpcomingDates ? 'accentDark.pale' : 'background.paper',
 				scrollMarginTop: 96,
 			}}
 		>
-			<Box sx={{ mb: 2 }}>
-				<Typography variant='h6' sx={{ fontSize: '1rem', fontWeight: 700, mb: 0.5 }}>
-					{title}
-				</Typography>
-				<Typography variant='body2' color='text.secondary'>
-					{description}
-				</Typography>
-				{demandLabel ? (
-					<Typography
-						variant='body2'
-						sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+			<Box
+				sx={{
+					mb: 2,
+					display: 'flex',
+					gap: 2,
+					alignItems: 'flex-start',
+				}}
+			>
+				{noUpcomingDates ? (
+					<Box
+						sx={{
+							flexShrink: 0,
+							width: 48,
+							height: 48,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							bgcolor: 'primary.main',
+							color: 'primary.contrastText',
+						}}
+						aria-hidden
 					>
-						{demandLabel}
-					</Typography>
+						<CalendarMonthIcon />
+					</Box>
 				) : null}
+				<Box sx={{ minWidth: 0 }}>
+					<Typography
+						variant={noUpcomingDates ? 'h5' : 'h6'}
+						component='h3'
+						sx={{
+							fontSize: noUpcomingDates ? undefined : '1rem',
+							fontWeight: 700,
+							mb: 0.5,
+						}}
+					>
+						{title}
+					</Typography>
+					<Typography variant='body2' color='text.secondary'>
+						{description}
+					</Typography>
+					{demandLabel ? (
+						<Typography
+							variant='body2'
+							sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+						>
+							{demandLabel}
+						</Typography>
+					) : null}
+				</Box>
 			</Box>
 
 			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 2 }}>
@@ -92,6 +125,6 @@ export const CourseWaitingListSection = ({
 				onError={setError}
 				onSuccess={() => setError(null)}
 			/>
-		</Box>
+		</HardShadow>
 	);
 };

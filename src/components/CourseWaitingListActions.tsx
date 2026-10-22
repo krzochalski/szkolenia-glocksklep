@@ -131,7 +131,7 @@ const GuestWaitingListForm = ({
 					/>
 				)}
 			/>
-			<Button type='submit' variant='outlined' disabled={isSubmitting}>
+			<Button type='submit' variant='contained' disabled={isSubmitting}>
 				Zapisz na listę oczekujących
 			</Button>
 			<Typography variant='body2' color='text.secondary'>
@@ -288,7 +288,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 	return (
 		<>
 			<Button
-				variant='outlined'
+				variant='contained'
 				disabled={pending || eligibility.loading}
 				onClick={() => setConfirmAction('join')}
 			>
