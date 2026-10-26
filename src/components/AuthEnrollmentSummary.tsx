@@ -1,11 +1,10 @@
 'use client';
 
-import { PlaceNameLink } from '@components/PlaceNameLink';
+import { CourseDateMeta } from '@components/CourseDateMeta';
 import { getCourseBySlug } from '@services/courses';
-import { Box, Price, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
+import { Box, Price, Typography } from '@ui';
 import { useSearchParams } from 'next/navigation';
-import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { courseSlugFromRedirect } from '@/utils/paths';
 import { bruttoFromNetto } from '@/utils/pricing';
 
@@ -39,10 +38,10 @@ export const AuthEnrollmentSummary = () => {
 				bgcolor: 'surface.muted',
 			}}
 		>
-			<Typography variant='body2' sx={{ fontWeight: 600 }}>
-				Zapisujesz się na: {course.name}, {formatCourseDatePl(date.date)}, {date.timeStart},{' '}
-				<PlaceNameLink place={date.place} />
+			<Typography variant='body2' sx={{ fontWeight: 600, mb: 0.75 }}>
+				Zapisujesz się na: {course.name}
 			</Typography>
+			<CourseDateMeta date={date.date} timeStart={date.timeStart} place={date.place} />
 			<Price
 				gross={bruttoFromNetto(netto)}
 				net={netto}

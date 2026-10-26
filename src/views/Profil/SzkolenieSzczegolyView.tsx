@@ -19,12 +19,11 @@ import {
 import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { CourseDateMeta } from '@/components/CourseDateMeta';
 import { CourseFacts } from '@/components/CourseFacts';
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
-import { PlaceNameLink } from '@/components/PlaceNameLink';
-import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { mapParticipantDescription } from '@/utils/mapParticipantDescription';
 import { fillPath } from '@/utils/paths';
@@ -99,10 +98,12 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 					<Typography variant='h5' component='h1' gutterBottom>
 						{course.name}
 					</Typography>
-					<Typography color='text.secondary' sx={{ mb: 1 }}>
-						{formatCourseDatePl(date.date)} · {date.timeStart} ·{' '}
-						<PlaceNameLink place={date.place} />
-					</Typography>
+					<CourseDateMeta
+						date={date.date}
+						timeStart={date.timeStart}
+						place={date.place}
+						sx={{ mb: 1 }}
+					/>
 					{date.subtitle?.trim() ? (
 						<Typography
 							sx={{
@@ -216,10 +217,7 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 							<Divider sx={{ my: 4 }} />
 							<Box sx={{ mb: 4 }}>
 								<SectionLabel>Efekty</SectionLabel>
-								<Typography
-									variant='h2'
-									sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, mb: 2 }}
-								>
+								<Typography variant='h2' sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' }, mb: 2 }}>
 									{panel?.outcomesHeading || 'Co będziesz umiał'}
 								</Typography>
 								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

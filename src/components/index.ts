@@ -1,5 +1,6 @@
 export { AdminShell } from './AdminShell';
 export { AdminStickyActions } from './AdminStickyActions';
+export { CourseDateMeta } from './CourseDateMeta';
 export { JsonLd, safeJsonLd } from './JsonLd';
 export { MarkdownContent } from './MarkdownContent';
 export { MarkdownWysiwygEditor } from './MarkdownWysiwygEditor';

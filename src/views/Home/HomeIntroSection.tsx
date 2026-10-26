@@ -137,9 +137,10 @@ export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 						src={banner}
 						alt=''
 						sx={{
-							position: { md: 'absolute' },
+							position: { xs: 'relative', md: 'absolute' },
 							inset: { md: 0 },
 							width: '100%',
+							maxWidth: '100%',
 							height: '100%',
 							objectFit: 'cover',
 							objectPosition: 'center',

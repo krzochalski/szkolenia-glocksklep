@@ -34,16 +34,16 @@ const date: CourseClass = {
 const wrap = (ui: ReactElement) => render(<UiProvider>{ui}</UiProvider>);
 
 describe('CourseDateRow', () => {
-	it('renders title, Polish meta, dual price, and action in separate blocks', () => {
+	it('renders title, stacked meta, dual price, and action in separate blocks', () => {
 		wrap(<CourseDateRow course={course} date={date} action={<span>Zapisano</span>} />);
 
 		expect(screen.getByRole('link', { name: 'Movement Fundamentals' })).toHaveAttribute(
 			'href',
 			'/szkolenia/movement-fundamentals'
 		);
-		expect(
-			screen.getByText('18 października 2026 · 10:00 · Strzelnica Czacz · wolne: 7')
-		).toBeInTheDocument();
+		expect(screen.getByText('18 października 2026 · 10:00')).toBeInTheDocument();
+		expect(screen.getByText('Strzelnica Czacz')).toBeInTheDocument();
+		expect(screen.getByText('wolne: 7')).toBeInTheDocument();
 		expect(
 			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
 		).toBeInTheDocument();
@@ -66,18 +66,14 @@ describe('CourseDateRow', () => {
 			'href',
 			'/profil/moje-szkolenia/movement-fundamentals/d1'
 		);
-		expect(screen.getByText('18 października 2026 · 10:00 · Strzelnica Czacz')).toBeInTheDocument();
+		expect(screen.getByText('18 października 2026 · 10:00')).toBeInTheDocument();
+		expect(screen.getByText('Strzelnica Czacz')).toBeInTheDocument();
 		expect(screen.queryByText(/wolne:/)).toBeNull();
 		expect(screen.getByRole('link', { name: 'Proforma' })).toBeInTheDocument();
 	});
 
 	it('renders date subtitle when set', () => {
-		wrap(
-			<CourseDateRow
-				course={course}
-				date={{ ...date, subtitle: 'Orientacja IDPA' }}
-			/>
-		);
+		wrap(<CourseDateRow course={course} date={{ ...date, subtitle: 'Orientacja IDPA' }} />);
 		expect(screen.getByText('Orientacja IDPA')).toBeInTheDocument();
 	});
 
@@ -93,10 +89,9 @@ describe('CourseDateRow', () => {
 		);
 
 		expect(screen.getByText('18 października 2026 · 10:00')).toBeInTheDocument();
+		expect(screen.getByText('Strzelnica Czacz')).toBeInTheDocument();
 		expect(
-			screen.getByText(
-				'Strzelnica Czacz · instruktor: Piotr "Glockacci" Krzoska · wolne: 7'
-			)
+			screen.getByText('instruktor: Piotr "Glockacci" Krzoska · wolne: 7')
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
@@ -139,10 +134,8 @@ describe('CourseDateRow', () => {
 			],
 		};
 		wrap(<CourseDateRow course={course} date={scarce} />);
-		expect(
-			screen.getByText(
-				'18 października 2026 · 10:00 · Strzelnica Czacz · wolne: 2 · ostatnie miejsca'
-			)
-		).toBeInTheDocument();
+		expect(screen.getByText('18 października 2026 · 10:00')).toBeInTheDocument();
+		expect(screen.getByText('Strzelnica Czacz')).toBeInTheDocument();
+		expect(screen.getByText('wolne: 2 · ostatnie miejsca')).toBeInTheDocument();
 	});
 });

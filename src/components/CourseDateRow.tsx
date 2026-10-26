@@ -1,12 +1,12 @@
 'use client';
 
-import { PlaceNameLink } from '@components/PlaceNameLink';
+import { CourseDateMeta } from '@components/CourseDateMeta';
 import { Paths } from '@constants/paths';
 import { Box, Link, Paper, Price, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
-import { formatSlotsMeta, isCourseClassCanceled } from '@/utils/courseDates';
+import { isCourseClassCanceled } from '@/utils/courseDates';
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
@@ -53,9 +53,7 @@ export const CourseDateRow = ({
 				p: 2.5,
 				borderWidth: 2,
 				borderColor: highlighted ? 'primary.main' : 'ink.main',
-				boxShadow: highlighted
-					? (theme) => `4px 4px 0 ${theme.palette.primary.main}`
-					: undefined,
+				boxShadow: highlighted ? (theme) => `4px 4px 0 ${theme.palette.primary.main}` : undefined,
 				bgcolor: canceled || highlighted ? 'surface.muted' : 'background.paper',
 			}}
 		>
@@ -111,19 +109,16 @@ export const CourseDateRow = ({
 							{date.subtitle.trim()}
 						</Typography>
 					) : null}
-					<Typography
-						variant='body2'
-						component='p'
-						color='text.secondary'
-						sx={{ m: 0, display: 'block' }}
-					>
-						{showTitle ? <>{when} · </> : null}
-						<PlaceNameLink place={date.place} />
-						{showInstructor && date.instructor?.name ? (
-							<> · instruktor: {date.instructor.name}</>
-						) : null}
-						{showSlots ? <> · {canceled ? 'odwołane' : formatSlotsMeta(date)}</> : null}
-					</Typography>
+					<CourseDateMeta
+						date={date.date}
+						timeStart={date.timeStart}
+						place={date.place}
+						hideWhen={!showTitle}
+						showSlots={showSlots}
+						slotsSource={date}
+						showInstructor={showInstructor}
+						instructorName={date.instructor?.name}
+					/>
 					{!canceled ? (
 						<Box
 							sx={{
@@ -138,9 +133,7 @@ export const CourseDateRow = ({
 					) : null}
 				</Stack>
 				{action ? (
-					<Box sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'center' } }}>
-						{action}
-					</Box>
+					<Box sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'center' } }}>{action}</Box>
 				) : null}
 			</Stack>
 		</Paper>

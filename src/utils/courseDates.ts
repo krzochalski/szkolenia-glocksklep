@@ -11,7 +11,9 @@ export type CourseDateEntry = {
 export const isFutureDate = (dateStr: string): boolean =>
 	!dayjs(dateStr).isBefore(dayjs().startOf('day'));
 
-export const isCourseClassCanceled = (date: CourseClass): boolean => date.canceled === true;
+export const isCourseClassCanceled = (
+	date: Pick<CourseClass, 'canceled'>
+): boolean => date.canceled === true;
 
 export const isCourseInactive = (course: Pick<Course, 'inactive'>): boolean =>
 	course.inactive === true;
@@ -30,15 +32,18 @@ export const getFutureCourseDates = (courses: Course[]): CourseDateEntry[] => {
 	return entries.sort((a, b) => a.date.date.localeCompare(b.date.date));
 };
 
-export const getSlotsLeft = (date: CourseClass): number =>
-	date.slotsMax - (date.participants?.length ?? 0);
+export const getSlotsLeft = (
+	date: Pick<CourseClass, 'slotsMax' | 'participants'>
+): number => date.slotsMax - (date.participants?.length ?? 0);
 
 /** True when seats remain but are scarce enough to urge booking. */
 export const isLowSlotsLeft = (slotsLeft: number): boolean =>
 	slotsLeft > 0 && slotsLeft <= SCARCITY_SLOTS_THRESHOLD;
 
 /** Meta fragment for date rows: `wolne: N` or `wolne: N · ostatnie miejsca`. */
-export const formatSlotsMeta = (date: CourseClass): string => {
+export const formatSlotsMeta = (
+	date: Pick<CourseClass, 'slotsMax' | 'participants'>
+): string => {
 	const left = getSlotsLeft(date);
 	if (isLowSlotsLeft(left)) {
 		return `wolne: ${left} · ostatnie miejsca`;
