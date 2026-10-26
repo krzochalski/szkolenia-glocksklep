@@ -27,6 +27,7 @@ import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { mapParticipantDescription } from '@/utils/mapParticipantDescription';
 import { fillPath } from '@/utils/paths';
+import { effectiveEnrollmentNetto } from '@/utils/pricing';
 
 type Props = {
 	readonly slug: string;
@@ -123,12 +124,14 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 
 					<CourseFacts
 						meta={{
-							price: date.customPrice ?? course.price,
+							price: effectiveEnrollmentNetto(course, date, participant),
 							hours: course.hours,
 							level: course.level,
 							tags: course.tags,
 							slotsMax: date.slotsMax,
 							courseSlug: course.slug,
+							individual: participant?.customPrice != null,
+							listPrice: effectiveEnrollmentNetto(course, date),
 						}}
 					/>
 

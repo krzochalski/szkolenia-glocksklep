@@ -11,6 +11,17 @@ export interface Participant {
 	paid?: boolean;
 	/* Whether the participant declares cash payment for the class */
 	paysByCash?: boolean;
+	/**
+	 * Optional per-signup price override (PLN netto), same unit as course/date.
+	 * Resolution: `customPrice ?? date.customPrice ?? course.price`.
+	 */
+	customPrice?: number;
+	/** Admin-only reason for the individual price (cleared with the price). */
+	customPriceNote?: string;
+	/** ISO timestamp of last set/clear of the individual price. */
+	customPriceUpdatedAt?: string;
+	/** Admin uid who last set/cleared the individual price. */
+	customPriceUpdatedBy?: string;
 }
 
 /** Catalog offer type: full course vs practice/training session. */
@@ -64,6 +75,11 @@ export interface Course {
 	 * Used to show demand when there are no upcoming dates.
 	 */
 	waitingListCount?: number;
+	/**
+	 * ISO timestamp of the last admin waitlist blast for this course
+	 * (written by Cloud Functions `/api/waitlist-notify` only).
+	 */
+	waitingListLastEmailedAt?: string;
 	dates?: CourseClass[];
 }
 

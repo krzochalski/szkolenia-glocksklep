@@ -2,7 +2,8 @@
  * Admin ops dashboard aggregators.
  *
  * Revenue rule: count a signup when `Participant.paid === true` (admin-confirmed
- * transfer/cash). Amount = `date.customPrice ?? course.price` (PLN netto).
+ * transfer/cash). Amount = `effectiveEnrollmentNetto(course, date, participant)`
+ * (PLN netto: participant → date → course).
  * Month bucket = session calendar date (`CourseClass.date` YYYY-MM-DD) in
  * Europe/Warsaw calendar months. When online payments exist, swap the paid
  * filter to the payment-status enum without changing the rest of the pipeline.
@@ -10,7 +11,7 @@
 
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { getSlotsLeft, isLowSlotsLeft } from '@/utils/courseDates';
-import { bruttoFromNetto, roundMoney } from '@/utils/pricing';
+import { bruttoFromNetto, effectiveEnrollmentNetto, roundMoney } from '@/utils/pricing';
 import type { Course, CourseClass } from '@/types/course';
 
 export type SessionStatus = 'open' | 'full' | 'cancelled';
@@ -90,9 +91,6 @@ export const sessionStatus = (date: CourseClass): SessionStatus => {
 	if (signedUp >= date.slotsMax) return 'full';
 	return 'open';
 };
-
-const effectiveNetto = (course: Course, date: CourseClass): number =>
-	roundMoney(date.customPrice ?? course.price);
 
 const signedUpCount = (date: CourseClass): number => date.participants?.length ?? 0;
 
@@ -183,9 +181,9 @@ const accumulatePaidByMonth = (courses: readonly Course[]): Map<string, number> 
 		for (const date of course.dates ?? []) {
 			if (!date.date || date.date.length < 7) continue;
 			const key = monthKeyFromYmd(date.date);
-			const unit = effectiveNetto(course, date);
 			for (const p of date.participants ?? []) {
 				if (p.paid !== true) continue;
+				const unit = effectiveEnrollmentNetto(course, date, p);
 				buckets.set(key, roundMoney((buckets.get(key) ?? 0) + unit));
 			}
 		}

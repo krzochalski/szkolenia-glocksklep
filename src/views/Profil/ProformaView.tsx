@@ -16,6 +16,7 @@ import {
 	Divider,
 	HardShadow,
 	MonoText,
+	Price,
 	Stack,
 	Typography,
 } from '@ui';
@@ -343,14 +344,18 @@ const ProformaDocument = ({
 						sx={{
 							display: 'flex',
 							justifyContent: 'space-between',
+							alignItems: 'flex-start',
 							gap: 2,
 							py: 0.5,
 						}}
 					>
 						<Typography sx={{ fontWeight: 800 }}>Do zapłaty</Typography>
-						<Typography sx={{ fontWeight: 800, color: 'primary.main' }}>
-							{money(invoice.amountGross)}
-						</Typography>
+						<Price
+							gross={invoice.amountGross}
+							net={invoice.amountNet}
+							size='md'
+							sx={{ alignItems: 'flex-end' }}
+						/>
 					</Box>
 				</Box>
 			</Box>
@@ -451,18 +456,24 @@ export const ProformaView = ({ slug, dateId }: Props) => {
 	}
 
 	const participant = date.participants?.find((p) => p.id === user?.uid);
-	const invoice = buildProformaFromBilling(course, date, billing, {
-		displayName:
-			participant?.name ??
-			profile?.fullName ??
-			profile?.displayName ??
-			user?.displayName ??
-			undefined,
-		email: participant?.email ?? profile?.email ?? user?.email ?? undefined,
-		phone: participant?.phoneNumber ?? profile?.phoneNumber ?? user?.phoneNumber ?? undefined,
-		nip: profile?.nip,
-		paid: participant?.paid,
-	});
+	const invoice = buildProformaFromBilling(
+		course,
+		date,
+		billing,
+		{
+			displayName:
+				participant?.name ??
+				profile?.fullName ??
+				profile?.displayName ??
+				user?.displayName ??
+				undefined,
+			email: participant?.email ?? profile?.email ?? user?.email ?? undefined,
+			phone: participant?.phoneNumber ?? profile?.phoneNumber ?? user?.phoneNumber ?? undefined,
+			nip: profile?.nip,
+			paid: participant?.paid,
+		},
+		participant
+	);
 
 	const handleDownloadPdf = async () => {
 		const el = documentRef.current;

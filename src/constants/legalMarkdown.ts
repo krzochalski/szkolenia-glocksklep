@@ -4,7 +4,7 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '27-10-2026';
+const EFFECTIVE_FROM = '26-10-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
@@ -68,7 +68,7 @@ Użyte w Regulaminie pojęcia oznaczają:
 
 ## VI. Ceny i płatności
 
-1. Ceny Szkolenia w systemie Serwisu są podawane w złotych polskich (PLN). W interfejsie kwota **brutto** jest prezentowana jako główna, a kwota **netto** — obok lub poniżej; podstawą rozliczenia pozostaje kwota netto. Podatek VAT wynosi zasadniczo **23%**, o ile przepisy lub oznaczenie przy danym Terminie nie stanowią inaczej. Dla konkretnego Terminu może obowiązywać cena indywidualna wskazana przy Terminie.
+1. Ceny Szkolenia w systemie Serwisu są podawane w złotych polskich (PLN). W interfejsie kwota **brutto** jest prezentowana jako główna, a kwota **netto** — obok lub poniżej; podstawą rozliczenia pozostaje kwota netto. Podatek VAT wynosi zasadniczo **23%**, o ile przepisy lub oznaczenie przy danym Terminie nie stanowią inaczej. Dla konkretnego Terminu może obowiązywać cena indywidualna wskazana przy Terminie. Organizator może także ustalić **cenę indywidualną dla konkretnego zapisu** Uczestnika (niewidoczną na publicznej liście Terminów); wówczas rozliczenie tego zapisu (w tym Proforma) opiera się na tej cenie.
 2. Po zapisie Uczestnik otrzymuje dostęp do **Proformy** z danymi sprzedawcy, rachunkiem bankowym i kwotą w sekcji „Moje szkolenia” / Proforma (oraz ewentualnie w wiadomości e-mail). Proforma jest dokumentem informacyjnym do zapłaty; status „opłacone” w Serwisie ustawia Organizator po potwierdzeniu wpływu lub uzgodnieniu gotówki.
 3. Akceptowane metody płatności: **przelew bankowy** na rachunek wskazany w Proformie oraz — za uzgodnieniem z Organizatorem — **gotówka** (oznaczenie w systemie przez Organizatora).
 4. Serwis **nie** obsługuje bramek płatności online (np. BLIK, karty, Przelewy24). Użytkownik nie opłaca Terminu w trakcie zapisu w Serwisie.

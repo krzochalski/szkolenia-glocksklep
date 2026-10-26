@@ -213,6 +213,30 @@ describe('buildMonthlyRevenue', () => {
 		expect(rows[0]?.month).toBe('2025-01');
 	});
 
+	it('uses per-participant customPrice over date and course price', () => {
+		const courses = [
+			course({
+				id: 'c1',
+				name: 'Mixed',
+				price: 100,
+				dates: [
+					dateEntry({
+						id: 'oct',
+						date: '2025-10-15',
+						customPrice: 200,
+						participants: [
+							participant({ id: '1', paid: true, customPrice: 50 }),
+							participant({ id: '2', paid: true }),
+						],
+					}),
+				],
+			}),
+		];
+		const rows = buildMonthlyRevenue(courses, { year: 2025 });
+		const oct = rows.find((r) => r.month === '2025-10');
+		expect(oct?.netto).toBe(250);
+	});
+
 	it('builds dense last-N-months window ending at today', () => {
 		const courses = [
 			course({

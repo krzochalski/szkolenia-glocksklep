@@ -9,6 +9,7 @@ import {
 import {
 	getCourse,
 	setCourseDateCanceled,
+	setParticipantCustomPrice,
 	setParticipantPaysByCash,
 	toggleParticipantPaid,
 	unenrollFromCourse,
@@ -21,6 +22,7 @@ import {
 	ConfirmDialog,
 	ContentSwap,
 	FormControlLabel,
+	Price,
 	Stack,
 	Stagger,
 	StaggerItem,
@@ -35,9 +37,11 @@ import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Participant } from '@/types/course';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
+import { bruttoFromNetto, effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
 import { removeCourseDate } from './forms/dateMutations';
+import { ParticipantCustomPriceDialog } from './ParticipantCustomPriceDialog';
 
 type Props = {
 	readonly courseId: string;
@@ -68,10 +72,13 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		completed: boolean;
 	} | null>(null);
 	const [removeTarget, setRemoveTarget] = useState<Participant | null>(null);
+	const [priceTarget, setPriceTarget] = useState<Participant | null>(null);
 
 	const date = course?.dates?.find((d) => d.id === dateId);
 	const participants = date?.participants ?? [];
 	const participantIds = useMemo(() => participants.map((p) => p.id), [participants]);
+	const listNetto =
+		course && date ? effectiveEnrollmentNetto(course, date) : course?.price ?? 0;
 
 	const completionQueries = useQueries({
 		queries: participantIds.map((uid) => ({
@@ -158,6 +165,22 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		},
 	});
 
+	const setCustomPrice = useMutation({
+		mutationFn: ({
+			participantId,
+			customPrice,
+			note,
+		}: {
+			participantId: string;
+			customPrice: number | null;
+			note?: string;
+		}) => setParticipantCustomPrice(courseId, dateId, participantId, { customPrice, note }),
+		onSuccess: async () => {
+			setPriceTarget(null);
+			await invalidate();
+		},
+	});
+
 	const deleteDate = useMutation({
 		mutationFn: async () => {
 			if (!course) throw new Error('Brak kursu');
@@ -232,6 +255,8 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							const isCompleted = completedByUid.get(p.id) ?? false;
 							const overdue = isParticipantPaymentOverdue(p.paid, date.date);
 							const rowBg = p.paid ? 'success.light' : overdue ? 'error.light' : undefined;
+							const payable = effectiveEnrollmentNetto(course, date, p);
+							const hasCustom = p.customPrice != null;
 							return (
 								<StaggerItem key={p.id}>
 									<Stack
@@ -252,7 +277,41 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 											<Typography variant='body2' color='text.secondary'>
 												{p.email} {p.phoneNumber ? `· ${p.phoneNumber}` : ''}
 											</Typography>
+											<Box sx={{ mt: 0.75, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+												<Price
+													gross={bruttoFromNetto(payable)}
+													net={payable}
+													size='sm'
+												/>
+												{hasCustom ? (
+													<Typography
+														variant='caption'
+														sx={{
+															fontFamily: '"Space Mono", monospace',
+															fontWeight: 700,
+															letterSpacing: 0.04,
+															textTransform: 'uppercase',
+															color: 'primary.main',
+														}}
+													>
+														Cena indywidualna
+													</Typography>
+												) : null}
+												{p.customPriceNote ? (
+													<Typography variant='caption' color='text.secondary'>
+														{p.customPriceNote}
+													</Typography>
+												) : null}
+											</Box>
 										</Box>
+										<Button
+											size='small'
+											variant='outlined'
+											disabled={setCustomPrice.isPending}
+											onClick={() => setPriceTarget(p)}
+										>
+											Cena
+										</Button>
 										<FormControlLabel
 											control={
 												<Switch checked={Boolean(p.paid)} onChange={() => setPaidTarget(p)} />
@@ -436,6 +495,29 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							terminu? Tej operacji nie można cofnąć.
 						</Typography>
 					</ConfirmDialog>
+
+					<ParticipantCustomPriceDialog
+						open={Boolean(priceTarget)}
+						participant={priceTarget}
+						listNetto={listNetto}
+						loading={setCustomPrice.isPending}
+						onClose={() => setPriceTarget(null)}
+						onSave={({ customPrice, note }) => {
+							if (!priceTarget) return;
+							setCustomPrice.mutate({
+								participantId: priceTarget.id,
+								customPrice,
+								note,
+							});
+						}}
+						onClear={() => {
+							if (!priceTarget) return;
+							setCustomPrice.mutate({
+								participantId: priceTarget.id,
+								customPrice: null,
+							});
+						}}
+					/>
 				</Box>
 			)}
 		</ContentSwap>

@@ -228,6 +228,63 @@ export const setParticipantPaysByCash = async (
 	await updateDoc(doc(db, 'courses', courseId), { dates });
 };
 
+export type SetParticipantCustomPriceInput = {
+	/** PLN netto; `null` clears the override (keeps audit fields). */
+	readonly customPrice: number | null;
+	readonly note?: string;
+};
+
+/**
+ * Sets or clears a per-signup custom price (PLN netto).
+ * Clear removes `customPrice` + `customPriceNote` but still stamps audit fields.
+ */
+export const setParticipantCustomPrice = async (
+	courseId: string,
+	dateId: string,
+	participantId: string,
+	input: SetParticipantCustomPriceInput
+): Promise<void> => {
+	const admin = auth.currentUser;
+	if (!admin) throw new Error('Brak zalogowanego użytkownika.');
+	const snap = await getDoc(doc(db, 'courses', courseId));
+	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
+	const course = { id: snap.id, ...snap.data() } as Course;
+	const now = new Date().toISOString();
+	const note = input.note?.trim() || undefined;
+	const dates = (course.dates ?? []).map((d) => {
+		if (d.id !== dateId && d.date !== dateId) return d;
+		return {
+			...d,
+			participants: (d.participants ?? []).map((p) => {
+				if (p.id !== participantId) return p;
+				if (input.customPrice === null) {
+					const next: Participant = {
+						id: p.id,
+						name: p.name,
+						email: p.email,
+						customPriceUpdatedAt: now,
+						customPriceUpdatedBy: admin.uid,
+					};
+					if (p.phoneNumber) next.phoneNumber = p.phoneNumber;
+					if (p.paid != null) next.paid = p.paid;
+					if (p.paysByCash != null) next.paysByCash = p.paysByCash;
+					return next;
+				}
+				const next: Participant = {
+					...p,
+					customPrice: input.customPrice,
+					customPriceUpdatedAt: now,
+					customPriceUpdatedBy: admin.uid,
+				};
+				if (note) next.customPriceNote = note;
+				else delete next.customPriceNote;
+				return next;
+			}),
+		};
+	});
+	await updateDoc(doc(db, 'courses', courseId), { dates: stripUndefined(dates) });
+};
+
 /**
  * Replaces the entire `dates` array on a course document.
  * Used by admin pages to add, remove, clone, or reorder dates.

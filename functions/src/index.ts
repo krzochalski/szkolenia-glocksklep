@@ -20,6 +20,7 @@ import { sendCourseCompletionThankYou } from './courseCompletionMail';
 import { sendEnrollmentConfirmation } from './enrollmentMail';
 import { syncCourseWaitingListCount } from './waitingListCount';
 import { sendWaitingListConfirmation } from './waitingListMail';
+import { sendWaitlistNotify, waitlistNotifyBodySchema } from './waitlistNotifyMail';
 
 initializeApp();
 
@@ -186,6 +187,36 @@ app.post(['/api/notify-course-completion', '/notify-course-completion'], async (
 		}
 		console.error(err);
 		res.status(500).json({ error: 'Nie udało się wysłać e-maila.' });
+	}
+});
+
+/** Admin-only: compose + send email to waitlist (one course or all). */
+app.post(['/api/waitlist-notify', '/waitlist-notify'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const body = waitlistNotifyBodySchema.parse(req.body);
+		const result = await sendWaitlistNotify(getFirestore(), body);
+		if (!result.ok) {
+			const status = result.code === 'too_many' ? 400 : 400;
+			res.status(status).json({ error: result.error, code: result.code });
+			return;
+		}
+		res.status(200).json(result);
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowe dane.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać e-maili.' });
 	}
 });
 

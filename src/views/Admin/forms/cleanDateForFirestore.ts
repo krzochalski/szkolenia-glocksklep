@@ -16,6 +16,10 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 			if (p.phoneNumber) cp.phoneNumber = p.phoneNumber;
 			if (p.paid != null) cp.paid = p.paid;
 			if (p.paysByCash != null) cp.paysByCash = p.paysByCash;
+			if (p.customPrice != null) cp.customPrice = p.customPrice;
+			if (p.customPriceNote) cp.customPriceNote = p.customPriceNote;
+			if (p.customPriceUpdatedAt) cp.customPriceUpdatedAt = p.customPriceUpdatedAt;
+			if (p.customPriceUpdatedBy) cp.customPriceUpdatedBy = p.customPriceUpdatedBy;
 			return cp;
 		}),
 	};

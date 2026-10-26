@@ -2,9 +2,11 @@ import { formatCurrencyAmount } from '@ui';
 import { describe, expect, it } from 'vitest';
 import {
 	bruttoFromNetto,
+	effectiveEnrollmentNetto,
 	formatCoursePrice,
 	formatPlnDisplay,
 	formatPlnNettoBrutto,
+	parseParticipantCustomPriceNetto,
 } from './pricing';
 
 describe('pricing', () => {
@@ -34,5 +36,50 @@ describe('pricing', () => {
 		expect(formatPlnNettoBrutto(850)).toBe(
 			`${formatCurrencyAmount(1045.5)} brutto / ${formatCurrencyAmount(850)} netto`
 		);
+	});
+});
+
+describe('effectiveEnrollmentNetto', () => {
+	const course = { price: 850 };
+	const date = { customPrice: 700 };
+
+	it('uses course price when no date or participant override', () => {
+		expect(effectiveEnrollmentNetto(course, {}, null)).toBe(850);
+		expect(effectiveEnrollmentNetto(course, {})).toBe(850);
+	});
+
+	it('prefers date override over course price', () => {
+		expect(effectiveEnrollmentNetto(course, date)).toBe(700);
+		expect(effectiveEnrollmentNetto(course, date, {})).toBe(700);
+	});
+
+	it('prefers participant override over date and course', () => {
+		expect(effectiveEnrollmentNetto(course, date, { customPrice: 500 })).toBe(500);
+		expect(effectiveEnrollmentNetto(course, {}, { customPrice: 400 })).toBe(400);
+	});
+
+	it('treats participant customPrice 0 as a valid override', () => {
+		expect(effectiveEnrollmentNetto(course, date, { customPrice: 0 })).toBe(0);
+	});
+});
+
+describe('parseParticipantCustomPriceNetto', () => {
+	it('clears on empty / null / undefined', () => {
+		expect(parseParticipantCustomPriceNetto('')).toBeNull();
+		expect(parseParticipantCustomPriceNetto(null)).toBeNull();
+		expect(parseParticipantCustomPriceNetto(undefined)).toBeNull();
+		expect(parseParticipantCustomPriceNetto('   ')).toBeNull();
+	});
+
+	it('accepts zero and positive netto', () => {
+		expect(parseParticipantCustomPriceNetto(0)).toBe(0);
+		expect(parseParticipantCustomPriceNetto('500')).toBe(500);
+		expect(parseParticipantCustomPriceNetto(500.555)).toBe(500.56);
+	});
+
+	it('rejects NaN and negative', () => {
+		expect(() => parseParticipantCustomPriceNetto('abc')).toThrow();
+		expect(() => parseParticipantCustomPriceNetto(Number.NaN)).toThrow();
+		expect(() => parseParticipantCustomPriceNetto(-1)).toThrow();
 	});
 });

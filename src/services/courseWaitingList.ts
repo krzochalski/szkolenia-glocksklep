@@ -16,6 +16,7 @@ import {
 	isEligibleForCourse,
 	PREREQUISITE_ENROLL_ERROR,
 } from '@/utils/courseKind';
+import { auth } from './auth';
 import { db } from './firestore';
 
 const COLLECTION = 'courseWaitingList';
@@ -152,4 +153,62 @@ export const adminGetWaitingListEntries = async (): Promise<CourseWaitingListEnt
 
 export const adminRemoveFromWaitingList = async (entryId: string): Promise<void> => {
 	await deleteDoc(doc(db, COLLECTION, entryId));
+};
+
+export type AdminWaitlistNotifyScope = 'course' | 'all';
+
+export type AdminWaitlistNotifyResult = {
+	ok: true;
+	sent: number;
+	skipped: number;
+	failed: number;
+	recipientCount: number;
+	skippedInvalid: number;
+	courseIds: string[];
+};
+
+export const adminNotifyWaitingList = async (params: {
+	scope: AdminWaitlistNotifyScope;
+	courseId?: string;
+	subject: string;
+	body: string;
+}): Promise<AdminWaitlistNotifyResult> => {
+	const user = auth.currentUser;
+	if (!user) throw new Error('Brak zalogowanego użytkownika.');
+	const token = await user.getIdToken();
+	const res = await fetch('/api/waitlist-notify', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			scope: params.scope,
+			...(params.courseId ? { courseId: params.courseId } : {}),
+			subject: params.subject,
+			body: params.body,
+		}),
+	});
+	const data = (await res.json().catch(() => ({}))) as {
+		error?: string;
+		ok?: boolean;
+		sent?: number;
+		skipped?: number;
+		failed?: number;
+		recipientCount?: number;
+		skippedInvalid?: number;
+		courseIds?: string[];
+	};
+	if (!res.ok) {
+		throw new Error(data.error || 'Nie udało się wysłać e-maili.');
+	}
+	return {
+		ok: true,
+		sent: data.sent ?? 0,
+		skipped: data.skipped ?? 0,
+		failed: data.failed ?? 0,
+		recipientCount: data.recipientCount ?? 0,
+		skippedInvalid: data.skippedInvalid ?? 0,
+		courseIds: data.courseIds ?? [],
+	};
 };

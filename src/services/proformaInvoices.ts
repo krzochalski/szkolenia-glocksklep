@@ -3,6 +3,7 @@ import type { BillingData } from '@/types/billingData';
 import type { Course, CourseClass, Participant } from '@/types/course';
 import type { ProformaInvoice } from '@/types/proformaInvoice';
 import { formatProformaServiceName, getCourseKind } from '@/utils/courseKind';
+import { effectiveEnrollmentNetto } from '@/utils/pricing';
 import { proformaDueDate } from '@/utils/proformaDue';
 
 export type ProformaBuyerInfo = {
@@ -88,9 +89,10 @@ export const buildProformaFromBilling = (
 	course: Course,
 	dateEntry: CourseClass,
 	billing: BillingData,
-	buyer?: ProformaBuyerInfo
+	buyer?: ProformaBuyerInfo,
+	participant?: Participant | null
 ): ProformaInvoice => {
-	const price = dateEntry.customPrice ?? course.price;
+	const price = effectiveEnrollmentNetto(course, dateEntry, participant);
 	const vatRate = billing.vatRate;
 	const amountNet = price;
 	const amountGross = Math.round(price * (1 + vatRate / 100) * 100) / 100;

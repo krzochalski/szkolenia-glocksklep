@@ -37,6 +37,10 @@ export type CourseFactsMeta = {
 	readonly slotsMax?: number;
 	/** When set, looks up position on ścieżka rozwoju. */
 	readonly courseSlug?: string;
+	/** Per-signup custom price (profile / enrolled detail). */
+	readonly individual?: boolean;
+	/** List price (date/course) when `individual` for secondary caption. */
+	readonly listPrice?: number;
 };
 
 type CourseFactsProps = {
@@ -61,7 +65,11 @@ export const CourseFacts = ({ meta }: CourseFactsProps) => {
 
 	return (
 		<Stack spacing={2} sx={{ mt: 3 }}>
-			<CoursePriceDisplay price={meta.price} />
+			<CoursePriceDisplay
+				price={meta.price}
+				individual={meta.individual}
+				listPrice={meta.listPrice}
+			/>
 			<Box
 				sx={{
 					display: 'flex',
