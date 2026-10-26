@@ -1,7 +1,7 @@
 'use client';
 
-import { Typography } from '@ui';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { Price } from '@ui';
+import { bruttoFromNetto } from '@/utils/pricing';
 
 type NettoBruttoHintProps = {
 	readonly netto: number;
@@ -11,8 +11,11 @@ type NettoBruttoHintProps = {
 export const NettoBruttoHint = ({ netto }: NettoBruttoHintProps) => {
 	if (!Number.isFinite(netto) || netto <= 0) return null;
 	return (
-		<Typography variant='caption' color='text.secondary' sx={{ mt: 0.5, ml: 0.5, display: 'block' }}>
-			{formatPlnNettoBrutto(netto)}
-		</Typography>
+		<Price
+			gross={bruttoFromNetto(netto)}
+			net={netto}
+			size='sm'
+			sx={{ mt: 0.5, ml: 0.5, display: 'block' }}
+		/>
 	);
 };

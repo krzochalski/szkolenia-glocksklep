@@ -1,3 +1,4 @@
+import { formatCurrencyAmount } from '@ui';
 import { describe, expect, it } from 'vitest';
 import {
 	bruttoFromNetto,
@@ -26,8 +27,12 @@ describe('pricing', () => {
 		expect(formatPlnDisplay(850, 'brutto')).toBe('1045.50 zł');
 	});
 
-	it('formats compact netto/brutto dual label', () => {
-		expect(formatPlnNettoBrutto(500)).toBe('500 zł netto / 615 zł brutto');
-		expect(formatPlnNettoBrutto(850)).toBe('850 zł netto / 1045.50 zł brutto');
+	it('formats compact brutto-first dual label via Intl', () => {
+		expect(formatPlnNettoBrutto(500)).toBe(
+			`${formatCurrencyAmount(615)} brutto / ${formatCurrencyAmount(500)} netto`
+		);
+		expect(formatPlnNettoBrutto(850)).toBe(
+			`${formatCurrencyAmount(1045.5)} brutto / ${formatCurrencyAmount(850)} netto`
+		);
 	});
 });

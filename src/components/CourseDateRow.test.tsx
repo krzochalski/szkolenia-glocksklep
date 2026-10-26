@@ -44,7 +44,9 @@ describe('CourseDateRow', () => {
 		expect(
 			screen.getByText('18 października 2026 · 10:00 · Strzelnica Czacz · wolne: 7')
 		).toBeInTheDocument();
-		expect(screen.getByText('500 zł netto / 615 zł brutto')).toBeInTheDocument();
+		expect(
+			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
+		).toBeInTheDocument();
 		expect(screen.getByText('Zapisano')).toBeInTheDocument();
 		expect(screen.queryByText(/wolne: 4500/)).toBeNull();
 	});
@@ -96,7 +98,9 @@ describe('CourseDateRow', () => {
 				'Strzelnica Czacz · instruktor: Piotr "Glockacci" Krzoska · wolne: 7'
 			)
 		).toBeInTheDocument();
-		expect(screen.getByText('500 zł netto / 615 zł brutto')).toBeInTheDocument();
+		expect(
+			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
+		).toBeInTheDocument();
 		expect(screen.queryByRole('link', { name: 'Movement Fundamentals' })).toBeNull();
 	});
 

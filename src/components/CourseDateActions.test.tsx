@@ -100,7 +100,7 @@ describe('CourseDateActions', () => {
 		);
 		expect(
 			screen.getByText(
-				/Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł netto \/ 615 zł brutto/
+				/Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 615,00.+zł brutto \/ 500,00.+zł netto/
 			)
 		).toBeInTheDocument();
 	});

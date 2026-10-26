@@ -1,21 +1,13 @@
 'use client';
 
-import { Typography } from '@ui';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { Price } from '@ui';
+import { bruttoFromNetto } from '@/utils/pricing';
 
 type CoursePriceDisplayProps = {
 	readonly price: number;
 };
 
+/** Course detail price: stored netto → DS Price (brutto primary). */
 export const CoursePriceDisplay = ({ price }: CoursePriceDisplayProps) => (
-	<Typography
-		sx={{
-			fontFamily: '"Space Mono", monospace',
-			fontWeight: 700,
-			fontSize: { xs: '1.25rem', md: '1.5rem' },
-			letterSpacing: '0.02em',
-		}}
-	>
-		{formatPlnNettoBrutto(price)}
-	</Typography>
+	<Price gross={bruttoFromNetto(price)} net={price} size='lg' />
 );

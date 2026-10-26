@@ -30,7 +30,7 @@ import {
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { bruttoFromNetto } from '@/utils/pricing';
 import {
 	Box,
 	Button,
@@ -39,6 +39,7 @@ import {
 	ConfirmDialog,
 	ContentSwap,
 	IconButton,
+	Price,
 	Stack,
 	Table,
 	TableBody,
@@ -142,7 +143,12 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				<Typography variant='body2'>{levelLabel}</Typography>
 			</TableCell>
 			<TableCell align='right'>
-				<Typography variant='body2'>{formatPlnNettoBrutto(course.price)}</Typography>
+				<Price
+					gross={bruttoFromNetto(course.price)}
+					net={course.price}
+					size='sm'
+					sx={{ alignItems: 'flex-end', display: 'inline-flex' }}
+				/>
 			</TableCell>
 			<TableCell align='right'>
 				<Typography variant='body2'>{course.hours} h</Typography>

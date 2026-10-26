@@ -3,14 +3,14 @@
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { Paths } from '@constants/paths';
 import { OptimizedImage } from '@components';
-import { Box, Button, CatalogCard, Chip, Typography } from '@ui';
+import { Box, Button, CatalogCard, Chip, Price, Typography } from '@ui';
 import { ArrowForwardIcon, GpsFixedOutlined } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import type { Course } from '@/types/course';
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { fillPath } from '@/utils/paths';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { bruttoFromNetto } from '@/utils/pricing';
 
 type CourseCardProps = {
 	readonly course: Course;
@@ -102,7 +102,7 @@ export const CourseCard = ({ course, imageSrc, prerequisiteNames = [] }: CourseC
 					</Box>
 				</Box>
 			}
-			price={formatPlnNettoBrutto(course.price)}
+			price={<Price gross={bruttoFromNetto(course.price)} net={course.price} size='md' />}
 			action={
 				<Button
 					component={NextLink}

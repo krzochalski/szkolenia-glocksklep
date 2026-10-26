@@ -2,7 +2,7 @@
 
 import { PlaceNameLink } from '@components/PlaceNameLink';
 import { Paths } from '@constants/paths';
-import { Box, Link, Paper, Stack, Typography } from '@ui';
+import { Box, Link, Paper, Price, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
 import type { ReactNode } from 'react';
 import type { Course, CourseClass } from '@/types/course';
@@ -10,7 +10,7 @@ import { formatSlotsMeta, isCourseClassCanceled } from '@/utils/courseDates';
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { bruttoFromNetto } from '@/utils/pricing';
 
 export type CourseDateRowProps = {
 	readonly course: Pick<Course, 'name' | 'slug' | 'price' | 'kind'>;
@@ -42,7 +42,7 @@ export const CourseDateRow = ({
 	const href = titleHref ?? fillPath(Paths.coursePage, { slug: course.slug });
 	const canceled = isCourseClassCanceled(date);
 	const when = `${formatCourseDatePl(date.date)} · ${date.timeStart}`;
-	const priceLabel = formatPlnNettoBrutto(date.customPrice ?? course.price);
+	const netto = date.customPrice ?? course.price;
 	const kind = getCourseKind(course);
 
 	return (
@@ -125,21 +125,16 @@ export const CourseDateRow = ({
 						{showSlots ? <> · {canceled ? 'odwołane' : formatSlotsMeta(date)}</> : null}
 					</Typography>
 					{!canceled ? (
-						<Typography
-							variant='body2'
-							component='p'
+						<Box
 							sx={{
-								m: 0,
 								mt: 0.75,
 								pt: 0.75,
 								borderTop: '1px solid',
 								borderColor: 'divider',
-								fontWeight: 600,
-								display: 'block',
 							}}
 						>
-							{priceLabel}
-						</Typography>
+							<Price gross={bruttoFromNetto(netto)} net={netto} size='sm' />
+						</Box>
 					) : null}
 				</Stack>
 				{action ? (

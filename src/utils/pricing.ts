@@ -1,4 +1,5 @@
 import type { PriceMode } from '@ui';
+import { formatCurrencyAmount } from '@ui';
 
 const VAT_RATE = 0.23;
 
@@ -27,9 +28,15 @@ export const formatPlnDisplay = (netto: number, mode?: PriceMode): string => {
 	return `${formatted} zł`;
 };
 
-/** Compact dual label for dialogs / one-line summaries. */
-export const formatPlnNettoBrutto = (netto: number): string =>
-	`${formatPlnDisplay(netto)} netto / ${formatPlnDisplay(netto, 'brutto')} brutto`;
+/**
+ * Compact dual label for dialogs / one-line summaries (brutto first).
+ * Uses the same Intl formatting as `@ui` Price.
+ */
+export const formatPlnNettoBrutto = (netto: number): string => {
+	const gross = bruttoFromNetto(netto);
+	const n = roundMoney(netto);
+	return `${formatCurrencyAmount(gross)} brutto / ${formatCurrencyAmount(n)} netto`;
+};
 
 /** Course list/detail price: stored as netto, shown as `850.00PLN`. */
 export const formatCoursePrice = (netto: number, mode: PriceMode): string => {

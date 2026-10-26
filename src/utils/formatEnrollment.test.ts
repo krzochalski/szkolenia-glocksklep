@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatBookingSummary, formatCourseDatePl } from './formatEnrollment';
+import { formatPlnNettoBrutto } from './pricing';
 
 describe('formatCourseDatePl', () => {
 	it('formats ISO date as Polish long date', () => {
@@ -18,7 +19,7 @@ describe('formatBookingSummary', () => {
 				price: 500,
 			})
 		).toBe(
-			'Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, 500 zł netto / 615 zł brutto'
+			`Movement Fundamentals, 18 października 2026, 10:00, Strzelnica Czacz, ${formatPlnNettoBrutto(500)}`
 		);
 	});
 
@@ -31,6 +32,6 @@ describe('formatBookingSummary', () => {
 				place: null,
 				price: 100.5,
 			})
-		).toBe('Course, 2 stycznia 2026, 09:00, —, 100.50 zł netto / 123.62 zł brutto');
+		).toBe(`Course, 2 stycznia 2026, 09:00, —, ${formatPlnNettoBrutto(100.5)}`);
 	});
 });

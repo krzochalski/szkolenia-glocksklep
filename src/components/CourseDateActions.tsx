@@ -21,6 +21,7 @@ import {
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
+	Price,
 	Stack,
 	Typography,
 } from '@ui';
@@ -32,7 +33,7 @@ import { getSlotsLeft } from '@/utils/courseDates';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
-import { formatPlnNettoBrutto } from '@/utils/pricing';
+import { bruttoFromNetto, formatPlnNettoBrutto } from '@/utils/pricing';
 
 type Props = {
 	readonly course: Course;
@@ -222,7 +223,12 @@ export const CourseDateActions = ({
 						gap: 1.5,
 					}}
 				>
-					<Typography sx={{ fontWeight: 700, mr: 'auto' }}>{priceLabel}</Typography>
+					<Price
+						gross={bruttoFromNetto(bookingPrice)}
+						net={bookingPrice}
+						size='sm'
+						sx={{ mr: 'auto' }}
+					/>
 					<Button onClick={() => setConfirmAction(null)} disabled={pending} variant='outlined'>
 						Anuluj
 					</Button>
