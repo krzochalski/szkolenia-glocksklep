@@ -2,6 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import type { UpcomingDateItem, UpcomingHorizonDays } from '@/utils/adminDashboard';
+import { formatMinParticipantsMeta } from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
 import { Box, Button, Chip, Paper, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
@@ -70,6 +71,7 @@ export const UpcomingDatesSection = ({ items, days, onDaysChange }: Props) => (
 									{item.date} {item.timeStart}
 									{item.placeName ? ` · ${item.placeName}` : ''}
 									{` · ${item.signedUp}/${item.slotsMax} zapisanych`}
+									{` · ${formatMinParticipantsMeta(item.signedUp, item.minParticipants)}`}
 								</Typography>
 							</Box>
 							<Button

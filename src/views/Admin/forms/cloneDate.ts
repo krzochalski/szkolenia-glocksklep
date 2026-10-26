@@ -13,6 +13,7 @@ export const withClonedDate = (
 		id: newId,
 		participants: [],
 		canceled: undefined,
+		runConfirmedDespiteMin: undefined,
 	};
 	const next = [...dates];
 	next.splice(sourceIndex + 1, 0, cloned);

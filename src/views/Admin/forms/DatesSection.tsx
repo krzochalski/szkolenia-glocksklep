@@ -8,6 +8,11 @@ import { Add } from '@ui/icons';
 import { useEffect, useState } from 'react';
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import type { Instructor, Place } from '@/types/course';
+import {
+	defaultMinDecisionBy,
+	getCourseMinDecisionDaysBefore,
+	getCourseMinParticipants,
+} from '@/utils/minParticipants';
 import type { CourseFormValues } from '@/utils/schemas';
 import { DateEntry } from './DateEntry';
 import { SectionTitle } from './SectionTitle';
@@ -20,6 +25,9 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 	const { control, formState, getValues } = useFormContext<CourseFormValues>();
 	const { fields, append, remove, insert } = useFieldArray({ control, name: 'dates' });
 	const courseSlotsMax = useWatch({ control, name: 'slotsMax' });
+	const courseMinParticipants = useWatch({ control, name: 'minParticipants' });
+	const courseMinDecisionDaysBefore = useWatch({ control, name: 'minDecisionDaysBefore' });
+	const courseKind = useWatch({ control, name: 'kind' });
 	const [places, setPlaces] = useState<Place[]>([]);
 	const [instructors, setInstructors] = useState<Instructor[]>([]);
 	const [toRemoveIndex, setToRemoveIndex] = useState<number | null>(null);
@@ -29,15 +37,29 @@ export const DatesSection = ({ isAdmin }: DatesSectionProps) => {
 		void getInstructors().then(setInstructors);
 	}, []);
 
-	const addDate = () =>
+	const addDate = () => {
+		const minDefaults = {
+			kind: courseKind,
+			minParticipants: courseMinParticipants,
+			minDecisionDaysBefore: courseMinDecisionDaysBefore,
+			slotsMax: courseSlotsMax,
+		};
+		const minParticipants = getCourseMinParticipants(minDefaults);
+		const daysBefore = getCourseMinDecisionDaysBefore(minDefaults);
 		append({
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
 			slotsMax: getCourseSlotsMax({ slotsMax: courseSlotsMax }),
+			minParticipants,
+			minDecisionBy: defaultMinDecisionBy(
+				new Date().toISOString().slice(0, 10),
+				daysBefore
+			),
 			subtitle: '',
 			instructor: { name: '', slug: '' },
 			place: { name: '', googleMapsLink: '', link: '' },
 		});
+	};
 
 	const cloneDate = (index: number) => {
 		const source = getValues(`dates.${index}`);

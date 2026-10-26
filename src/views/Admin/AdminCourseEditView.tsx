@@ -1,6 +1,10 @@
 'use client';
 
 import { getCourseSlotsMax } from '@constants/courses';
+import {
+	getCourseMinDecisionDaysBefore,
+	getCourseMinParticipants,
+} from '@/utils/minParticipants';
 import { Paths } from '@constants/paths';
 import { getCourse, updateCourse } from '@services/courses';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +38,8 @@ const EditInner = ({ courseId }: Props) => {
 				price: course.price,
 				hours: course.hours,
 				slotsMax: getCourseSlotsMax(course),
+				minParticipants: getCourseMinParticipants(course),
+				minDecisionDaysBefore: getCourseMinDecisionDaysBefore(course),
 				level: course.level,
 				kind: getCourseKind(course),
 				prerequisiteCourseIds: course.prerequisiteCourseIds ?? [],

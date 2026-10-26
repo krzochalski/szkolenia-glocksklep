@@ -2,27 +2,42 @@
 
 import { Paths } from '@constants/paths';
 import { getCourse, setCourseDateCanceled } from '@services/courses';
-import type { CourseClass } from '@/types/course';
+import type { Course, CourseClass } from '@/types/course';
+import { warsawToday } from '@/utils/adminDashboard';
 import { isFutureDate } from '@/utils/courseDates';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import {
+	formatMinParticipantsMeta,
+	isBelowMinStatus,
+	resolveDateMinParticipants,
+	resolveSessionStatus,
+	signedUpCount,
+} from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
 	Button,
+	Chip,
 	CircularProgress,
 	ConfirmDialog,
 	ContentSwap,
+	FormControlLabel,
 	Paper,
 	Stack,
 	Stagger,
 	StaggerItem,
+	Switch,
 	Typography,
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
+import {
+	SESSION_STATUS_LABEL,
+	sessionStatusChipColor,
+} from './dashboard/sessionStatusLabel';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
 type Props = {
@@ -41,6 +56,8 @@ const DatesInner = ({ courseId }: Props) => {
 	const [toCancel, setToCancel] = useState<CourseClass | null>(null);
 	const [toClone, setToClone] = useState<CourseClass | null>(null);
 	const [toUncancel, setToUncancel] = useState<CourseClass | null>(null);
+	const [belowMinOnly, setBelowMinOnly] = useState(false);
+	const today = warsawToday();
 
 	const invalidate = () => invalidateCourseQueries(queryClient);
 
@@ -89,7 +106,13 @@ const DatesInner = ({ courseId }: Props) => {
 	});
 
 	const dates = course?.dates ?? [];
-	const futureDates = dates.filter((d) => isFutureDate(d.date));
+	const futureDates = useMemo(() => {
+		const future = dates.filter((d) => isFutureDate(d.date));
+		if (!belowMinOnly || !course) return future;
+		return future.filter((d) =>
+			isBelowMinStatus(resolveSessionStatus({ date: d, course, today }))
+		);
+	}, [dates, belowMinOnly, course, today]);
 	const pastDates = dates.filter((d) => !isFutureDate(d.date));
 	const pending =
 		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
@@ -107,7 +130,17 @@ const DatesInner = ({ courseId }: Props) => {
 				sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}
 			>
 				<Typography variant='h5'>Terminy: {course.name}</Typography>
-				<Stack direction='row' spacing={1}>
+				<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
+					<FormControlLabel
+						control={
+							<Switch
+								checked={belowMinOnly}
+								onChange={(_, v) => setBelowMinOnly(v)}
+								size='small'
+							/>
+						}
+						label='Poniżej minimum'
+					/>
 					<Button
 						component={NextLink}
 						href={fillPath(Paths.adminCourseEdit, { courseId })}
@@ -132,23 +165,32 @@ const DatesInner = ({ courseId }: Props) => {
 					<DateGroup
 						title='Nadchodzące'
 						dates={futureDates}
+						course={course}
 						courseId={courseId}
+						today={today}
 						pending={pending}
+						emptyFilterMessage={
+							belowMinOnly ? 'Brak nadchodzących terminów poniżej minimum.' : undefined
+						}
 						onClone={setToClone}
 						onCancel={setToCancel}
 						onUncancel={setToUncancel}
 						onDelete={setToDelete}
 					/>
-					<DateGroup
-						title='Przeszłe'
-						dates={pastDates}
-						courseId={courseId}
-						pending={pending}
-						onClone={setToClone}
-						onCancel={setToCancel}
-						onUncancel={setToUncancel}
-						onDelete={setToDelete}
-					/>
+					{belowMinOnly ? null : (
+						<DateGroup
+							title='Przeszłe'
+							dates={pastDates}
+							course={course}
+							courseId={courseId}
+							today={today}
+							pending={pending}
+							onClone={setToClone}
+							onCancel={setToCancel}
+							onUncancel={setToUncancel}
+							onDelete={setToDelete}
+						/>
+					)}
 				</Stack>
 			)}
 
@@ -230,8 +272,11 @@ const DatesInner = ({ courseId }: Props) => {
 type DateGroupProps = {
 	readonly title: string;
 	readonly dates: CourseClass[];
+	readonly course: Course;
 	readonly courseId: string;
+	readonly today: string;
 	readonly pending: boolean;
+	readonly emptyFilterMessage?: string;
 	readonly onClone: (date: CourseClass) => void;
 	readonly onCancel: (date: CourseClass) => void;
 	readonly onUncancel: (date: CourseClass) => void;
@@ -241,51 +286,84 @@ type DateGroupProps = {
 const DateGroup = ({
 	title,
 	dates,
+	course,
 	courseId,
+	today,
 	pending,
+	emptyFilterMessage,
 	onClone,
 	onCancel,
 	onUncancel,
 	onDelete,
 }: DateGroupProps) => {
-	if (dates.length === 0) return null;
+	if (dates.length === 0) {
+		if (!emptyFilterMessage) return null;
+		return (
+			<Box>
+				<Typography variant='caption' sx={{ fontWeight: 700, letterSpacing: '0.08em' }}>
+					{title}
+				</Typography>
+				<Typography color='text.secondary' sx={{ mt: 1 }}>
+					{emptyFilterMessage}
+				</Typography>
+			</Box>
+		);
+	}
 	return (
 		<Box>
 			<Typography variant='caption' sx={{ fontWeight: 700, letterSpacing: '0.08em' }}>
 				{title}
 			</Typography>
 			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
-				{dates.map((date) => (
-					<StaggerItem key={date.id}>
-					<Paper variant='outlined' sx={{ p: 2 }}>
-						<Stack
-							direction={{ xs: 'column', sm: 'row' }}
-							spacing={1}
-							sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between' }}
-						>
-							<Box>
-								<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
-									{date.date} · {date.timeStart}
-								</Typography>
-								<Typography variant='body2' color='text.secondary'>
-									<PlaceNameLink place={date.place} /> · {date.participants?.length ?? 0}/
-									{date.slotsMax}
-									{date.canceled ? ' · ODWOŁANY' : ''}
-								</Typography>
-							</Box>
-							<AdminDateRowActions
-								date={date}
-								editHref={fillPath(Paths.adminCourseDates, { courseId, dateId: date.id })}
-								pending={pending}
-								onClone={() => onClone(date)}
-								onCancel={() => onCancel(date)}
-								onUncancel={() => onUncancel(date)}
-								onDelete={() => onDelete(date)}
-							/>
-						</Stack>
-					</Paper>
-					</StaggerItem>
-				))}
+				{dates.map((date) => {
+					const signedUp = signedUpCount(date);
+					const min = resolveDateMinParticipants(course, date);
+					const status = resolveSessionStatus({ date, course, today });
+					return (
+						<StaggerItem key={date.id}>
+							<Paper variant='outlined' sx={{ p: 2 }}>
+								<Stack
+									direction={{ xs: 'column', sm: 'row' }}
+									spacing={1}
+									sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between' }}
+								>
+									<Box>
+										<Stack
+											direction='row'
+											spacing={1}
+											sx={{ alignItems: 'center', flexWrap: 'wrap', mb: 0.5 }}
+										>
+											<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+												{date.date} · {date.timeStart}
+											</Typography>
+											<Chip
+												label={SESSION_STATUS_LABEL[status]}
+												size='small'
+												color={sessionStatusChipColor(status)}
+											/>
+										</Stack>
+										<Typography variant='body2' color='text.secondary'>
+											<PlaceNameLink place={date.place} /> · {signedUp}/{date.slotsMax}
+											{` · ${formatMinParticipantsMeta(signedUp, min)}`}
+										</Typography>
+									</Box>
+									<AdminDateRowActions
+										date={date}
+										editHref={fillPath(Paths.adminCourseDates, {
+											courseId,
+											dateId: date.id,
+										})}
+										pending={pending}
+										onClone={() => onClone(date)}
+										onCancel={() => onCancel(date)}
+										onUncancel={() => onUncancel(date)}
+										onDelete={() => onDelete(date)}
+									/>
+								</Stack>
+							</Paper>
+						</StaggerItem>
+					);
+				})}
 			</Stagger>
 		</Box>
 	);

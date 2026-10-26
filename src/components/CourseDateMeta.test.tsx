@@ -90,4 +90,24 @@ describe('CourseDateMeta', () => {
 			screen.getByText('instruktor: Piotr "Glockacci" Krzoska · wolne: 2 · ostatnie miejsca')
 		).toBeInTheDocument();
 	});
+
+	it('shows public min soft copy when below min', () => {
+		wrap(
+			<CourseDateMeta
+				date='2026-12-01'
+				timeStart='10:00'
+				place={place}
+				showSlots
+				courseMin={{ kind: 'course', minParticipants: 4 }}
+				slotsSource={{
+					date: '2026-12-01',
+					slotsMax: 6,
+					minParticipants: 4,
+					participants: [{ id: 'u1', name: 'Ada', email: 'a@b.c' }],
+				}}
+			/>
+		);
+
+		expect(screen.getByText('Termin wystartuje przy min. 4 osobach')).toBeInTheDocument();
+	});
 });

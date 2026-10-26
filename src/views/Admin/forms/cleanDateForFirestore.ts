@@ -48,5 +48,11 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 	const subtitle = d.subtitle?.trim();
 	if (subtitle) clean.subtitle = subtitle;
 	if (d.canceled) clean.canceled = true;
+	if (typeof d.minParticipants === 'number' && d.minParticipants >= 1) {
+		clean.minParticipants = Math.floor(d.minParticipants);
+	}
+	const minDecisionBy = d.minDecisionBy?.trim();
+	if (minDecisionBy) clean.minDecisionBy = minDecisionBy;
+	if (d.runConfirmedDespiteMin === true) clean.runConfirmedDespiteMin = true;
 	return clean;
 };

@@ -11,10 +11,17 @@
 
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { getSlotsLeft, isLowSlotsLeft } from '@/utils/courseDates';
+import {
+	isBelowMinStatus,
+	resolveDateMinParticipants,
+	resolveSessionStatus,
+	signedUpCount,
+	type MinParticipantsSessionStatus,
+} from '@/utils/minParticipants';
 import { bruttoFromNetto, effectiveEnrollmentNetto, roundMoney } from '@/utils/pricing';
 import type { Course, CourseClass } from '@/types/course';
 
-export type SessionStatus = 'open' | 'full' | 'cancelled';
+export type SessionStatus = MinParticipantsSessionStatus;
 
 export type SignupsSpotlightItem = {
 	readonly courseId: string;
@@ -25,8 +32,11 @@ export type SignupsSpotlightItem = {
 	readonly timeStart: string;
 	readonly signedUp: number;
 	readonly slotsMax: number;
+	readonly minParticipants: number;
 	readonly fillRatio: number;
 	readonly nearFull: boolean;
+	readonly belowMin: boolean;
+	readonly status: SessionStatus;
 	readonly waitingListCount: number;
 };
 
@@ -40,6 +50,7 @@ export type UpcomingDateItem = {
 	readonly placeName: string | null;
 	readonly signedUp: number;
 	readonly slotsMax: number;
+	readonly minParticipants: number;
 	readonly status: SessionStatus;
 };
 
@@ -84,15 +95,28 @@ export const addCalendarDays = (ymd: string, days: number): string => {
 	return `${yy}-${mm}-${dd}`;
 };
 
-/** Session status for ops UI. Cancelled wins over full. */
-export const sessionStatus = (date: CourseClass): SessionStatus => {
-	if (date.canceled === true) return 'cancelled';
-	const signedUp = date.participants?.length ?? 0;
-	if (signedUp >= date.slotsMax) return 'full';
-	return 'open';
-};
+/**
+ * Session status for ops UI.
+ * Priority: cancelled > needs_decision > at_risk > full > open.
+ * Min headcount uses every signup in participants[] (same as capacity).
+ */
+export const sessionStatus = (
+	date: CourseClass,
+	options?: { readonly course?: Course | null; readonly today?: string }
+): SessionStatus =>
+	resolveSessionStatus({
+		date,
+		course: options?.course,
+		today: options?.today ?? warsawToday(),
+	});
 
-const signedUpCount = (date: CourseClass): number => date.participants?.length ?? 0;
+const STATUS_SORT_RANK: Record<SessionStatus, number> = {
+	needs_decision: 0,
+	at_risk: 1,
+	full: 2,
+	open: 3,
+	cancelled: 4,
+};
 
 export const buildSignupsSpotlight = (
 	courses: readonly Course[],
@@ -107,8 +131,10 @@ export const buildSignupsSpotlight = (
 			if (date.date < today) continue;
 			const signedUp = signedUpCount(date);
 			const slotsMax = date.slotsMax > 0 ? date.slotsMax : 1;
+			const minParticipants = resolveDateMinParticipants(course, date);
 			const fillRatio = signedUp / slotsMax;
 			const left = getSlotsLeft(date);
+			const status = sessionStatus(date, { course, today });
 			items.push({
 				courseId: course.id,
 				dateId: date.id,
@@ -118,13 +144,19 @@ export const buildSignupsSpotlight = (
 				timeStart: date.timeStart,
 				signedUp,
 				slotsMax: date.slotsMax,
+				minParticipants,
 				fillRatio,
 				nearFull: isLowSlotsLeft(left),
+				belowMin: isBelowMinStatus(status),
+				status,
 				waitingListCount,
 			});
 		}
 	}
 	return items.sort((a, b) => {
+		const rankDiff = STATUS_SORT_RANK[a.status] - STATUS_SORT_RANK[b.status];
+		if (rankDiff !== 0) return rankDiff;
+		if (a.belowMin !== b.belowMin) return a.belowMin ? -1 : 1;
 		if (b.fillRatio !== a.fillRatio) return b.fillRatio - a.fillRatio;
 		if (b.signedUp !== a.signedUp) return b.signedUp - a.signedUp;
 		return a.date.localeCompare(b.date) || a.courseName.localeCompare(b.courseName);
@@ -152,7 +184,8 @@ export const buildUpcomingDates = (
 				placeName: date.place?.name?.trim() || null,
 				signedUp: signedUpCount(date),
 				slotsMax: date.slotsMax,
-				status: sessionStatus(date),
+				minParticipants: resolveDateMinParticipants(course, date),
+				status: sessionStatus(date, { course, today }),
 			});
 		}
 	}

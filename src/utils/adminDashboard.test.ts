@@ -57,11 +57,22 @@ describe('warsawYmd / addCalendarDays', () => {
 });
 
 describe('sessionStatus', () => {
+	const today = '2025-11-01';
+
 	it('returns cancelled when canceled flag is set', () => {
-		expect(sessionStatus(dateEntry({ id: 'd', date: '2025-10-01', canceled: true, slotsMax: 2, participants: [
-			participant({ id: 'a' }),
-			participant({ id: 'b' }),
-		] }))).toBe('cancelled');
+		expect(
+			sessionStatus(
+				dateEntry({
+					id: 'd',
+					date: '2025-11-10',
+					canceled: true,
+					slotsMax: 2,
+					minParticipants: 2,
+					participants: [participant({ id: 'a' }), participant({ id: 'b' })],
+				}),
+				{ today }
+			)
+		).toBe('cancelled');
 	});
 
 	it('returns full when seats exhausted', () => {
@@ -69,16 +80,50 @@ describe('sessionStatus', () => {
 			sessionStatus(
 				dateEntry({
 					id: 'd',
-					date: '2025-10-01',
+					date: '2025-11-10',
 					slotsMax: 2,
+					minParticipants: 2,
 					participants: [participant({ id: 'a' }), participant({ id: 'b' })],
-				})
+				}),
+				{ today }
 			)
 		).toBe('full');
 	});
 
-	it('returns open otherwise', () => {
-		expect(sessionStatus(dateEntry({ id: 'd', date: '2025-10-01' }))).toBe('open');
+	it('returns at_risk when below min before decision deadline', () => {
+		expect(
+			sessionStatus(
+				dateEntry({
+					id: 'd',
+					date: '2025-11-20',
+					slotsMax: 6,
+					minParticipants: 4,
+					minDecisionBy: '2025-11-13',
+					participants: [participant({ id: 'a' })],
+				}),
+				{ today }
+			)
+		).toBe('at_risk');
+	});
+
+	it('returns open when at/above min', () => {
+		expect(
+			sessionStatus(
+				dateEntry({
+					id: 'd',
+					date: '2025-11-20',
+					slotsMax: 6,
+					minParticipants: 4,
+					participants: [
+						participant({ id: 'a' }),
+						participant({ id: 'b' }),
+						participant({ id: 'c' }),
+						participant({ id: 'd' }),
+					],
+				}),
+				{ today }
+			)
+		).toBe('open');
 	});
 });
 

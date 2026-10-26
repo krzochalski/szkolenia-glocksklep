@@ -1,10 +1,12 @@
 'use client';
 
+import { NettoBruttoHint } from '@components/NettoBruttoHint';
 import type { Instructor, Place } from '@/types/course';
+import { defaultMinDecisionBy, getCourseMinDecisionDaysBefore } from '@/utils/minParticipants';
 import { Box, IconButton, Paper, Tooltip, Typography } from '@ui';
 import { ContentCopy, Delete } from '@ui/icons';
+import { useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { NettoBruttoHint } from '@components/NettoBruttoHint';
 import { FormDatePicker } from './FormDatePicker';
 import { FormSelect } from './FormSelect';
 import { FormTextField } from './FormTextField';
@@ -29,6 +31,18 @@ export const DateEntry = ({
 }: DateEntryProps) => {
 	const { setValue, control } = useFormContext();
 	const customPrice = useWatch({ control, name: `dates.${index}.customPrice` });
+	const sessionDate = useWatch({ control, name: `dates.${index}.date` }) as string | undefined;
+	const daysBefore = useWatch({ control, name: 'minDecisionDaysBefore' }) as number | undefined;
+	const deadlineTouched = useRef(false);
+
+	useEffect(() => {
+		if (!sessionDate || !/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) return;
+		if (deadlineTouched.current) return;
+		setValue(
+			`dates.${index}.minDecisionBy`,
+			defaultMinDecisionBy(sessionDate, getCourseMinDecisionDaysBefore({ minDecisionDaysBefore: daysBefore }))
+		);
+	}, [sessionDate, daysBefore, index, setValue]);
 
 	const handlePlaceChange = (placeId: string) => {
 		const p = places.find((x) => x.id === placeId);
@@ -71,7 +85,9 @@ export const DateEntry = ({
 				</Box>
 			</Box>
 
-			<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
+			<Box
+				sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr 1fr' }, gap: 2 }}
+			>
 				<FormDatePicker name={`dates.${index}.date`} label='Data' />
 				<FormTimePicker name={`dates.${index}.timeStart`} label='Godzina' />
 				<FormTextField
@@ -80,7 +96,23 @@ export const DateEntry = ({
 					placeholder='12'
 					type='number'
 				/>
+				<FormTextField
+					name={`dates.${index}.minParticipants`}
+					label='Min. osób'
+					type='number'
+					helperText='Liczy każdy zapis na liście.'
+				/>
 			</Box>
+			<Box
+				onFocusCapture={() => {
+					deadlineTouched.current = true;
+				}}
+			>
+				<FormDatePicker name={`dates.${index}.minDecisionBy`} label='Termin decyzji (min.)' />
+			</Box>
+			<Typography variant='caption' color='text.secondary'>
+				Po tej dacie, jeśli zapisów &lt; min., status = „do decyzji”. Anulowanie tylko ręcznie.
+			</Typography>
 
 			<FormTextField
 				name={`dates.${index}.subtitle`}

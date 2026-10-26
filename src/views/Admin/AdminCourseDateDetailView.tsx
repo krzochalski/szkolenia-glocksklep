@@ -9,6 +9,7 @@ import {
 import {
 	getCourse,
 	setCourseDateCanceled,
+	setCourseDateRunConfirmed,
 	setParticipantCustomPrice,
 	setParticipantPaysByCash,
 	toggleParticipantPaid,
@@ -18,6 +19,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import {
 	Box,
 	Button,
+	Chip,
 	CircularProgress,
 	ConfirmDialog,
 	ContentSwap,
@@ -35,10 +37,23 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Participant } from '@/types/course';
+import { warsawToday } from '@/utils/adminDashboard';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import {
+	formatMinParticipantsMeta,
+	isBelowMinStatus,
+	resolveDateMinDecisionBy,
+	resolveDateMinParticipants,
+	resolveSessionStatus,
+	signedUpCount,
+} from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
 import { bruttoFromNetto, effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
+import {
+	SESSION_STATUS_LABEL,
+	sessionStatusChipColor,
+} from './dashboard/sessionStatusLabel';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
 import { removeCourseDate } from './forms/dateMutations';
 import { ParticipantCustomPriceDialog } from './ParticipantCustomPriceDialog';
@@ -61,7 +76,9 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	});
 	const [cancelOpen, setCancelOpen] = useState(false);
 	const [restoreOpen, setRestoreOpen] = useState(false);
+	const [confirmRunOpen, setConfirmRunOpen] = useState(false);
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const today = warsawToday();
 	const [paidTarget, setPaidTarget] = useState<Participant | null>(null);
 	const [cashTarget, setCashTarget] = useState<{
 		participant: Participant;
@@ -157,6 +174,15 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 		},
 	});
 
+	const confirmRun = useMutation({
+		mutationFn: (runConfirmed: boolean) =>
+			setCourseDateRunConfirmed(courseId, dateId, runConfirmed),
+		onSuccess: async () => {
+			setConfirmRunOpen(false);
+			await invalidate();
+		},
+	});
+
 	const removeParticipant = useMutation({
 		mutationFn: (participantId: string) => unenrollFromCourse(courseId, dateId, participantId),
 		onSuccess: async () => {
@@ -208,16 +234,46 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					>
 						Powrót
 					</Button>
-					<Typography variant='h5'>
-						{course.name} — {date.date} {date.timeStart}
-					</Typography>
+					<Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+						<Typography variant='h5'>
+							{course.name} — {date.date} {date.timeStart}
+						</Typography>
+						{(() => {
+							const status = resolveSessionStatus({ date, course, today });
+							return (
+								<Chip
+									label={SESSION_STATUS_LABEL[status]}
+									size='small'
+									color={sessionStatusChipColor(status)}
+								/>
+							);
+						})()}
+					</Stack>
 					<Typography color='text.secondary'>
 						<PlaceNameLink place={date.place} /> · {date.instructor?.name}
 					</Typography>
+					{(() => {
+						const signedUp = signedUpCount(date);
+						const min = resolveDateMinParticipants(course, date);
+						const deadline = resolveDateMinDecisionBy(course, date);
+						const status = resolveSessionStatus({ date, course, today });
+						return (
+							<Typography variant='body2' color='text.secondary'>
+								Zapisy: {signedUp}/{date.slotsMax} · {formatMinParticipantsMeta(signedUp, min)} ·
+								decyzja do {deadline}
+								{date.runConfirmedDespiteMin
+									? ' · potwierdzono prowadzenie mimo min.'
+									: ''}
+								{isBelowMinStatus(status)
+									? ' — minimum liczy każdy zapis (także nieopłacony); anulowanie tylko ręczne.'
+									: ''}
+							</Typography>
+						);
+					})()}
 
 					<CourseDateEditForm courseId={courseId} courseDate={date} onSaved={invalidate} />
 
-					<Stack direction='row' spacing={1}>
+					<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
 						{date.canceled ? (
 							<Button
 								variant='outlined'
@@ -228,14 +284,36 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 								Przywróć termin
 							</Button>
 						) : (
-							<Button
-								variant='outlined'
-								color='error'
-								disabled={toggleCanceled.isPending}
-								onClick={() => setCancelOpen(true)}
-							>
-								Odwołaj termin
-							</Button>
+							<>
+								{isBelowMinStatus(resolveSessionStatus({ date, course, today })) &&
+								!date.runConfirmedDespiteMin ? (
+									<Button
+										variant='outlined'
+										color='warning'
+										disabled={confirmRun.isPending}
+										onClick={() => setConfirmRunOpen(true)}
+									>
+										Potwierdź prowadzenie mimo min.
+									</Button>
+								) : null}
+								{date.runConfirmedDespiteMin ? (
+									<Button
+										variant='outlined'
+										disabled={confirmRun.isPending}
+										onClick={() => confirmRun.mutate(false)}
+									>
+										Cofnij potwierdzenie mimo min.
+									</Button>
+								) : null}
+								<Button
+									variant='outlined'
+									color='error'
+									disabled={toggleCanceled.isPending}
+									onClick={() => setCancelOpen(true)}
+								>
+									Odwołaj termin
+								</Button>
+							</>
 						)}
 						<Button
 							variant='outlined'
@@ -248,7 +326,12 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					</Stack>
 
 					<Typography variant='h6'>
-						Uczestnicy ({participants.length}/{date.slotsMax})
+						Uczestnicy ({participants.length}/{date.slotsMax} ·{' '}
+						{formatMinParticipantsMeta(
+							signedUpCount(date),
+							resolveDateMinParticipants(course, date)
+						)}
+						)
 					</Typography>
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 						{participants.map((p) => {
@@ -361,6 +444,27 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							<Typography color='text.secondary'>Brak uczestników.</Typography>
 						) : null}
 					</Stagger>
+
+					<ConfirmDialog
+						open={confirmRunOpen}
+						title='Potwierdź prowadzenie mimo minimum'
+						cancelLabel='Wróć'
+						confirmLabel='Potwierdź'
+						confirmColor='warning'
+						loading={confirmRun.isPending}
+						onCancel={() => setConfirmRunOpen(false)}
+						onConfirm={() => confirmRun.mutate(true)}
+					>
+						<Typography>
+							Termin <strong>{date.date}</strong> ma{' '}
+							{formatMinParticipantsMeta(
+								signedUpCount(date),
+								resolveDateMinParticipants(course, date)
+							)}{' '}
+							zapisów. Potwierdź, że prowadzisz mimo braku minimum. To nie anuluje terminu —
+							uczestnicy pozostają zapisani.
+						</Typography>
+					</ConfirmDialog>
 
 					<ConfirmDialog
 						open={cancelOpen}

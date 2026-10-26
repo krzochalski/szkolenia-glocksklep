@@ -2,9 +2,11 @@
 
 import { Paths } from '@constants/paths';
 import type { SignupsSpotlightItem } from '@/utils/adminDashboard';
+import { formatMinParticipantsMeta } from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
 import { Box, Button, Chip, Paper, Stack, Typography } from '@ui';
 import NextLink from 'next/link';
+import { SESSION_STATUS_LABEL, sessionStatusChipColor } from './sessionStatusLabel';
 
 type Props = {
 	readonly items: readonly SignupsSpotlightItem[];
@@ -16,7 +18,8 @@ export const SignupsSpotlightSection = ({ items }: Props) => (
 			Wymagają uwagi
 		</Typography>
 		<Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-			Terminy z najwyższym wypełnieniem — przypomnienia, lista oczekujących, nowe daty.
+			Najpierw terminy poniżej minimum / do decyzji, potem prawie pełne — przypomnienia, lista
+			oczekujących.
 		</Typography>
 		{items.length === 0 ? (
 			<Typography color='text.secondary'>Brak nadchodzących terminów do obserwacji.</Typography>
@@ -35,12 +38,20 @@ export const SignupsSpotlightSection = ({ items }: Props) => (
 										{item.courseName}
 									</Typography>
 									<Chip label={item.kindLabel} size='small' variant='outlined' />
+									{item.belowMin ? (
+										<Chip
+											label={SESSION_STATUS_LABEL[item.status]}
+											size='small'
+											color={sessionStatusChipColor(item.status)}
+										/>
+									) : null}
 									{item.nearFull ? (
 										<Chip label='Prawie pełne' size='small' color='warning' />
 									) : null}
 								</Stack>
 								<Typography variant='body2' color='text.secondary'>
 									{item.date} {item.timeStart} · {item.signedUp}/{item.slotsMax} zapisanych
+									{` · ${formatMinParticipantsMeta(item.signedUp, item.minParticipants)}`}
 									{item.waitingListCount > 0
 										? ` · lista oczekujących: ${item.waitingListCount}`
 										: ''}

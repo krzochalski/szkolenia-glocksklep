@@ -44,6 +44,17 @@ export interface Course {
 	 * Each date can still override via `dates[].slotsMax`.
 	 */
 	slotsMax?: number;
+	/**
+	 * Default minimum headcount to treat a date as ready to run (new date defaults).
+	 * Each date can override via `dates[].minParticipants`. Counts every signup in
+	 * `participants[]` (same as capacity) — unpaid seats still count.
+	 */
+	minParticipants?: number;
+	/**
+	 * Days before session `date` used to seed `dates[].minDecisionBy` for new dates.
+	 * On/after that deadline, below-min upcoming dates escalate to needs_decision.
+	 */
+	minDecisionDaysBefore?: number;
 	/* Tags for this date */
 	tags: string[];
 	/* Level of proficiency for this date */
@@ -87,6 +98,23 @@ export interface CourseClass {
 	id: string;
 	/* Maximum number of students of the class */
 	slotsMax: number;
+	/**
+	 * Minimum headcount for this date to be treated as ready to run.
+	 * Counts every signup in `participants[]` (same as capacity).
+	 * Legacy docs without the field: resolve via course/kind defaults.
+	 */
+	minParticipants?: number;
+	/**
+	 * Calendar deadline `YYYY-MM-DD` (≤ session `date`) after which a below-min
+	 * future date escalates to needs_decision in admin. Legacy: compute from
+	 * course `minDecisionDaysBefore`.
+	 */
+	minDecisionBy?: string;
+	/**
+	 * Admin explicitly confirmed the date will run despite being below min.
+	 * Clears at_risk / needs_decision until min is reached or cancel.
+	 */
+	runConfirmedDespiteMin?: boolean;
 	/* Date in format YYYY-MM-DD */
 	date: string;
 	/* Time in format HH:MM */

@@ -3,24 +3,39 @@
 import { Paths } from '@constants/paths';
 import { getCourses, setCourseDateCanceled } from '@services/courses';
 import type { Course, CourseClass } from '@/types/course';
+import { warsawToday } from '@/utils/adminDashboard';
 import { getSlotsLeft, isFutureDate } from '@/utils/courseDates';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import {
+	formatMinParticipantsMeta,
+	isBelowMinStatus,
+	resolveDateMinParticipants,
+	resolveSessionStatus,
+	signedUpCount,
+} from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
+	Chip,
 	CircularProgress,
 	ConfirmDialog,
 	ContentSwap,
+	FormControlLabel,
 	Paper,
 	Stack,
 	Stagger,
 	StaggerItem,
+	Switch,
 	Typography,
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
+import {
+	SESSION_STATUS_LABEL,
+	sessionStatusChipColor,
+} from './dashboard/sessionStatusLabel';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
 type DateTarget = {
@@ -40,6 +55,8 @@ const NearestInner = () => {
 	const [toCancel, setToCancel] = useState<DateTarget | null>(null);
 	const [toClone, setToClone] = useState<DateTarget | null>(null);
 	const [toUncancel, setToUncancel] = useState<DateTarget | null>(null);
+	const [belowMinOnly, setBelowMinOnly] = useState(false);
+	const today = warsawToday();
 
 	const invalidate = () => invalidateCourseQueries(queryClient);
 
@@ -87,13 +104,19 @@ const NearestInner = () => {
 		},
 	});
 
-	const upcoming = courses
-		.flatMap((course) =>
-			(course.dates ?? [])
-				.filter((date) => isFutureDate(date.date))
-				.map((date) => ({ course, date }))
-		)
-		.sort((a, b) => a.date.date.localeCompare(b.date.date));
+	const upcoming = useMemo(() => {
+		const all = courses
+			.flatMap((course) =>
+				(course.dates ?? [])
+					.filter((date) => isFutureDate(date.date))
+					.map((date) => ({ course, date }))
+			)
+			.sort((a, b) => a.date.date.localeCompare(b.date.date));
+		if (!belowMinOnly) return all;
+		return all.filter(({ course, date }) =>
+			isBelowMinStatus(resolveSessionStatus({ date, course, today }))
+		);
+	}, [courses, belowMinOnly, today]);
 	const pending =
 		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
 
@@ -103,46 +126,79 @@ const NearestInner = () => {
 				<CircularProgress />
 			) : (
 		<Box>
-			<Typography variant='h5' gutterBottom>
-				Najbliższe terminy
-			</Typography>
+			<Stack
+				direction={{ xs: 'column', sm: 'row' }}
+				sx={{ mb: 2, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}
+			>
+				<Typography variant='h5'>Najbliższe terminy</Typography>
+				<FormControlLabel
+					control={
+						<Switch
+							checked={belowMinOnly}
+							onChange={(_, v) => setBelowMinOnly(v)}
+							size='small'
+						/>
+					}
+					label='Poniżej minimum'
+				/>
+			</Stack>
 			<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-				{upcoming.map(({ course, date }) => (
-					<StaggerItem key={`${course.id}-${date.id}`}>
-					<Paper variant='outlined' sx={{ p: 2 }}>
-						<Stack
-							direction={{ xs: 'column', sm: 'row' }}
-							spacing={1}
-							sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between' }}
-						>
-							<Box>
-								<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
-									{course.name} — {date.date} {date.timeStart}
-								</Typography>
-								<Typography variant='body2' color='text.secondary'>
-									<PlaceNameLink place={date.place} /> · {getSlotsLeft(date)} wolnych /{' '}
-									{date.slotsMax}
-									{date.canceled ? ' · ODWOŁANY' : ''}
-								</Typography>
-							</Box>
-							<AdminDateRowActions
-								date={date}
-								editHref={fillPath(Paths.adminCourseDates, {
-									courseId: course.id,
-									dateId: date.id,
-								})}
-								pending={pending}
-								onClone={() => setToClone({ course, date })}
-								onCancel={() => setToCancel({ course, date })}
-								onUncancel={() => setToUncancel({ course, date })}
-								onDelete={() => setToDelete({ course, date })}
-							/>
-						</Stack>
-					</Paper>
-					</StaggerItem>
-				))}
+				{upcoming.map(({ course, date }) => {
+					const signedUp = signedUpCount(date);
+					const min = resolveDateMinParticipants(course, date);
+					const status = resolveSessionStatus({ date, course, today });
+					return (
+						<StaggerItem key={`${course.id}-${date.id}`}>
+							<Paper variant='outlined' sx={{ p: 2 }}>
+								<Stack
+									direction={{ xs: 'column', sm: 'row' }}
+									spacing={1}
+									sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between' }}
+								>
+									<Box>
+										<Stack
+											direction='row'
+											spacing={1}
+											sx={{ alignItems: 'center', flexWrap: 'wrap', mb: 0.5 }}
+										>
+											<Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
+												{course.name} — {date.date} {date.timeStart}
+											</Typography>
+											<Chip
+												label={SESSION_STATUS_LABEL[status]}
+												size='small'
+												color={sessionStatusChipColor(status)}
+											/>
+										</Stack>
+										<Typography variant='body2' color='text.secondary'>
+											<PlaceNameLink place={date.place} /> · {getSlotsLeft(date)} wolnych /{' '}
+											{date.slotsMax}
+											{` · ${formatMinParticipantsMeta(signedUp, min)}`}
+										</Typography>
+									</Box>
+									<AdminDateRowActions
+										date={date}
+										editHref={fillPath(Paths.adminCourseDates, {
+											courseId: course.id,
+											dateId: date.id,
+										})}
+										pending={pending}
+										onClone={() => setToClone({ course, date })}
+										onCancel={() => setToCancel({ course, date })}
+										onUncancel={() => setToUncancel({ course, date })}
+										onDelete={() => setToDelete({ course, date })}
+									/>
+								</Stack>
+							</Paper>
+						</StaggerItem>
+					);
+				})}
 				{upcoming.length === 0 ? (
-					<Typography color='text.secondary'>Brak nadchodzących terminów.</Typography>
+					<Typography color='text.secondary'>
+						{belowMinOnly
+							? 'Brak nadchodzących terminów poniżej minimum.'
+							: 'Brak nadchodzących terminów.'}
+					</Typography>
 				) : null}
 			</Stagger>
 

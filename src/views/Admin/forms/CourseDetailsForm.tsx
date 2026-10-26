@@ -1,7 +1,11 @@
 'use client';
 
 import { AdminStickyActions } from '@components';
-import { DEFAULT_COURSE_SLOTS_MAX } from '@constants/courses';
+import {
+	DEFAULT_COURSE_MIN_PARTICIPANTS,
+	DEFAULT_COURSE_SLOTS_MAX,
+	DEFAULT_MIN_DECISION_DAYS_BEFORE,
+} from '@constants/courses';
 import { getTags } from '@services/tags';
 import type { Tag } from '@/types/course';
 import { type CourseFormValues, courseSchema } from '@/utils/schemas';
@@ -45,6 +49,8 @@ export const CourseDetailsForm = ({
 		defaultValues: {
 			tags: [],
 			slotsMax: DEFAULT_COURSE_SLOTS_MAX,
+			minParticipants: DEFAULT_COURSE_MIN_PARTICIPANTS,
+			minDecisionDaysBefore: DEFAULT_MIN_DECISION_DAYS_BEFORE,
 			kind: 'course',
 			prerequisiteCourseIds: [],
 			...defaultValues,
@@ -130,6 +136,18 @@ export const CourseDetailsForm = ({
 								label='Maks. osób (domyślne)'
 								type='number'
 								helperText='Na karcie szkolenia i jako domyślna wartość nowych terminów.'
+							/>
+							<FormTextField
+								name='minParticipants'
+								label='Min. osób (domyślne)'
+								type='number'
+								helperText='Minimum do „gotowe” — liczy każdy zapis (także nieopłacony). Nowe terminy dziedziczą tę wartość.'
+							/>
+							<FormTextField
+								name='minDecisionDaysBefore'
+								label='Decyzja na X dni przed'
+								type='number'
+								helperText='Na ile dni przed terminem eskalować „poniżej min.” do „do decyzji” (bez auto-anulowania).'
 							/>
 						</Box>
 					</Box>

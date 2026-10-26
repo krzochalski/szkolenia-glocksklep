@@ -311,6 +311,26 @@ export const setCourseDateCanceled = async (
 	await updateDoc(doc(db, 'courses', courseId), { dates: stripUndefined(dates) });
 };
 
+/**
+ * Admin confirms the date will run despite being below minParticipants.
+ * Explicit action only — never set automatically.
+ */
+export const setCourseDateRunConfirmed = async (
+	courseId: string,
+	dateId: string,
+	runConfirmed: boolean
+): Promise<void> => {
+	const snap = await getDoc(doc(db, 'courses', courseId));
+	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
+	const course = { id: snap.id, ...snap.data() } as Course;
+	const dates = (course.dates ?? []).map((d) =>
+		d.id === dateId
+			? { ...d, runConfirmedDespiteMin: runConfirmed ? true : undefined }
+			: d
+	);
+	await updateDoc(doc(db, 'courses', courseId), { dates: stripUndefined(dates) });
+};
+
 /** Admin-only client enroll (Firestore rules require admins/{uid}). */
 export const adminEnrollParticipant = async (
 	courseId: string,

@@ -5,10 +5,16 @@ import { getCourse, updateCourseDates } from '@services/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import type { CourseClass, Instructor, Place } from '@/types/course';
+import {
+	defaultMinDecisionBy,
+	getCourseMinDecisionDaysBefore,
+	resolveDateMinDecisionBy,
+	resolveDateMinParticipants,
+} from '@/utils/minParticipants';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, MotionAlert, Paper } from '@ui';
-import { useEffect, useState } from 'react';
-import { FormProvider, type Resolver, useForm } from 'react-hook-form';
+import { Box, Button, MotionAlert, Paper, Typography } from '@ui';
+import { useEffect, useRef, useState } from 'react';
+import { FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { cleanDateForFirestore } from './cleanDateForFirestore';
 import { type DateEntryValues, dateEntrySchema } from './dateEntrySchema';
 import { FormDatePicker } from './FormDatePicker';
@@ -33,11 +39,23 @@ export const CourseDateEditForm = ({
 	const [instructors, setInstructors] = useState<Instructor[]>([]);
 	const [success, setSuccess] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [courseDefaults, setCourseDefaults] = useState<{
+		minParticipants: number;
+		minDecisionDaysBefore: number;
+	} | null>(null);
+	const deadlineTouched = useRef(false);
 
 	useEffect(() => {
 		void getPlaces().then(setPlaces);
 		void getInstructors().then(setInstructors);
-	}, []);
+		void getCourse(courseId).then((c) => {
+			if (!c) return;
+			setCourseDefaults({
+				minParticipants: resolveDateMinParticipants(c, courseDate),
+				minDecisionDaysBefore: getCourseMinDecisionDaysBefore(c),
+			});
+		});
+	}, [courseId, courseDate]);
 
 	const methods = useForm<DateEntryValues>({
 		resolver: zodResolver(dateEntrySchema) as Resolver<DateEntryValues>,
@@ -45,12 +63,47 @@ export const CourseDateEditForm = ({
 			date: courseDate.date,
 			timeStart: courseDate.timeStart,
 			slotsMax: courseDate.slotsMax,
+			minParticipants: resolveDateMinParticipants(null, courseDate),
+			minDecisionBy: resolveDateMinDecisionBy(null, courseDate),
 			subtitle: courseDate.subtitle ?? '',
 			_instructorId: '',
 			_placeId: '',
 			customPrice: courseDate.customPrice ?? undefined,
 		},
 	});
+
+	useEffect(() => {
+		if (!courseDefaults) return;
+		methods.setValue(
+			'minParticipants',
+			resolveDateMinParticipants(
+				{
+					minParticipants: courseDefaults.minParticipants,
+					minDecisionDaysBefore: courseDefaults.minDecisionDaysBefore,
+				},
+				courseDate
+			)
+		);
+		if (!deadlineTouched.current) {
+			methods.setValue(
+				'minDecisionBy',
+				resolveDateMinDecisionBy(
+					{ minDecisionDaysBefore: courseDefaults.minDecisionDaysBefore },
+					courseDate
+				)
+			);
+		}
+	}, [courseDefaults, courseDate, methods]);
+
+	const sessionDate = useWatch({ control: methods.control, name: 'date' });
+
+	useEffect(() => {
+		if (!sessionDate || !/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) return;
+		if (deadlineTouched.current) return;
+		const days =
+			courseDefaults?.minDecisionDaysBefore ?? getCourseMinDecisionDaysBefore(null);
+		methods.setValue('minDecisionBy', defaultMinDecisionBy(sessionDate, days));
+	}, [sessionDate, courseDefaults, methods]);
 
 	useEffect(() => {
 		if (instructors.length > 0 && !methods.getValues('_instructorId')) {
@@ -96,6 +149,8 @@ export const CourseDateEditForm = ({
 					date: data.date,
 					timeStart: data.timeStart,
 					slotsMax: data.slotsMax,
+					minParticipants: data.minParticipants,
+					minDecisionBy: data.minDecisionBy,
 					participants: d.participants ?? [],
 					instructor: {
 						id: selectedInstructor.id,
@@ -115,6 +170,7 @@ export const CourseDateEditForm = ({
 				if (subtitle) updated.subtitle = subtitle;
 				if (data.customPrice) updated.customPrice = data.customPrice;
 				if (d.canceled) updated.canceled = true;
+				if (d.runConfirmedDespiteMin) updated.runConfirmedDespiteMin = true;
 				return updated;
 			});
 
@@ -149,18 +205,49 @@ export const CourseDateEditForm = ({
 						<FormDatePicker name='date' label='Data' />
 						<FormTimePicker name='timeStart' label='Godzina' />
 						<FormTextField name='slotsMax' label='Maks. miejsc' type='number' />
+						<FormTextField
+							name='minParticipants'
+							label='Min. osób'
+							type='number'
+							helperText='Liczy każdy zapis (także nieopłacony).'
+						/>
+					</Box>
+					<Box
+						sx={{
+							display: 'grid',
+							gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+							gap: 2,
+						}}
+					>
+						<Box
+							onFocusCapture={() => {
+								deadlineTouched.current = true;
+							}}
+						>
+							<FormDatePicker name='minDecisionBy' label='Termin decyzji (min.)' />
+						</Box>
 						<Box sx={{ display: 'flex', flexDirection: 'column' }}>
 							<FormTextField name='customPrice' label='Cena indywidualna netto (PLN)' type='number' />
 							<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 						</Box>
 					</Box>
+					<Typography variant='caption' color='text.secondary'>
+						Po terminie decyzji, przy zapisach poniżej min., status = „do decyzji”. Anulowanie
+						terminu tylko ręcznie — bez automatycznego odwołania.
+					</Typography>
 					<FormTextField
 						name='subtitle'
 						label='Podtytuł'
 						placeholder='np. Orientacja IDPA · dry-fire: reset z kabury'
 						helperText='Opcjonalnie — krótko, czym ta edycja się wyróżnia (fokus, format, dyscyplina).'
 					/>
-					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+					<Box
+						sx={{
+							display: 'grid',
+							gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+							gap: 2,
+						}}
+					>
 						<FormSelect name='_instructorId' label='Instruktor' options={instructorOptions} />
 						<FormSelect name='_placeId' label='Miejsce' options={placeOptions} />
 					</Box>
@@ -172,7 +259,7 @@ export const CourseDateEditForm = ({
 					</MotionAlert>
 					<AdminStickyActions justifyContent='flex-end'>
 						<Button type='submit' variant='contained' disabled={methods.formState.isSubmitting}>
-							ZAPISZ TERMIN
+							ZAPISZ
 						</Button>
 					</AdminStickyActions>
 				</Box>

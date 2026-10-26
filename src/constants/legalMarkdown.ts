@@ -4,7 +4,7 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '26-10-2026';
+const EFFECTIVE_FROM = '27-10-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
@@ -84,12 +84,13 @@ Użyte w Regulaminie pojęcia oznaczają:
 ## VIII. Rezygnacja, odwołanie Terminu i zwroty
 
 1. Uczestnik może wypisać się z Terminu w Serwisie (funkcja wypisu) — wypis usuwa go z listy Uczestników danego Terminu. Serwis nie blokuje wypisu ze względu na liczbę dni do Terminu; skutki finansowe określa pkt 2–4 poniżej.
-2. **Zwrot wpłaty:**
+2. Każdy Termin może mieć **minimalną liczbę Uczestników** wymaganą do realizacji (wskazaną przy Terminie lub w komunikacji Organizatora). Zapis na Termin poniżej tego minimum jest możliwy; brak minimum **nie** blokuje zapisu w Serwisie. Jeżeli do wyznaczonego przez Organizatora terminu decyzji (albo do daty Terminu) liczba zapisanych Uczestników nie osiągnie minimum, Organizator może **odwołać Termin** decyzją administracyjną w Serwisie — Serwis **nie** odwołuje Terminu automatycznie.
+3. **Zwrot wpłaty:**
    - przy rezygnacji Uczestnika złożonej **co najmniej 3 dni przed** datą Terminu — zwrot **100%** wpłaconej kwoty;
    - przy rezygnacji **później niż 3 dni przed** datą Terminu (tj. w okresie krótszym niż 3 pełne dni przed datą Terminu) — **brak zwrotu** wpłaconej kwoty;
-   - przy **odwołaniu Terminu przez Organizatora** — zwrot **100%** wpłaconej kwoty albo — za zgodą Uczestnika — przeniesienie zapisu na inny Termin.
-3. Zwrot dokonywany jest przelewem na rachunek, z którego dokonano płatności, lub inny wskazany przez Uczestnika, w rozsądnym terminie (co do zasady do 14 dni od skutecznego ustalenia podstawy zwrotu).
-4. Wypis z Terminu w Serwisie **nie** uruchamia automatycznego zwrotu ani zmiany statusu płatności — Uczestnik powinien skontaktować się w sprawie zwrotu na ${EMAIL_ORDERS}, podając dane umożliwiające identyfikację zapisu i płatności.
+   - przy **odwołaniu Terminu przez Organizatora** (w tym z powodu nieosiągnięcia minimum uczestników) — zwrot **100%** wpłaconej kwoty albo — za zgodą Uczestnika — przeniesienie zapisu na inny Termin.
+4. Zwrot dokonywany jest przelewem na rachunek, z którego dokonano płatności, lub inny wskazany przez Uczestnika, w rozsądnym terminie (co do zasady do 14 dni od skutecznego ustalenia podstawy zwrotu).
+5. Wypis z Terminu w Serwisie **nie** uruchamia automatycznego zwrotu ani zmiany statusu płatności — Uczestnik powinien skontaktować się w sprawie zwrotu na ${EMAIL_ORDERS}, podając dane umożliwiające identyfikację zapisu i płatności.
 
 ## IX. Prawo odstąpienia od umowy zawartej na odległość
 

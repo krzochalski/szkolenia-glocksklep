@@ -8,15 +8,20 @@ import { getCourse, updateCourseDates } from '@services/courses';
 import { getInstructors } from '@services/instructors';
 import { getPlaces } from '@services/places';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+	defaultMinDecisionBy,
+	getCourseMinDecisionDaysBefore,
+	getCourseMinParticipants,
+} from '@/utils/minParticipants';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import { fillPath } from '@/utils/paths';
 import { Box, Button, CircularProgress, ContentSwap, MotionAlert, Paper, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { FormProvider, type Resolver, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
-import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
-import { fillPath } from '@/utils/paths';
 import { cleanDateForFirestore } from './forms/cleanDateForFirestore';
 import { type DateEntryValues, dateEntrySchema } from './forms/dateEntrySchema';
 import { FormDatePicker } from './forms/FormDatePicker';
@@ -45,6 +50,7 @@ const NewDateInner = ({ courseId }: Props) => {
 		queryFn: getInstructors,
 	});
 	const [error, setError] = useState<string | null>(null);
+	const deadlineTouched = useRef(false);
 
 	const methods = useForm<DateEntryValues>({
 		resolver: zodResolver(dateEntrySchema) as Resolver<DateEntryValues>,
@@ -52,6 +58,11 @@ const NewDateInner = ({ courseId }: Props) => {
 			date: '',
 			timeStart: DEFAULT_COURSE_TIME_START,
 			slotsMax: getCourseSlotsMax(null),
+			minParticipants: getCourseMinParticipants(null),
+			minDecisionBy: defaultMinDecisionBy(
+				new Date().toISOString().slice(0, 10),
+				getCourseMinDecisionDaysBefore(null)
+			),
 			subtitle: '',
 			_instructorId: '',
 			_placeId: '',
@@ -62,7 +73,26 @@ const NewDateInner = ({ courseId }: Props) => {
 	useEffect(() => {
 		if (!course) return;
 		methods.setValue('slotsMax', getCourseSlotsMax(course));
+		methods.setValue('minParticipants', getCourseMinParticipants(course));
+		const dateVal = methods.getValues('date');
+		if (dateVal && /^\d{4}-\d{2}-\d{2}$/.test(dateVal) && !deadlineTouched.current) {
+			methods.setValue(
+				'minDecisionBy',
+				defaultMinDecisionBy(dateVal, getCourseMinDecisionDaysBefore(course))
+			);
+		}
 	}, [course, methods]);
+
+	const sessionDate = useWatch({ control: methods.control, name: 'date' });
+
+	useEffect(() => {
+		if (!sessionDate || !/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) return;
+		if (deadlineTouched.current) return;
+		methods.setValue(
+			'minDecisionBy',
+			defaultMinDecisionBy(sessionDate, getCourseMinDecisionDaysBefore(course ?? null))
+		);
+	}, [sessionDate, course, methods]);
 
 	const placeOptions = useMemo(() => places.map((p) => ({ value: p.id, label: p.name })), [places]);
 	const instructorOptions = useMemo(
@@ -107,6 +137,8 @@ const NewDateInner = ({ courseId }: Props) => {
 											date: data.date,
 											timeStart: data.timeStart,
 											slotsMax: data.slotsMax,
+											minParticipants: data.minParticipants,
+											minDecisionBy: data.minDecisionBy,
 											participants: [],
 											instructor: {
 												id: selectedInstructor.id,
@@ -146,6 +178,27 @@ const NewDateInner = ({ courseId }: Props) => {
 									<FormDatePicker name='date' label='Data' />
 									<FormTimePicker name='timeStart' label='Godzina' />
 									<FormTextField name='slotsMax' label='Maks. miejsc' type='number' />
+									<FormTextField
+										name='minParticipants'
+										label='Min. osób'
+										type='number'
+										helperText='Liczy każdy zapis (także nieopłacony).'
+									/>
+								</Box>
+								<Box
+									sx={{
+										display: 'grid',
+										gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+										gap: 2,
+									}}
+								>
+									<Box
+										onFocusCapture={() => {
+											deadlineTouched.current = true;
+										}}
+									>
+										<FormDatePicker name='minDecisionBy' label='Termin decyzji (min.)' />
+									</Box>
 									<Box sx={{ display: 'flex', flexDirection: 'column' }}>
 										<FormTextField
 											name='customPrice'
@@ -155,6 +208,10 @@ const NewDateInner = ({ courseId }: Props) => {
 										<WatchedNettoBruttoHint control={methods.control} name='customPrice' />
 									</Box>
 								</Box>
+								<Typography variant='caption' color='text.secondary'>
+									Po terminie decyzji, przy zapisach poniżej min., status = „do decyzji”.
+									Anulowanie terminu tylko ręcznie.
+								</Typography>
 								<FormTextField
 									name='subtitle'
 									label='Podtytuł'

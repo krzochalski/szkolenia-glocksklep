@@ -1,4 +1,8 @@
-import { DEFAULT_COURSE_SLOTS_MAX } from '@constants/courses';
+import {
+	DEFAULT_COURSE_MIN_PARTICIPANTS,
+	DEFAULT_COURSE_SLOTS_MAX,
+	DEFAULT_MIN_DECISION_DAYS_BEFORE,
+} from '@constants/courses';
 import { z } from 'zod';
 
 export const loginSchema = z.object({
@@ -64,6 +68,16 @@ export const courseSchema = z.object({
 		.int('Liczba miejsc musi być liczbą całkowitą')
 		.positive('Liczba miejsc musi być większa od 0')
 		.default(DEFAULT_COURSE_SLOTS_MAX),
+	minParticipants: z.coerce
+		.number({ error: 'Podaj minimum osób' })
+		.int('Minimum musi być liczbą całkowitą')
+		.min(1, 'Min. 1 osoba')
+		.default(DEFAULT_COURSE_MIN_PARTICIPANTS),
+	minDecisionDaysBefore: z.coerce
+		.number({ error: 'Podaj liczbę dni' })
+		.int('Liczba dni musi być całkowita')
+		.min(0, 'Min. 0 dni')
+		.default(DEFAULT_MIN_DECISION_DAYS_BEFORE),
 	level: z.enum(['basic', 'intermediate', 'advanced'], { error: 'Wybierz poziom' }),
 	kind: z.enum(['course', 'practice']).default('course'),
 	prerequisiteCourseIds: z.array(z.string()).default([]),
@@ -73,44 +87,65 @@ export const courseSchema = z.object({
 	inactive: z.boolean().optional().default(false),
 	dates: z
 		.array(
-			z.object({
-				slotsMax: z.coerce
-					.number({ error: 'Podaj liczbę miejsc' })
-					.int('Liczba miejsc musi być liczbą całkowitą')
-					.positive('Liczba miejsc musi być większa od 0'),
-				date: z.string().min(1, 'Data jest wymagana'),
-				timeStart: z
-					.string()
-					.min(1, 'Godzina jest wymagana')
-					.regex(/^\d{2}:\d{2}$/, 'Format godziny: HH:MM'),
-				subtitle: courseDateSubtitleSchema,
-				instructor: z.object({
-					name: z.string().min(2, 'Imię instruktora jest wymagane'),
-					slug: z
+			z
+				.object({
+					slotsMax: z.coerce
+						.number({ error: 'Podaj liczbę miejsc' })
+						.int('Liczba miejsc musi być liczbą całkowitą')
+						.positive('Liczba miejsc musi być większa od 0'),
+					minParticipants: z.coerce
+						.number({ error: 'Podaj minimum osób' })
+						.int('Minimum musi być liczbą całkowitą')
+						.min(1, 'Min. 1 osoba'),
+					minDecisionBy: z
 						.string()
-						.min(1, 'Slug instruktora jest wymagany')
-						.regex(/^[a-z0-9-]+$/, 'Tylko małe litery, cyfry i myślniki'),
-				}),
-				place: z.object({
-					name: z.string().min(1, 'Nazwa miejsca jest wymagana'),
-					googleMapsLink: z
+						.min(1, 'Termin decyzji jest wymagany')
+						.regex(/^\d{4}-\d{2}-\d{2}$/, 'Format daty: YYYY-MM-DD'),
+					date: z.string().min(1, 'Data jest wymagana'),
+					timeStart: z
 						.string()
-						.url('Podaj prawidłowy link Google Maps')
-						.or(z.literal(''))
+						.min(1, 'Godzina jest wymagana')
+						.regex(/^\d{2}:\d{2}$/, 'Format godziny: HH:MM'),
+					subtitle: courseDateSubtitleSchema,
+					instructor: z.object({
+						name: z.string().min(2, 'Imię instruktora jest wymagane'),
+						slug: z
+							.string()
+							.min(1, 'Slug instruktora jest wymagany')
+							.regex(/^[a-z0-9-]+$/, 'Tylko małe litery, cyfry i myślniki'),
+					}),
+					place: z.object({
+						name: z.string().min(1, 'Nazwa miejsca jest wymagana'),
+						googleMapsLink: z
+							.string()
+							.url('Podaj prawidłowy link Google Maps')
+							.or(z.literal(''))
+							.optional()
+							.default(''),
+						link: z.string().url('Podaj prawidłowy link Google Maps').or(z.literal('')).optional(),
+					}),
+					customPrice: z.coerce
+						.number()
+						.positive('Cena musi być większa od 0')
 						.optional()
-						.default(''),
-					link: z.string().url('Podaj prawidłowy link Google Maps').or(z.literal('')).optional(),
-				}),
-				customPrice: z.coerce
-					.number()
-					.positive('Cena musi być większa od 0')
-					.optional()
-					.or(z.literal(0).transform(() => undefined))
-					.or(z.literal('').transform(() => undefined)),
-			})
+						.or(z.literal(0).transform(() => undefined))
+						.or(z.literal('').transform(() => undefined)),
+				})
+				.refine((d) => d.minParticipants <= d.slotsMax, {
+					message: 'Minimum nie może przekraczać maks. miejsc',
+					path: ['minParticipants'],
+				})
+				.refine((d) => d.minDecisionBy <= d.date, {
+					message: 'Termin decyzji nie może być po dacie szkolenia',
+					path: ['minDecisionBy'],
+				})
 		)
 		.default([]),
-});
+})
+	.refine((d) => d.minParticipants <= d.slotsMax, {
+		message: 'Minimum nie może przekraczać maks. osób',
+		path: ['minParticipants'],
+	});
 
 export type CourseFormValues = z.infer<typeof courseSchema>;
 
