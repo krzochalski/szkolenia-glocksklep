@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
-	redirect(Paths.adminNearestDates);
+	redirect(Paths.adminDashboard);
 }

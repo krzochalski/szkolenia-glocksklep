@@ -12,6 +12,7 @@ export const Paths = {
 	faq: '/faq',
 	sciezkaRozwoju: '/sciezka-rozwoju',
 	admin: '/admin',
+	adminDashboard: '/admin/dashboard',
 	adminNearestDates: '/admin/nearest-dates',
 	adminCourses: '/admin/courses',
 	adminCourseNew: '/admin/courses/new',

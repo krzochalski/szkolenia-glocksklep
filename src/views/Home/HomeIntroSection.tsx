@@ -8,6 +8,16 @@ type HomeIntroSectionProps = {
 	readonly content: HomepageDocument;
 };
 
+/** Orange offset is 8px — keep HardShadow width/margin in sync so the shadow is not clipped. */
+const introShadowSx = {
+	bgcolor: 'ink.main',
+	boxShadow: (theme: { palette: { primary: { main: string } } }) =>
+		`8px 8px 0 0 ${theme.palette.primary.main}`,
+	width: 'calc(100% - 8px)',
+	maxWidth: 'calc(100% - 8px)',
+	marginBottom: '8px',
+} as const;
+
 export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 	const title = content.introTitle?.trim();
 	const subline = content.introSubline?.trim();
@@ -21,10 +31,12 @@ export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 			sx={{
 				p: { xs: 3, md: 4 },
 				minWidth: 0,
+				maxWidth: '100%',
 				height: '100%',
 				justifyContent: 'center',
 				bgcolor: 'ink.main',
 				color: 'ink.contrastText',
+				overflowWrap: 'anywhere',
 				borderRight: { xs: 'none', md: banner ? '3px solid' : 'none' },
 				borderColor: 'primary.main',
 				'& a': {
@@ -80,9 +92,9 @@ export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 				<Box
 					sx={{
 						pt: 0.5,
+						minWidth: 0,
 						borderTop: '2px solid',
 						borderColor: 'primary.main',
-						opacity: 1,
 						'& > *:first-of-type': { mt: 1.5 },
 					}}
 				>
@@ -93,32 +105,16 @@ export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 	);
 
 	if (!banner) {
-		return (
-			<HardShadow
-				sx={{
-					overflow: 'hidden',
-					bgcolor: 'ink.main',
-					boxShadow: (theme) => `8px 8px 0 0 ${theme.palette.primary.main}`,
-				}}
-			>
-				{text}
-			</HardShadow>
-		);
+		return <HardShadow sx={introShadowSx}>{text}</HardShadow>;
 	}
 
 	return (
-		<HardShadow
-			sx={{
-				overflow: 'hidden',
-				bgcolor: 'ink.main',
-				boxShadow: (theme) => `8px 8px 0 0 ${theme.palette.primary.main}`,
-			}}
-		>
+		<HardShadow sx={introShadowSx}>
 			<Box
 				sx={{
 					display: 'grid',
 					gridTemplateColumns: {
-						xs: '1fr',
+						xs: 'minmax(0, 1fr)',
 						md: 'repeat(2, minmax(0, 1fr))',
 					},
 					alignItems: 'stretch',
@@ -130,8 +126,10 @@ export const HomeIntroSection = ({ content }: HomeIntroSectionProps) => {
 					sx={{
 						position: 'relative',
 						minHeight: { xs: 240, md: '100%' },
+						minWidth: 0,
 						aspectRatio: { xs: '16 / 9', md: 'auto' },
 						bgcolor: 'surface.muted',
+						overflow: 'hidden',
 						order: { xs: -1, md: 0 },
 					}}
 				>

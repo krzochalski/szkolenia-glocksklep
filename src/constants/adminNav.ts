@@ -8,6 +8,7 @@ export type AdminNavItem = {
 
 /** Default admin sidebar order. `id` is stable for persisted menu order. */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
+	{ id: 'dashboard', label: 'Dashboard', href: Paths.adminDashboard },
 	{ id: 'nearest-dates', label: 'Najbliższe terminy', href: Paths.adminNearestDates },
 	{ id: 'courses', label: 'Szkolenia', href: Paths.adminCourses },
 	{ id: 'participants', label: 'Uczestnicy', href: Paths.adminParticipants },
