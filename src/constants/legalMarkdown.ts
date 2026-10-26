@@ -4,7 +4,7 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '22-10-2026';
+const EFFECTIVE_FROM = '26-10-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
@@ -146,20 +146,22 @@ Administrator przetwarza dane wyłącznie w zakresie niezbędnym do poniższych 
 5. **Reklamacje, roszczenia, obrona przed roszczeniami** — art. 6 ust. 1 lit. b oraz lit. f RODO.
 6. **Obsługa zapytań i formularza kontaktowego** — art. 6 ust. 1 lit. f RODO (komunikacja) lub lit. b, jeśli kontakt dotyczy umowy.
 7. **Bezpieczeństwo i ciągłość Serwisu** (hosting, logi, zapobieganie nadużyciom) — art. 6 ust. 1 lit. f RODO.
-8. **Zapamiętanie wyboru dotyczącego cookies** (cookie \`cookiesConsent\`) — art. 6 ust. 1 lit. f RODO (respektowanie preferencji). Serwis **obecnie nie uruchamia** narzędzi analitycznych (np. Firebase Analytics) wymagających zgody; gdyby takie narzędzia zostały włączone, podstawą będzie art. 6 ust. 1 lit. a RODO po wyrażeniu zgody w banerze.
+8. **Zapamiętanie wyboru dotyczącego cookies** (cookie \`cookiesConsent\`) — art. 6 ust. 1 lit. f RODO (respektowanie preferencji).
+9. **Analityka użytkowania Serwisu (Firebase Analytics / Google Analytics 4)** — art. 6 ust. 1 lit. a RODO (zgoda). Uruchamiana wyłącznie po wyborze „Spoko” w banerze cookies. Zakres: identyfikatory urządzenia / klienta pomiaru, dane o wizytach i odsłonach stron (m.in. ścieżka URL, tytuł strony), przybliżona lokalizacja i informacje o urządzeniu / przeglądarce przekazywane przez dostawcę. Odrzucenie zgody („Odrzuć”) nie uruchamia analityki.
 
 ## 5. Dobrowolność podania danych
 
 1. Podanie danych wymaganych przy rejestracji i zapisie jest warunkiem świadczenia tych usług. Ich niepodanie uniemożliwia założenie Konta lub zapis na Termin.
 2. Podanie NIP jest dobrowolne i potrzebne, jeżeli Użytkownik chce fakturę z NIP.
 3. Zapis gościa na listę oczekujących wymaga co najmniej adresu e-mail.
-4. Wybór w banerze cookies jest dobrowolny; odrzucenie nie ogranicza przeglądania Serwisu ani zapisów (przy braku analityki efekt praktyczny dotyczy zapamiętania preferencji).
+4. Wybór w banerze cookies jest dobrowolny; odrzucenie nie ogranicza przeglądania Serwisu ani zapisów — uniemożliwia jedynie uruchomienie Firebase Analytics.
 
 ## 6. Odbiorcy danych
 
 Dane mogą być ujawniane wyłącznie podmiotom przetwarzającym je na zlecenie Administratora lub gdy jest to niezbędne do umowy albo obowiązku prawnego, w szczególności:
 
-- dostawcom usług chmurowych i infrastrukturalnych (w tym Google Cloud / Firebase — hosting, Authentication, Firestore, Cloud Functions);
+- dostawcom usług chmurowych i infrastrukturalnych (w tym Google Cloud / Firebase — hosting, Authentication, Firestore, Cloud Functions, a po zgodzie na cookies — Firebase Analytics / Google Analytics);
+- dostawcy Google Analytics (Google Ireland Limited / podmioty z grupy Google) — wyłącznie w zakresie analityki po wyrażeniu zgody w banerze;
 - dostawcom usług poczty elektronicznej / SMTP (potwierdzenia zapisów, waitlist, komunikacja);
 - podmiotom świadczącym usługi księgowe, prawne lub doradcze — w niezbędnym zakresie;
 - organom państwowym lub sądowym — gdy obowiązek wynika z prawa.
@@ -182,6 +184,7 @@ Dane są przechowywane nie dłużej, niż jest to konieczne:
 - dane z listy oczekujących — do czasu zapisu na Termin, usunięcia wpisu lub ustania celu;
 - dane z korespondencji / formularza kontaktowego — przez czas obsługi sprawy i przedawnienia ewentualnych roszczeń;
 - cookie \`cookiesConsent\` — do 150 dni lub do wcześniejszego usunięcia przez użytkownika;
+- dane analityczne Firebase Analytics / GA4 — zgodnie z retencją skonfigurowaną u dostawcy (Google) oraz do czasu cofnięcia zgody / usunięcia cookies pomiarowych;
 - dane w localStorage / sessionStorage — do usunięcia przez użytkownika, wyczyszczenia pamięci przeglądarki lub zakończenia sesji.
 
 ## 9. Prawa osoby, której dane dotyczą
@@ -204,7 +207,7 @@ Osobie, której dane dotyczą, przysługuje prawo wniesienia skargi do Prezesa U
 
 ## 11. Zautomatyzowane podejmowanie decyzji i profilowanie
 
-Administrator nie podejmuje decyzji opartych wyłącznie na zautomatyzowanym przetwarzaniu, w tym profilowaniu, które wywołują skutki prawne lub w podobny sposób istotnie wpływają na osobę w rozumieniu art. 22 RODO. Serwis obecnie nie prowadzi analityki marketingowej opartej na zgodzie cookies.
+Administrator nie podejmuje decyzji opartych wyłącznie na zautomatyzowanym przetwarzaniu, w tym profilowaniu, które wywołują skutki prawne lub w podobny sposób istotnie wpływają na osobę w rozumieniu art. 22 RODO. Firebase Analytics służy do statystyk użytkowania Serwisu (odsłony, ścieżki), a nie do zautomatyzowanych decyzji wobec użytkownika; Serwis nie włącza reklamowych sygnałów Google w konfiguracji Analytics.
 
 ## 12. Bezpieczeństwo danych
 
@@ -244,7 +247,7 @@ export const DEFAULT_COOKIES_POLICY_MD = `# Polityka cookies
 ## 3. Podstawy prawne
 
 1. Stosowanie cookies i podobnych technologii **niezbędnych** do świadczenia usługi drogą elektronicznej, której użytkownik wyraźnie żąda (w tym sesja logowania oraz zapamiętanie wyboru dotyczącego cookies), opiera się na przepisach o świadczeniu usług drogą elektroniczną / komunikacji elektronicznej oraz — w zakresie danych osobowych — na art. 6 ust. 1 lit. b lub lit. f RODO (wykonanie umowy / prawnie uzasadniony interes: działanie Serwisu i respektowanie preferencji).
-2. Stosowanie cookies **analitycznych** wymagałoby uprzedniej zgody (art. 6 ust. 1 lit. a RODO). **Obecnie Serwis nie inicjuje Firebase Analytics ani innych narzędzi analitycznych** wymagających takiej zgody. Baner cookies służy do zapamiętania wyboru użytkownika i przygotowania Serwisu na ewentualne przyszłe włączenie analityki wyłącznie po akceptacji.
+2. Stosowanie cookies **analitycznych** wymaga uprzedniej zgody (art. 6 ust. 1 lit. a RODO). Firebase Analytics (Google Analytics 4) jest inicjowane **wyłącznie** po wyborze „Spoko” w banerze. Przy „Odrzuć” Serwis nie wywołuje \`getAnalytics\` / \`initializeAnalytics\` i nie loguje zdarzeń analitycznych.
 
 ## 4. Rodzaje cookies i podobnych technologii w Serwisie
 
@@ -256,7 +259,7 @@ Serwis stosuje następujące kategorie:
    - localStorage \`emailForSignIn\` — tymczasowo przechowuje e-mail przy logowaniu linkiem e-mail;
    - sessionStorage \`authReturnPath\` — zapamiętuje ścieżkę powrotu po logowaniu w ramach sesji przeglądarki.
    Dane te nie służą marketingowi ani zewnętrznej analityce.
-4. **Analityczne** — **obecnie nieużywane**. W konfiguracji projektu może figurować identyfikator pomiaru Firebase, jednak Serwis nie wywołuje \`getAnalytics\` / nie loguje zdarzeń analitycznych. Gdyby analityka została włączona, uruchamiana byłaby wyłącznie po wyborze „Spoko”, a szczegóły zostałyby zaktualizowane w niniejszej Polityce.
+4. **Analityczne (po zgodzie „Spoko”)** — Firebase Analytics / Google Analytics 4 (identyfikator pomiaru z konfiguracji Firebase, np. \`G-…\`). Po akceptacji Serwis inicjuje Analytics w przeglądarce i rejestruje odsłony stron (w tym nawigację w aplikacji). Dostawca może ustawiać własne cookies / identyfikatory pomiarowe (np. \`_ga\`, \`_gid\` lub równoważne). Przy odrzuceniu zgody analityka nie jest uruchamiana; jeśli użytkownik wcześniej wyraził zgodę w tej samej sesji, zbieranie danych jest wyłączane.
 
 ## 5. Zarządzanie zgodą i baner
 
@@ -278,6 +281,7 @@ Zmiana wcześniej zapisanego wyboru jest możliwa w szczególności przez:
 ## 7. Okres przechowywania
 
 - \`cookiesConsent\` — do 150 dni od zapisu albo do wcześniejszego usunięcia przez użytkownika;
+- cookies / identyfikatory Firebase Analytics / GA4 — zgodnie z polityką Google Analytics oraz do czasu cofnięcia zgody lub usunięcia danych witryny;
 - dane Firebase Auth (sesja) — zgodnie z mechanizmem sesji dostawcy / do wylogowania;
 - \`emailForSignIn\` (localStorage) — do zakończenia procedury logowania linkiem lub usunięcia przez Serwis / użytkownika;
 - \`authReturnPath\` (sessionStorage) — do zakończenia sesji przeglądarki lub odczytania i usunięcia przez Serwis.

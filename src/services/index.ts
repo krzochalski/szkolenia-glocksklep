@@ -120,6 +120,14 @@ export {
 	getFaqItems,
 	updateFaqItem,
 } from './faq';
+export {
+	COOKIES_CONSENT_ACCEPTED,
+	COOKIES_CONSENT_COOKIE,
+	disableAnalytics,
+	enableAnalytics,
+	isCookiesConsentAccepted,
+	logAnalyticsPageView,
+} from './analytics';
 export { firebaseApp } from './firebase';
 export { db } from './firestore';
 export {
