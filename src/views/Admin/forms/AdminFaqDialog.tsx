@@ -14,14 +14,10 @@ import {
 	TextField,
 	Typography,
 } from '@ui';
+import { FAQ_CATEGORY_OPTIONS } from '@constants/faqCategories';
 import { useEffect, useState } from 'react';
 
-export const FAQ_CATEGORY_OPTIONS = [
-	{ value: 'rekrutacja', label: 'Rekrutacja i Zapisy' },
-	{ value: 'sprzet', label: 'Sprzęt i Wyposażenie' },
-	{ value: 'bezpieczenstwo', label: 'Bezpieczeństwo' },
-	{ value: 'logistyka', label: 'Logistyka i Dojazd' },
-] as const;
+export { FAQ_CATEGORY_OPTIONS };
 
 export type FaqFormData = {
 	question: string;

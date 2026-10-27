@@ -58,7 +58,7 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 		path: '/szkolenia',
 	},
 	faq: {
-		title: 'FAQ',
+		title: 'Najczęściej zadawane pytania',
 		description: 'Najczęstsze pytania o szkolenia, zapisy, płatności i wymagania uczestników.',
 		path: '/faq',
 	},
