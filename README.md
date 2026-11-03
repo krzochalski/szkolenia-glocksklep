@@ -126,7 +126,7 @@ pnpm deploy:auth
 
 ## Transactional email (SMTP via Cloud Functions)
 
-Waiting-list and enrollment confirmations are sent by Cloud Functions with **nodemailer** (same pattern as Stayfrosty) — not the Trigger Email extension.
+Waiting-list, enrollment confirmations, and **admin class-date blasts** (`POST /api/date-notify`) are sent by Cloud Functions with **nodemailer** (same pattern as Stayfrosty) — not the Trigger Email extension.
 
 Copy [`functions/.env.example`](./functions/.env.example) → `functions/.env` and set a [Google App Password](https://myaccount.google.com/apppasswords) for `zamowienia@glocksklep.pl`:
 
@@ -140,6 +140,12 @@ MAIL_FROM=zamowienia@glocksklep.pl
 
 Without `SMTP_PASS`, enroll / waitlist still work; confirmation emails are skipped (logged).
 Password-reset and email-link endpoints return 503; the web app then falls back to Firebase Auth’s built-in mailer (action URL on `*.firebaseapp.com`).
+
+### Class-date participant email (`/api/date-notify`)
+
+- Admin-only (existence of `admins/{uid}`). Cap: **200** recipients per request; Function timeout **60s** (same as waitlist notify).
+- Idempotent via client `idempotencyKey` (UUID = Firestore `dateMessages` doc id). Log under `courses/{courseId}/dateMessages/{messageId}/recipients/{participantId}`.
+- Sender domain should keep SPF/DKIM aligned with `MAIL_FROM` / SMTP user (no DNS changes in code).
 
 ## Deploy
 

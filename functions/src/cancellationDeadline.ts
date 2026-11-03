@@ -1,4 +1,7 @@
-/** Shared cancellation / unenroll cutoff (SZ-2, SZ-7, SZ-8). */
+/** Shared cancellation / unenroll cutoff (SZ-2, SZ-7, SZ-8).
+ * Keep logic identical to `src/utils/cancellationDeadline.ts` (App Hosting ignores this dir).
+ * Sync enforced by `src/utils/cancellationDeadline.sync.test.ts`.
+ */
 export const CANCELLATION_DEADLINE_HOURS_BEFORE = 96;
 
 export const WARSAW_TZ = 'Europe/Warsaw';
@@ -100,8 +103,7 @@ export const sessionStartUtc = (dateYmd: string, timeHm: string): Date => {
 
 export const cancellationDeadlineUtc = (dateYmd: string, timeHm: string): Date =>
 	new Date(
-		sessionStartUtc(dateYmd, timeHm).getTime() -
-			CANCELLATION_DEADLINE_HOURS_BEFORE * 60 * 60 * 1000
+		sessionStartUtc(dateYmd, timeHm).getTime() - CANCELLATION_DEADLINE_HOURS_BEFORE * 60 * 60 * 1000
 	);
 
 export const getUnenrollEligibility = (input: {

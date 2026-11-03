@@ -99,6 +99,12 @@ export {
 	removeFromWaitingList,
 } from './courseWaitingList';
 export {
+	adminNotifyDateParticipants,
+	listDateMessageRecipients,
+	listDateMessages,
+} from './dateNotify';
+export type { AdminDateNotifyParams, AdminDateNotifyResult } from './dateNotify';
+export {
 	DEFAULT_DEVELOPMENT_PATH,
 	getDevelopmentPath,
 	saveDevelopmentPath,

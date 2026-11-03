@@ -6,6 +6,7 @@ import {
 	adminRemoveCourseCompletion,
 	adminSetCourseCompletion,
 } from '@services/courseCompletions';
+import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import {
 	getCourse,
 	setCourseDateCanceled,
@@ -15,8 +16,11 @@ import {
 	toggleParticipantPaid,
 	unenrollFromCourse,
 } from '@services/courses';
+import { adminGetWaitingListEntries } from '@services/courseWaitingList';
+import { adminNotifyDateParticipants } from '@services/dateNotify';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+	Alert,
 	Box,
 	Button,
 	Chip,
@@ -35,6 +39,7 @@ import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Participant } from '@/types/course';
 import { warsawToday } from '@/utils/adminDashboard';
@@ -54,6 +59,11 @@ import {
 	SESSION_STATUS_LABEL,
 	sessionStatusChipColor,
 } from './dashboard/sessionStatusLabel';
+import {
+	DateNotifyDialog,
+	type DateNotifyComposePayload,
+} from './dateNotify/DateNotifyDialog';
+import { DateMessagesLog } from './dateNotify/DateMessagesLog';
 import { CourseDateEditForm } from './forms/CourseDateEditForm';
 import { removeCourseDate } from './forms/dateMutations';
 import { ParticipantCustomPriceDialog } from './ParticipantCustomPriceDialog';
@@ -90,12 +100,50 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	} | null>(null);
 	const [removeTarget, setRemoveTarget] = useState<Participant | null>(null);
 	const [priceTarget, setPriceTarget] = useState<Participant | null>(null);
+	const [composeOpen, setComposeOpen] = useState(false);
+	const [confirmDraft, setConfirmDraft] = useState<DateNotifyComposePayload | null>(null);
+	const [notifyResult, setNotifyResult] = useState<string | null>(null);
 
 	const date = course?.dates?.find((d) => d.id === dateId);
 	const participants = date?.participants ?? [];
 	const participantIds = useMemo(() => participants.map((p) => p.id), [participants]);
 	const listNetto =
 		course && date ? effectiveEnrollmentNetto(course, date) : course?.price ?? 0;
+
+	const { data: waitlistAll = [] } = useQuery({
+		queryKey: ['adminWaitingList'],
+		queryFn: adminGetWaitingListEntries,
+		enabled: composeOpen,
+	});
+	const waitlistForCourse = useMemo(
+		() => waitlistAll.filter((e) => e.courseId === courseId),
+		[waitlistAll, courseId]
+	);
+
+	const courseSlug = course?.slug ?? '';
+	const { data: courseDescription } = useQuery({
+		queryKey: ['courseDescription', courseSlug],
+		queryFn: () => getCourseDescriptionBySlug(courseSlug),
+		enabled: Boolean(composeOpen && courseSlug),
+	});
+
+	const notifyDate = useMutation({
+		mutationFn: adminNotifyDateParticipants,
+		onSuccess: async (result, variables) => {
+			setConfirmDraft(null);
+			setComposeOpen(false);
+			setNotifyResult(
+				variables.isTest
+					? `Wysłano test (${result.sent} e-mail).`
+					: `Wysłano ${result.sent}/${result.recipientCount}` +
+							(result.failed > 0 ? `, błędów: ${result.failed}` : '') +
+							(result.idempotentReplay ? ' (ponowione żądanie — bez duplikatu).' : '.')
+			);
+			await queryClient.invalidateQueries({
+				queryKey: ['dateMessages', courseId, dateId],
+			});
+		},
+	});
 
 	const completionQueries = useQueries({
 		queries: participantIds.map((uid) => ({
@@ -274,6 +322,9 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					<CourseDateEditForm courseId={courseId} courseDate={date} onSaved={invalidate} />
 
 					<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
+						<Button variant='contained' onClick={() => setComposeOpen(true)}>
+							Wyślij wiadomość do uczestników
+						</Button>
 						{date.canceled ? (
 							<Button
 								variant='outlined'
@@ -324,6 +375,20 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							Usuń termin
 						</Button>
 					</Stack>
+
+					{notifyResult ? (
+						<Alert severity='success' onClose={() => setNotifyResult(null)}>
+							{notifyResult}
+						</Alert>
+					) : null}
+					{notifyDate.isError ? (
+						<Alert severity='error' onClose={() => notifyDate.reset()}>
+							{(notifyDate.error as Error).message}
+						</Alert>
+					) : null}
+
+					<Typography variant='h6'>Wysłane wiadomości</Typography>
+					<DateMessagesLog courseId={courseId} dateId={dateId} />
 
 					<Typography variant='h6'>
 						Uczestnicy ({participants.length}/{date.slotsMax} ·{' '}
@@ -622,6 +687,62 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							});
 						}}
 					/>
+
+					<DateNotifyDialog
+						open={composeOpen && !confirmDraft}
+						course={course}
+						date={date}
+						waitlistEntries={waitlistForCourse}
+						requirements={courseDescription?.requirements}
+						loading={notifyDate.isPending}
+						onClose={() => setComposeOpen(false)}
+						onSubmit={(payload) => setConfirmDraft(payload)}
+						onTestSend={(payload) => {
+							notifyDate.mutate({
+								courseId,
+								dateId,
+								subject: payload.subject,
+								bodyMarkdown: payload.bodyMarkdown,
+								recipientMode: payload.recipientMode,
+								manualParticipantIds: payload.manualParticipantIds,
+								idempotencyKey: uuidv4(),
+								isTest: true,
+							});
+						}}
+					/>
+
+					<ConfirmDialog
+						open={Boolean(confirmDraft)}
+						title='Potwierdź wysyłkę'
+						cancelLabel='Anuluj'
+						confirmLabel='Wyślij'
+						loading={notifyDate.isPending}
+						onCancel={() => setConfirmDraft(null)}
+						onConfirm={() => {
+							if (!confirmDraft) return;
+							notifyDate.mutate({
+								courseId,
+								dateId,
+								subject: confirmDraft.subject,
+								bodyMarkdown: confirmDraft.bodyMarkdown,
+								recipientMode: confirmDraft.recipientMode,
+								manualParticipantIds: confirmDraft.manualParticipantIds,
+								idempotencyKey: uuidv4(),
+							});
+						}}
+					>
+						<Typography>
+							Wyślesz e-mail do <strong>{confirmDraft?.recipientCount ?? 0}</strong>{' '}
+							odbiorców.
+							{confirmDraft?.subject ? (
+								<>
+									{' '}
+									Temat: <strong>{confirmDraft.subject}</strong>.
+								</>
+							) : null}{' '}
+							Operacja jest nieodwracalna. Kontynuować?
+						</Typography>
+					</ConfirmDialog>
 				</Box>
 			)}
 		</ContentSwap>

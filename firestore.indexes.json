@@ -1,4 +1,13 @@
 {
-	"indexes": [],
+	"indexes": [
+		{
+			"collectionGroup": "dateMessages",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "dateId", "order": "ASCENDING" },
+				{ "fieldPath": "createdAt", "order": "DESCENDING" }
+			]
+		}
+	],
 	"fieldOverrides": []
 }
