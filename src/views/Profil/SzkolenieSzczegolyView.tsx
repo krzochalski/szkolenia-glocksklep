@@ -2,6 +2,7 @@
 
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
+import { getMyCourseCompletions } from '@services/courseCompletions';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import { getCourseBySlug, unenrollFromCourse } from '@services/courses';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +14,7 @@ import {
 	ContentSwap,
 	Divider,
 	Link,
+	MotionAlert,
 	Stack,
 	Typography,
 } from '@ui';
@@ -24,6 +26,10 @@ import { CourseFacts } from '@/components/CourseFacts';
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
+import {
+	getUnenrollEligibility,
+	unenrollBlockedMessage,
+} from '@/utils/cancellationDeadline';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { mapParticipantDescription } from '@/utils/mapParticipantDescription';
 import { fillPath } from '@/utils/paths';
@@ -49,12 +55,28 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 		queryFn: () => getCourseDescriptionBySlug(slug),
 	});
 
+	const { data: completions = [] } = useQuery({
+		queryKey: ['myCourseCompletions'],
+		queryFn: getMyCourseCompletions,
+		enabled: Boolean(user),
+	});
+
 	const date = course?.dates?.find((d) => d.id === dateId);
 	const participant = date?.participants?.find((p) => p.id === user?.uid);
 	const panel = description ? mapParticipantDescription(description) : null;
 	const hasForWhomSection = Boolean(panel?.forWhom?.length || panel?.notExpect?.length);
 	const hasOutcomes = Boolean(panel?.outcomes?.length);
 	const hasBringSection = Boolean(panel?.bring?.length || panel?.dontBring?.length);
+	const attendanceMarked = Boolean(course && completions.some((c) => c.courseId === course.id));
+	const unenrollEligibility =
+		date != null
+			? getUnenrollEligibility({
+					now: new Date(),
+					date: date.date,
+					timeStart: date.timeStart,
+					attendanceMarked,
+				})
+			: { allowed: true as const };
 
 	const unenroll = useMutation({
 		mutationFn: async () => {
@@ -66,6 +88,8 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 			await invalidateCourseQueries(queryClient);
 		},
 	});
+	const unenrollError =
+		unenroll.error instanceof Error ? unenroll.error.message : unenroll.error ? String(unenroll.error) : '';
 
 	const detailState = isLoading ? 'loading' : !course || !date ? 'notfound' : 'content';
 
@@ -305,28 +329,42 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 					</Stack>
 
 					{participant ? (
-						<>
-							<Button
-								sx={{ mt: 3 }}
-								variant='outlined'
-								color='error'
-								disabled={unenroll.isPending}
-								onClick={() => setConfirmOpen(true)}
-							>
-								Wypisz się
-							</Button>
-							<ConfirmDialog
-								open={confirmOpen}
-								title='Potwierdź wypisanie'
-								cancelLabel='Anuluj'
-								confirmLabel='Wypisz się'
-								loading={unenroll.isPending}
-								onCancel={() => setConfirmOpen(false)}
-								onConfirm={() => unenroll.mutate()}
-							>
-								{`Czy na pewno chcesz wypisać się z „${course.name}” (${date.date})?`}
-							</ConfirmDialog>
-						</>
+						unenrollEligibility.allowed ? (
+							<>
+								<Button
+									sx={{ mt: 3 }}
+									variant='outlined'
+									color='error'
+									disabled={unenroll.isPending}
+									onClick={() => setConfirmOpen(true)}
+								>
+									Wypisz się
+								</Button>
+								<MotionAlert show={Boolean(unenrollError)} severity='error' sx={{ mt: 2 }}>
+									{unenrollError}
+								</MotionAlert>
+								<ConfirmDialog
+									open={confirmOpen}
+									title='Potwierdź wypisanie'
+									cancelLabel='Anuluj'
+									confirmLabel='Wypisz się'
+									loading={unenroll.isPending}
+									onCancel={() => setConfirmOpen(false)}
+									onConfirm={() => unenroll.mutate()}
+								>
+									{`Czy na pewno chcesz wypisać się z „${course.name}” (${date.date})?`}
+								</ConfirmDialog>
+							</>
+						) : (
+							<Stack spacing={1} sx={{ mt: 3, maxWidth: 480 }}>
+								<Typography color='text.secondary'>
+									{unenrollBlockedMessage(unenrollEligibility.reason)}
+								</Typography>
+								<Link component={NextLink} href={Paths.regulamin}>
+									Regulamin — rezygnacja i zwroty
+								</Link>
+							</Stack>
+						)
 					) : (
 						<Typography sx={{ mt: 2 }} color='text.secondary'>
 							Nie jesteś zapisany na ten termin.
