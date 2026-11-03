@@ -70,7 +70,8 @@ export const FAQ_SEED_ITEMS: FaqSeedItem[] = [
 	{
 		question: 'Anulowanie i zwrot',
 		answer: [
-			'Rezygnacja w Serwisie (wypis) jest możliwa zawsze — skutki finansowe zależą od terminu:',
+			'Rezygnacja w Serwisie (wypis) jest możliwa do 96 godzin przed rozpoczęciem zajęć (czas Europe/Warsaw). Później oraz po odbytym szkoleniu wypis jest zablokowany.',
+			'Skutki finansowe rezygnacji złożonej w dopuszczalnym terminie:',
 			'• co najmniej 3 dni przed datą Terminu — zwrot 100% wpłaconej kwoty;',
 			'• później niż 3 dni przed — brak zwrotu;',
 			'• gdy Organizator odwoła Termin (w tym z powodu braku minimum osób) — zwrot 100% albo, za Twoją zgodą, przeniesienie na inny Termin.',

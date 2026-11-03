@@ -4,7 +4,7 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '27-10-2026';
+const EFFECTIVE_FROM = '03-11-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
@@ -83,7 +83,7 @@ Użyte w Regulaminie pojęcia oznaczają:
 
 ## VIII. Rezygnacja, odwołanie Terminu i zwroty
 
-1. Uczestnik może wypisać się z Terminu w Serwisie (funkcja wypisu) — wypis usuwa go z listy Uczestników danego Terminu. Serwis nie blokuje wypisu ze względu na liczbę dni do Terminu; skutki finansowe określa pkt 2–4 poniżej.
+1. Uczestnik może wypisać się z Terminu w Serwisie (funkcja wypisu) — wypis usuwa go z listy Uczestników danego Terminu — **wyłącznie do 96 godzin przed rozpoczęciem zajęć** (czas lokalny Europe/Warsaw, według daty i godziny rozpoczęcia Terminu). Po upływie tego terminu oraz po rozpoczęciu lub zakończeniu zajęć (w tym gdy Organizator oznaczy obecność / ukończenie) funkcja wypisu jest niedostępna. Skutki finansowe rezygnacji złożonej w dopuszczalnym terminie określa pkt 2–4 poniżej.
 2. Każdy Termin może mieć **minimalną liczbę Uczestników** wymaganą do realizacji (wskazaną przy Terminie lub w komunikacji Organizatora). Zapis na Termin poniżej tego minimum jest możliwy; brak minimum **nie** blokuje zapisu w Serwisie. Jeżeli do wyznaczonego przez Organizatora terminu decyzji (albo do daty Terminu) liczba zapisanych Uczestników nie osiągnie minimum, Organizator może **odwołać Termin** decyzją administracyjną w Serwisie — Serwis **nie** odwołuje Terminu automatycznie.
 3. **Zwrot wpłaty:**
    - przy rezygnacji Uczestnika złożonej **co najmniej 3 dni przed** datą Terminu — zwrot **100%** wpłaconej kwoty;

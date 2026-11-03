@@ -1,5 +1,6 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import { z } from 'zod';
+import { getUnenrollEligibility, unenrollBlockedMessage } from './cancellationDeadline';
 
 const participantSchema = z.object({
 	id: z.string().min(1),
@@ -23,6 +24,7 @@ export const unenrollBodySchema = z.object({
 type CourseDate = {
 	id?: string;
 	date?: string;
+	timeStart?: string;
 	canceled?: boolean;
 	slotsMax?: number;
 	participants?: Array<{
@@ -122,7 +124,8 @@ export const unenrollFromCourseTx = async (
 	db: Firestore,
 	uid: string,
 	input: z.infer<typeof unenrollBodySchema>,
-	asAdmin: boolean
+	asAdmin: boolean,
+	now: Date = new Date()
 ): Promise<void> => {
 	if (!asAdmin && input.participantId !== uid) {
 		throw new Error('Możesz wypisać tylko siebie.');
@@ -138,6 +141,25 @@ export const unenrollFromCourseTx = async (
 		const idx = dates.findIndex((d) => matchDate(d, input.dateId));
 		if (idx < 0) throw new Error('Termin nie istnieje.');
 		const target = dates[idx];
+
+		if (!asAdmin) {
+			const completionRef = db
+				.collection('users')
+				.doc(input.participantId)
+				.collection('courseCompletions')
+				.doc(input.courseId);
+			const completionSnap = await tx.get(completionRef);
+			const eligibility = getUnenrollEligibility({
+				now,
+				date: target.date ?? '',
+				timeStart: target.timeStart ?? '',
+				attendanceMarked: completionSnap.exists,
+			});
+			if (!eligibility.allowed) {
+				throw new Error(unenrollBlockedMessage(eligibility.reason));
+			}
+		}
+
 		dates[idx] = {
 			...target,
 			participants: (target.participants ?? []).filter((p) => p.id !== input.participantId),
