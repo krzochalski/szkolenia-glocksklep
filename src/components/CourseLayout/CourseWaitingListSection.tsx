@@ -28,6 +28,7 @@ export const CourseWaitingListSection = ({
 }: CourseWaitingListSectionProps) => {
 	const user = useAuthUser();
 	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
 	const enrolled = isEnrolledInFutureDate(futureDates, user?.uid);
 	const noUpcomingDates = futureDates.length === 0;
 	const waitingCount = course.waitingListCount ?? 0;
@@ -119,11 +120,20 @@ export const CourseWaitingListSection = ({
 			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 2 }}>
 				{error}
 			</MotionAlert>
+			<MotionAlert show={Boolean(success)} severity='success' sx={{ borderRadius: 0, mb: 2 }}>
+				{success}
+			</MotionAlert>
 
 			<CourseWaitingListActions
 				course={course}
-				onError={setError}
-				onSuccess={() => setError(null)}
+				onError={(message) => {
+					setSuccess(null);
+					setError(message);
+				}}
+				onSuccess={(message) => {
+					setError(null);
+					setSuccess(message ?? 'Zapisano na listę oczekujących.');
+				}}
 			/>
 		</HardShadow>
 	);

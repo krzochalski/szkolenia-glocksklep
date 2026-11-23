@@ -200,6 +200,11 @@ export interface CourseClass {
 	customPrice?: number;
 	/* Whether the class has been canceled by admin */
 	canceled?: boolean;
+	/**
+	 * ISO timestamp when waitlisted users were auto-notified about this term.
+	 * Written by Cloud Functions; preserved on admin date edits via cleanDateForFirestore.
+	 */
+	waitlistNotifiedAt?: string;
 }
 
 export interface Place {

@@ -6,6 +6,10 @@ import {
 	SITE_NAME,
 	SITE_ORIGIN,
 } from './mail';
+import {
+	buildWaitlistUnsubscribeToken,
+	waitlistUnsubscribeUrl,
+} from './waitlistUnsubscribe';
 
 const ink = '#191c1d';
 const paper = '#ffffff';
@@ -18,16 +22,19 @@ export type WaitingListMailInput = {
 	courseName: string;
 	courseSlug: string;
 	recipientEmail: string;
+	entryId: string;
+	courseId: string;
 };
 
 const buildSubject = (courseName: string): string => `Lista oczekujących — ${courseName}`;
 
-const buildHtml = (input: WaitingListMailInput): string => {
+const buildHtml = (input: WaitingListMailInput & { unsubscribeUrl: string }): string => {
 	const courseUrl = coursePageUrl(input.courseSlug);
 	const name = escapeHtml(input.courseName);
 	const url = escapeHtml(courseUrl);
 	const site = escapeHtml(SITE_NAME);
 	const contact = escapeHtml(CONTACT_EMAIL);
+	const unsub = escapeHtml(input.unsubscribeUrl);
 
 	return `<!DOCTYPE html>
 <html lang="pl">
@@ -56,7 +63,7 @@ const buildHtml = (input: WaitingListMailInput): string => {
                 <strong>${name}</strong>.
               </p>
               <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:${ink};">
-                Skontaktujemy się, gdy pojawi się wolne miejsce lub nowy termin tego szkolenia.
+                Powiadomimy Cię e-mailem, gdy pojawi się nowy termin tego szkolenia.
               </p>
               <p style="margin:0 0 16px;padding:12px 14px;border:2px solid ${accent};background:#fff5f0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:${ink};">
                 To potwierdzenie dotyczy <strong>wyłącznie tego szkolenia</strong>.
@@ -69,8 +76,8 @@ const buildHtml = (input: WaitingListMailInput): string => {
           </tr>
           <tr>
             <td style="padding:18px 24px;border-top:3px solid ${border};background:${muted};">
-              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:${ink};">
-                Jeśli nie widzisz tej wiadomości w skrzynce — sprawdź folder <strong>spam / oferty</strong>.
+              <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:${secondary};">
+                <a href="${unsub}" style="color:${accent};text-decoration:none;">Wypisz się z listy oczekujących</a>
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:${secondary};">
                 ${site} ·
@@ -87,18 +94,19 @@ const buildHtml = (input: WaitingListMailInput): string => {
 </html>`;
 };
 
-const buildText = (input: WaitingListMailInput): string => {
+const buildText = (input: WaitingListMailInput & { unsubscribeUrl: string }): string => {
 	const courseUrl = coursePageUrl(input.courseSlug);
 	return [
 		SITE_NAME.toUpperCase(),
 		`Zapis na listę oczekujących — ${input.courseName}`,
 		'',
 		`Dziękujemy za zapis na listę oczekujących na szkolenie „${input.courseName}”.`,
-		'Skontaktujemy się, gdy pojawi się wolne miejsce lub nowy termin tego szkolenia.',
+		'Powiadomimy Cię e-mailem, gdy pojawi się nowy termin tego szkolenia.',
 		'',
 		'To potwierdzenie dotyczy wyłącznie tego szkolenia. Nie zapisujesz się na newsletter glocksklep.pl.',
 		'',
 		`Szkolenie: ${courseUrl}`,
+		`Wypisz się: ${input.unsubscribeUrl}`,
 		'',
 		`Kontakt: ${CONTACT_EMAIL}`,
 	].join('\n');
@@ -110,12 +118,20 @@ export const sendWaitingListConfirmation = async (
 ): Promise<void> => {
 	const email = input.recipientEmail.trim().toLowerCase();
 	if (!email) return;
+	const unsubscribeUrl = waitlistUnsubscribeUrl(
+		buildWaitlistUnsubscribeToken({
+			entryId: input.entryId,
+			email,
+			courseId: input.courseId,
+		})
+	);
+	const mailInput = { ...input, recipientEmail: email, unsubscribeUrl };
 	try {
 		await sendMail({
 			to: email,
 			subject: buildSubject(input.courseName),
-			html: buildHtml({ ...input, recipientEmail: email }),
-			text: buildText({ ...input, recipientEmail: email }),
+			html: buildHtml(mailInput),
+			text: buildText(mailInput),
 		});
 	} catch (err) {
 		console.error('Waiting-list confirmation email failed', err);

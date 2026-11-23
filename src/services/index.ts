@@ -90,6 +90,7 @@ export {
 	addToWaitingList,
 	adminGetWaitingListEntries,
 	adminNotifyWaitingList,
+	adminNotifyWaitlistForTerm,
 	adminRemoveFromWaitingList,
 	getGuestWaitingListEntryId,
 	getUserWaitingListEntries,
@@ -135,8 +136,10 @@ export {
 	disableAnalytics,
 	enableAnalytics,
 	isCookiesConsentAccepted,
+	logAnalyticsEvent,
 	logAnalyticsPageView,
 } from './analytics';
+export type { AnalyticsEventParams } from './analytics';
 export { firebaseApp } from './firebase';
 export { db } from './firestore';
 export {

@@ -306,18 +306,6 @@ export const CourseDateActions = ({
 		);
 	}
 
-	if (user && eligibility.hasPrerequisites && !eligibility.loading && !eligibility.eligible) {
-		const missing =
-			eligibility.missingNames.length > 0
-				? eligibility.missingNames.join(', ')
-				: eligibility.prerequisiteNames.join(', ');
-		return (
-			<Typography color='text.secondary' sx={{ fontSize: '0.8125rem', maxWidth: 280 }}>
-				Wymaga ukończenia: {missing}
-			</Typography>
-		);
-	}
-
 	if (!user) {
 		if (slots <= 0) {
 			return (
@@ -343,6 +331,17 @@ export const CourseDateActions = ({
 	}
 
 	if (slots > 0) {
+		if (eligibility.hasPrerequisites && !eligibility.loading && !eligibility.eligible) {
+			const missing =
+				eligibility.missingNames.length > 0
+					? eligibility.missingNames.join(', ')
+					: eligibility.prerequisiteNames.join(', ');
+			return (
+				<Typography color='text.secondary' sx={{ fontSize: '0.8125rem', maxWidth: 280 }}>
+					Wymaga ukończenia: {missing}
+				</Typography>
+			);
+		}
 		return (
 			<>
 				<Button

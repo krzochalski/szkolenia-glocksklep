@@ -29,6 +29,7 @@ import {
 	Typography,
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
@@ -36,8 +37,7 @@ import {
 	SESSION_STATUS_LABEL,
 	sessionStatusChipColor,
 } from './dashboard/sessionStatusLabel';
-import { CloneCourseDateDialog } from './forms/CloneCourseDateDialog';
-import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
+import { removeCourseDate } from './forms/dateMutations';
 
 type DateTarget = {
 	course: Course;
@@ -47,6 +47,7 @@ type DateTarget = {
 export const AdminNearestDatesView = () => <NearestInner />;
 
 const NearestInner = () => {
+	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { data: courses = [], isLoading } = useQuery({
 		queryKey: ['courses'],
@@ -54,23 +55,17 @@ const NearestInner = () => {
 	});
 	const [toDelete, setToDelete] = useState<DateTarget | null>(null);
 	const [toCancel, setToCancel] = useState<DateTarget | null>(null);
-	const [toClone, setToClone] = useState<DateTarget | null>(null);
 	const [toUncancel, setToUncancel] = useState<DateTarget | null>(null);
 	const [belowMinOnly, setBelowMinOnly] = useState(false);
 	const today = warsawToday();
 
 	const invalidate = () => invalidateCourseQueries(queryClient);
 
-	const clone = useMutation({
-		mutationFn: (newDate: string) => {
-			if (!toClone) throw new Error('Brak terminu');
-			return cloneCourseDate(toClone.course, toClone.date, newDate);
-		},
-		onSuccess: async () => {
-			setToClone(null);
-			await invalidate();
-		},
-	});
+	const openCloneForm = (course: Course, date: CourseClass) => {
+		router.push(
+			`${fillPath(Paths.adminCourseDateNew, { courseId: course.id })}?from=${encodeURIComponent(date.id)}`
+		);
+	};
 
 	const cancel = useMutation({
 		mutationFn: () => {
@@ -118,8 +113,7 @@ const NearestInner = () => {
 			isBelowMinStatus(resolveSessionStatus({ date, course, today }))
 		);
 	}, [courses, belowMinOnly, today]);
-	const pending =
-		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
+	const pending = cancel.isPending || uncancel.isPending || remove.isPending;
 
 	return (
 		<ContentSwap state={isLoading ? 'loading' : 'content'}>
@@ -184,7 +178,7 @@ const NearestInner = () => {
 											dateId: date.id,
 										})}
 										pending={pending}
-										onClone={() => setToClone({ course, date })}
+										onClone={() => openCloneForm(course, date)}
 										onCancel={() => setToCancel({ course, date })}
 										onUncancel={() => setToUncancel({ course, date })}
 										onDelete={() => setToDelete({ course, date })}
@@ -202,15 +196,6 @@ const NearestInner = () => {
 					</Typography>
 				) : null}
 			</Stagger>
-
-			<CloneCourseDateDialog
-				open={Boolean(toClone)}
-				sourceDateLabel={toClone?.date.date ?? ''}
-				courseName={toClone?.course.name}
-				loading={clone.isPending}
-				onCancel={() => setToClone(null)}
-				onConfirm={(newDate) => clone.mutate(newDate)}
-			/>
 
 			<ConfirmDialog
 				open={Boolean(toUncancel)}

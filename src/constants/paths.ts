@@ -42,6 +42,7 @@ export const Paths = {
 	mojeShkolenia: '/profil/moje-szkolenia',
 	harmonogram: '/profil/harmonogram',
 	listaOczekujacych: '/profil/lista-oczekujacych',
+	waitlistUnsubscribe: '/lista-oczekujacych/wypisz',
 	profilSciezkaRozwoju: '/profil/sciezka-rozwoju',
 	profilDebriefing: '/profil/debriefing',
 	profilDebriefingDetail: '/profil/debriefing/$courseId',

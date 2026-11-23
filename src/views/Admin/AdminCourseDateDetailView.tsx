@@ -17,7 +17,10 @@ import {
 	toggleParticipantPaid,
 	unenrollFromCourse,
 } from '@services/courses';
-import { adminGetWaitingListEntries } from '@services/courseWaitingList';
+import {
+	adminGetWaitingListEntries,
+	adminNotifyWaitlistForTerm,
+} from '@services/courseWaitingList';
 import { adminNotifyDateParticipants } from '@services/dateNotify';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -109,6 +112,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	const [composeOpen, setComposeOpen] = useState(false);
 	const [confirmDraft, setConfirmDraft] = useState<DateNotifyComposePayload | null>(null);
 	const [notifyResult, setNotifyResult] = useState<string | null>(null);
+	const [waitlistResendMsg, setWaitlistResendMsg] = useState<string | null>(null);
 
 	const date = course?.dates?.find((d) => d.id === dateId);
 	const participants = date?.participants ?? [];
@@ -119,12 +123,29 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	const { data: waitlistAll = [] } = useQuery({
 		queryKey: ['adminWaitingList'],
 		queryFn: adminGetWaitingListEntries,
-		enabled: composeOpen,
 	});
 	const waitlistForCourse = useMemo(
 		() => waitlistAll.filter((e) => e.courseId === courseId),
 		[waitlistAll, courseId]
 	);
+
+	const resendWaitlist = useMutation({
+		mutationFn: () =>
+			adminNotifyWaitlistForTerm({ courseId, dateId, force: true }),
+		onSuccess: async (result) => {
+			setWaitlistResendMsg(
+				`Powiadomienie listy: wysłano ${result.sent}/${result.recipientCount}` +
+					(result.failed > 0 ? `, błędów: ${result.failed}` : '') +
+					(result.skipped > 0 ? `, pominięto: ${result.skipped}` : '') +
+					'.'
+			);
+			await invalidateCourseQueries(queryClient);
+			await queryClient.invalidateQueries({ queryKey: ['course', courseId] });
+		},
+		onError: (err: Error) => {
+			setWaitlistResendMsg(err.message);
+		},
+	});
 
 	const courseSlug = course?.slug ?? '';
 	const { data: courseDescription } = useQuery({
@@ -364,12 +385,42 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							</Typography>
 						);
 					})()}
+					<Typography variant='body2' color='text.secondary'>
+						Lista oczekujących kursu: {waitlistForCourse.length}
+						{date.waitlistNotifiedAt
+							? ` · powiadomienie o terminie: ${date.waitlistNotifiedAt.slice(0, 19).replace('T', ' ')}`
+							: ' · brak automatycznego powiadomienia o tym terminie'}
+						{' · '}
+						<Button
+							component={NextLink}
+							href={Paths.adminWaitingList}
+							size='small'
+							sx={{ verticalAlign: 'baseline', minWidth: 0, p: 0 }}
+						>
+							zobacz listę
+						</Button>
+					</Typography>
+					{waitlistResendMsg ? (
+						<Alert
+							severity={waitlistResendMsg.startsWith('Powiadomienie') ? 'success' : 'error'}
+							onClose={() => setWaitlistResendMsg(null)}
+						>
+							{waitlistResendMsg}
+						</Alert>
+					) : null}
 
 					<CourseDateEditForm courseId={courseId} courseDate={date} onSaved={invalidate} />
 
 					<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
 						<Button variant='contained' onClick={() => setComposeOpen(true)}>
 							Wyślij wiadomość do uczestników
+						</Button>
+						<Button
+							variant='outlined'
+							disabled={resendWaitlist.isPending || waitlistForCourse.length === 0}
+							onClick={() => resendWaitlist.mutate()}
+						>
+							Wyślij powiadomienie ponownie (lista oczekujących)
 						</Button>
 						{date.canceled ? (
 							<Button

@@ -3,7 +3,11 @@ import express from 'express';
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { onDocumentCreated, onDocumentDeleted } from 'firebase-functions/v2/firestore';
+import {
+	onDocumentCreated,
+	onDocumentDeleted,
+	onDocumentUpdated,
+} from 'firebase-functions/v2/firestore';
 import { onRequest } from 'firebase-functions/v2/https';
 import { z, ZodError } from 'zod';
 
@@ -28,6 +32,15 @@ import { syncCourseWaitingListCount } from './waitingListCount';
 import { sendWaitingListConfirmation } from './waitingListMail';
 import { sendDateNotify, dateNotifyBodySchema } from './dateNotifyMail';
 import { sendWaitlistNotify, waitlistNotifyBodySchema } from './waitlistNotifyMail';
+import {
+	autoNotifyWaitlistOnCourseUpdate,
+	notifyWaitlistForTerm,
+	waitlistTermNotifyBodySchema,
+} from './waitlistTermNotify';
+import {
+	unsubscribeWaitlistByToken,
+	waitlistUnsubscribeBodySchema,
+} from './waitlistUnsubscribe';
 
 initializeApp();
 
@@ -364,6 +377,59 @@ app.post(['/api/date-notify', '/date-notify'], async (req, res) => {
 	}
 });
 
+/** Public: unsubscribe from course waitlist via signed email token. */
+app.post(['/api/waitlist-unsubscribe', '/waitlist-unsubscribe'], async (req, res) => {
+	try {
+		const body = waitlistUnsubscribeBodySchema.parse(req.body);
+		const result = await unsubscribeWaitlistByToken(getFirestore(), body.token);
+		if (!result.ok) {
+			res.status(400).json({ error: result.error });
+			return;
+		}
+		res.status(200).json({ ok: true, removed: result.removed });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowy token.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wypisać z listy.' });
+	}
+});
+
+/** Admin-only: (re)send new-term waitlist emails for one date. */
+app.post(['/api/waitlist-term-notify', '/waitlist-term-notify'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const body = waitlistTermNotifyBodySchema.parse(req.body);
+		const result = await notifyWaitlistForTerm(getFirestore(), {
+			courseId: body.courseId,
+			dateId: body.dateId,
+			force: body.force ?? true,
+		});
+		if (!result.ok) {
+			res.status(400).json({ error: result.error, code: result.code });
+			return;
+		}
+		res.status(200).json(result);
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowe dane.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać powiadomień.' });
+	}
+});
+
 /** Admin-only: compose + send email to waitlist (one course or all). */
 app.post(['/api/waitlist-notify', '/waitlist-notify'], async (req, res) => {
 	try {
@@ -497,17 +563,40 @@ export const onWaitingListCreated = onDocumentCreated(
 		const courseName = typeof data.courseName === 'string' ? data.courseName : 'Szkolenie';
 		const courseSlug = typeof data.courseSlug === 'string' ? data.courseSlug : '';
 		const courseId = typeof data.courseId === 'string' ? data.courseId : '';
+		const entryId = event.params.entryId;
 		await Promise.all([
 			courseId ? syncCourseWaitingListCount(getFirestore(), courseId) : Promise.resolve(),
-			email && courseSlug
+			email && courseSlug && courseId && entryId
 				? sendWaitingListConfirmation({
 						courseName,
 						courseSlug,
 						recipientEmail: email,
+						entryId,
+						courseId,
 					})
 				: Promise.resolve(),
 		]);
 		void requestCatalogRevalidation(courseSlug ? { slug: courseSlug } : undefined);
+	}
+);
+
+export const onCourseUpdatedWaitlistNotify = onDocumentUpdated(
+	{
+		document: 'courses/{courseId}',
+		region: 'europe-west1',
+		memory: '512MiB',
+		timeoutSeconds: 60,
+	},
+	async (event) => {
+		const before = event.data?.before.data();
+		const after = event.data?.after.data();
+		if (!after) return;
+		const courseId = event.params.courseId;
+		await autoNotifyWaitlistOnCourseUpdate(getFirestore(), {
+			courseId,
+			before: before as Parameters<typeof autoNotifyWaitlistOnCourseUpdate>[1]['before'],
+			after: after as Parameters<typeof autoNotifyWaitlistOnCourseUpdate>[1]['after'],
+		});
 	}
 );
 

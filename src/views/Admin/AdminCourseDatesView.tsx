@@ -31,6 +31,7 @@ import {
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
@@ -38,8 +39,7 @@ import {
 	SESSION_STATUS_LABEL,
 	sessionStatusChipColor,
 } from './dashboard/sessionStatusLabel';
-import { CloneCourseDateDialog } from './forms/CloneCourseDateDialog';
-import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
+import { removeCourseDate } from './forms/dateMutations';
 
 type Props = {
 	readonly courseId: string;
@@ -48,6 +48,7 @@ type Props = {
 export const AdminCourseDatesView = ({ courseId }: Props) => <DatesInner courseId={courseId} />;
 
 const DatesInner = ({ courseId }: Props) => {
+	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { data: course, isLoading } = useQuery({
 		queryKey: ['course', courseId],
@@ -55,23 +56,17 @@ const DatesInner = ({ courseId }: Props) => {
 	});
 	const [toDelete, setToDelete] = useState<CourseClass | null>(null);
 	const [toCancel, setToCancel] = useState<CourseClass | null>(null);
-	const [toClone, setToClone] = useState<CourseClass | null>(null);
 	const [toUncancel, setToUncancel] = useState<CourseClass | null>(null);
 	const [belowMinOnly, setBelowMinOnly] = useState(false);
 	const today = warsawToday();
 
 	const invalidate = () => invalidateCourseQueries(queryClient);
 
-	const clone = useMutation({
-		mutationFn: (newDate: string) => {
-			if (!course || !toClone) throw new Error('Brak kursu');
-			return cloneCourseDate(course, toClone, newDate);
-		},
-		onSuccess: async () => {
-			setToClone(null);
-			await invalidate();
-		},
-	});
+	const openCloneForm = (date: CourseClass) => {
+		router.push(
+			`${fillPath(Paths.adminCourseDateNew, { courseId })}?from=${encodeURIComponent(date.id)}`
+		);
+	};
 
 	const cancel = useMutation({
 		mutationFn: () => {
@@ -115,8 +110,7 @@ const DatesInner = ({ courseId }: Props) => {
 		);
 	}, [dates, belowMinOnly, course, today]);
 	const pastDates = dates.filter((d) => !isFutureDate(d.date));
-	const pending =
-		clone.isPending || cancel.isPending || uncancel.isPending || remove.isPending;
+	const pending = cancel.isPending || uncancel.isPending || remove.isPending;
 
 	return (
 		<ContentSwap state={isLoading ? 'loading' : !course ? 'empty' : 'content'}>
@@ -173,7 +167,7 @@ const DatesInner = ({ courseId }: Props) => {
 						emptyFilterMessage={
 							belowMinOnly ? 'Brak nadchodzących terminów poniżej minimum.' : undefined
 						}
-						onClone={setToClone}
+						onClone={openCloneForm}
 						onCancel={setToCancel}
 						onUncancel={setToUncancel}
 						onDelete={setToDelete}
@@ -186,7 +180,7 @@ const DatesInner = ({ courseId }: Props) => {
 							courseId={courseId}
 							today={today}
 							pending={pending}
-							onClone={setToClone}
+							onClone={openCloneForm}
 							onCancel={setToCancel}
 							onUncancel={setToUncancel}
 							onDelete={setToDelete}
@@ -194,14 +188,6 @@ const DatesInner = ({ courseId }: Props) => {
 					)}
 				</Stack>
 			)}
-
-			<CloneCourseDateDialog
-				open={Boolean(toClone)}
-				sourceDateLabel={toClone?.date ?? ''}
-				loading={clone.isPending}
-				onCancel={() => setToClone(null)}
-				onConfirm={(newDate) => clone.mutate(newDate)}
-			/>
 
 			<ConfirmDialog
 				open={Boolean(toUncancel)}
@@ -339,6 +325,12 @@ const DateGroup = ({
 										<Typography variant='body2' color='text.secondary'>
 											<PlaceNameLink place={date.place} /> · {signedUp}/{date.slotsMax}
 											{` · ${formatMinParticipantsMeta(signedUp, min)}`}
+											{typeof course.waitingListCount === 'number' && course.waitingListCount > 0
+												? ` · lista oczekujących: ${course.waitingListCount}`
+												: ''}
+											{date.waitlistNotifiedAt
+												? ` · powiadomiono: ${date.waitlistNotifiedAt.slice(0, 10)}`
+												: ''}
 										</Typography>
 									</Box>
 									<AdminDateRowActions

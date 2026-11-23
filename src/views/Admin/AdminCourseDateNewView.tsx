@@ -18,7 +18,7 @@ import { fillPath } from '@/utils/paths';
 import { Box, Button, CircularProgress, ContentSwap, MotionAlert, Paper, Typography } from '@ui';
 import { ArrowBack } from '@ui/icons';
 import NextLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
@@ -30,6 +30,7 @@ import { FormSelect } from './forms/FormSelect';
 import { FormTextField } from './forms/FormTextField';
 import { FormTimePicker } from './forms/FormTimePicker';
 import { SectionTitle } from './forms/SectionTitle';
+import { toCreateDefaults } from './forms/toCreateDefaults';
 import { WatchedNettoBruttoHint } from './forms/WatchedNettoBruttoHint';
 
 type Props = {
@@ -40,6 +41,8 @@ export const AdminCourseDateNewView = ({ courseId }: Props) => <NewDateInner cou
 
 const NewDateInner = ({ courseId }: Props) => {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const fromDateId = searchParams.get('from')?.trim() || '';
 	const queryClient = useQueryClient();
 	const { data: course, isLoading: courseLoading } = useQuery({
 		queryKey: ['course', courseId],
@@ -52,6 +55,7 @@ const NewDateInner = ({ courseId }: Props) => {
 	});
 	const [error, setError] = useState<string | null>(null);
 	const deadlineTouched = useRef(false);
+	const prefilledFromRef = useRef<string | null>(null);
 
 	const methods = useForm<DateEntryValues>({
 		resolver: zodResolver(dateEntrySchema) as Resolver<DateEntryValues>,
@@ -71,8 +75,21 @@ const NewDateInner = ({ courseId }: Props) => {
 		},
 	});
 
+	const sourceDate = useMemo(
+		() => (course?.dates ?? []).find((d) => d.id === fromDateId) ?? null,
+		[course, fromDateId]
+	);
+
 	useEffect(() => {
 		if (!course) return;
+		if (fromDateId && sourceDate) {
+			if (prefilledFromRef.current === fromDateId) return;
+			prefilledFromRef.current = fromDateId;
+			deadlineTouched.current = false;
+			methods.reset(toCreateDefaults(sourceDate));
+			return;
+		}
+		if (fromDateId && !sourceDate) return;
 		methods.setValue('slotsMax', getCourseSlotsMax(course));
 		methods.setValue('minParticipants', getCourseMinParticipants(course));
 		const dateVal = methods.getValues('date');
@@ -82,7 +99,7 @@ const NewDateInner = ({ courseId }: Props) => {
 				defaultMinDecisionBy(dateVal, getCourseMinDecisionDaysBefore(course))
 			);
 		}
-	}, [course, methods]);
+	}, [course, fromDateId, sourceDate, methods]);
 
 	const sessionDate = useWatch({ control: methods.control, name: 'date' });
 
@@ -116,8 +133,15 @@ const NewDateInner = ({ courseId }: Props) => {
 						Powrót do terminów
 					</Button>
 					<Typography variant='h5' gutterBottom>
-						Dodaj nowy termin
+						{sourceDate
+							? `Nowy termin (na podstawie ${sourceDate.date})`
+							: 'Dodaj nowy termin'}
 					</Typography>
+					{fromDateId && !sourceDate ? (
+						<MotionAlert show severity='warning' sx={{ mb: 2 }}>
+							Nie znaleziono terminu źródłowego — formularz startuje od domyślnych wartości.
+						</MotionAlert>
+					) : null}
 					<Paper variant='outlined' sx={{ p: 3 }}>
 						<FormProvider {...methods}>
 							<Box

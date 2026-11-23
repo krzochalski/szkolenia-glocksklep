@@ -9,17 +9,15 @@ import {
 	setDoc,
 	where,
 } from 'firebase/firestore';
-import type { Course } from '@/types/course';
 import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
-import {
-	getPrerequisiteCourseIds,
-	isEligibleForCourse,
-	PREREQUISITE_ENROLL_ERROR,
-} from '@/utils/courseKind';
 import { auth } from './auth';
 import { db } from './firestore';
 
 const COLLECTION = 'courseWaitingList';
+
+export const ALREADY_ON_WAITING_LIST = 'Jesteś już na liście oczekujących tego szkolenia.';
+export const GUEST_ALREADY_ON_WAITING_LIST =
+	'Ten adres e-mail jest już na liście oczekujących tego szkolenia.';
 
 export const normalizeWaitingListEmail = (email: string): string => email.trim().toLowerCase();
 
@@ -29,35 +27,6 @@ export const getWaitingListEntryId = (courseId: string, userId: string): string 
 export const getGuestWaitingListEntryId = (courseId: string, email: string): string =>
 	`${courseId}_guest_${normalizeWaitingListEmail(email)}`;
 
-const loadCourseForGate = async (courseId: string): Promise<Course> => {
-	const snap = await getDoc(doc(db, 'courses', courseId));
-	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
-	const data = snap.data();
-	const kind = data.kind === 'practice' ? 'practice' : 'course';
-	const prerequisiteCourseIds = Array.isArray(data.prerequisiteCourseIds)
-		? data.prerequisiteCourseIds.filter((x): x is string => typeof x === 'string' && x.length > 0)
-		: [];
-	return {
-		id: snap.id,
-		...(data as Omit<Course, 'id' | 'kind' | 'prerequisiteCourseIds'>),
-		kind,
-		prerequisiteCourseIds: kind === 'practice' ? prerequisiteCourseIds : [],
-	};
-};
-
-const assertUserEligibleForWaitlist = async (courseId: string, userId: string): Promise<void> => {
-	const course = await loadCourseForGate(courseId);
-	const prereqs = getPrerequisiteCourseIds(course);
-	if (prereqs.length === 0) return;
-	const snaps = await Promise.all(
-		prereqs.map((id) => getDoc(doc(db, 'users', userId, 'courseCompletions', id)))
-	);
-	const completedIds = new Set(snaps.filter((s) => s.exists()).map((s) => s.id));
-	if (!isEligibleForCourse(course, completedIds)) {
-		throw new Error(PREREQUISITE_ENROLL_ERROR);
-	}
-};
-
 export const addToWaitingList = async (params: {
 	courseId: string;
 	courseName: string;
@@ -66,11 +35,16 @@ export const addToWaitingList = async (params: {
 	userName: string;
 	email: string;
 	phoneNumber?: string;
-}): Promise<void> => {
-	await assertUserEligibleForWaitlist(params.courseId, params.userId);
+}): Promise<'created' | 'exists'> => {
 	const id = getWaitingListEntryId(params.courseId, params.userId);
+	const ref = doc(db, COLLECTION, id);
+	const existing = await getDoc(ref);
+	if (existing.exists()) {
+		return 'exists';
+	}
 	const email = normalizeWaitingListEmail(params.email);
-	const entry: Omit<CourseWaitingListEntry, 'id'> = {
+	const now = new Date().toISOString();
+	const entry: Omit<CourseWaitingListEntry, 'id' | 'lastNotifiedTermId'> = {
 		courseId: params.courseId,
 		courseName: params.courseName,
 		courseSlug: params.courseSlug,
@@ -78,38 +52,43 @@ export const addToWaitingList = async (params: {
 		userName: params.userName,
 		email,
 		...(params.phoneNumber ? { phoneNumber: params.phoneNumber } : {}),
-		createdAt: new Date().toISOString(),
+		createdAt: now,
+		consentAt: now,
 	};
-	await setDoc(doc(db, COLLECTION, id), entry);
+	await setDoc(ref, entry);
 	/* Confirmation email: Cloud Function onWaitingListCreated */
+	return 'created';
 };
 
-/** Unauthenticated waitlist signup by email only. */
+/** Unauthenticated waitlist signup by email only. Prerequisites do not block waitlist. */
 export const addGuestToWaitingList = async (params: {
 	courseId: string;
 	courseName: string;
 	courseSlug: string;
 	email: string;
-}): Promise<void> => {
-	const course = await loadCourseForGate(params.courseId);
-	if (getPrerequisiteCourseIds(course).length > 0) {
-		throw new Error(
-			'Ten trening wymaga ukończenia wcześniejszego kursu. Zaloguj się na konto z ukończonym szkoleniem.'
-		);
-	}
+}): Promise<'created' | 'exists'> => {
 	const email = normalizeWaitingListEmail(params.email);
 	const id = getGuestWaitingListEntryId(params.courseId, email);
-	const entry: Omit<CourseWaitingListEntry, 'id' | 'userId' | 'phoneNumber'> = {
-		courseId: params.courseId,
-		courseName: params.courseName,
-		courseSlug: params.courseSlug,
-		userName: 'Gość',
-		email,
-		guest: true,
-		createdAt: new Date().toISOString(),
-	};
-	await setDoc(doc(db, COLLECTION, id), entry);
+	const ref = doc(db, COLLECTION, id);
+	const existing = await getDoc(ref);
+	if (existing.exists()) {
+		return 'exists';
+	}
+	const now = new Date().toISOString();
+	const entry: Omit<CourseWaitingListEntry, 'id' | 'userId' | 'phoneNumber' | 'lastNotifiedTermId'> =
+		{
+			courseId: params.courseId,
+			courseName: params.courseName,
+			courseSlug: params.courseSlug,
+			userName: 'Gość',
+			email,
+			guest: true,
+			createdAt: now,
+			consentAt: now,
+		};
+	await setDoc(ref, entry);
 	/* Confirmation email: Cloud Function onWaitingListCreated */
+	return 'created';
 };
 
 export const removeFromWaitingList = async (courseId: string, userId: string): Promise<void> => {
@@ -210,5 +189,53 @@ export const adminNotifyWaitingList = async (params: {
 		recipientCount: data.recipientCount ?? 0,
 		skippedInvalid: data.skippedInvalid ?? 0,
 		courseIds: data.courseIds ?? [],
+	};
+};
+
+export type AdminWaitlistTermNotifyResult = {
+	ok: true;
+	sent: number;
+	skipped: number;
+	failed: number;
+	recipientCount: number;
+};
+
+/** Admin: (re)send new-term waitlist emails for one date. */
+export const adminNotifyWaitlistForTerm = async (params: {
+	courseId: string;
+	dateId: string;
+	force?: boolean;
+}): Promise<AdminWaitlistTermNotifyResult> => {
+	const user = auth.currentUser;
+	if (!user) throw new Error('Brak zalogowanego użytkownika.');
+	const token = await user.getIdToken();
+	const res = await fetch('/api/waitlist-term-notify', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			courseId: params.courseId,
+			dateId: params.dateId,
+			force: params.force ?? true,
+		}),
+	});
+	const data = (await res.json().catch(() => ({}))) as {
+		error?: string;
+		sent?: number;
+		skipped?: number;
+		failed?: number;
+		recipientCount?: number;
+	};
+	if (!res.ok) {
+		throw new Error(data.error || 'Nie udało się wysłać powiadomień.');
+	}
+	return {
+		ok: true,
+		sent: data.sent ?? 0,
+		skipped: data.skipped ?? 0,
+		failed: data.failed ?? 0,
+		recipientCount: data.recipientCount ?? 0,
 	};
 };

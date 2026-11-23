@@ -118,6 +118,16 @@ export const enrollInCourseTx = async (
 	if (waitSnap.exists) {
 		await waitRef.delete();
 	}
+
+	const email = input.participant.email.trim().toLowerCase();
+	if (email) {
+		const guestWaitId = `${input.courseId}_guest_${email}`;
+		const guestRef = db.collection('courseWaitingList').doc(guestWaitId);
+		const guestSnap = await guestRef.get();
+		if (guestSnap.exists) {
+			await guestRef.delete();
+		}
+	}
 };
 
 export const unenrollFromCourseTx = async (

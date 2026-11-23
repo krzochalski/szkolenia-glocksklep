@@ -13,6 +13,7 @@ const entry = (
 	userName: partial.userName ?? 'Jan',
 	email: partial.email ?? 'jan@example.com',
 	createdAt: partial.createdAt ?? '2026-01-01T00:00:00.000Z',
+	consentAt: partial.consentAt ?? partial.createdAt ?? '2026-01-01T00:00:00.000Z',
 	...partial,
 });
 

@@ -58,5 +58,7 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 	const minDecisionBy = d.minDecisionBy?.trim();
 	if (minDecisionBy) clean.minDecisionBy = minDecisionBy;
 	if (d.runConfirmedDespiteMin === true) clean.runConfirmedDespiteMin = true;
+	const waitlistNotifiedAt = d.waitlistNotifiedAt?.trim();
+	if (waitlistNotifiedAt) clean.waitlistNotifiedAt = waitlistNotifiedAt;
 	return clean;
 };

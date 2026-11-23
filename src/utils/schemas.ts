@@ -168,6 +168,11 @@ export type ContactRequestFormValues = z.infer<typeof contactRequestSchema>;
 
 export const guestWaitingListSchema = z.object({
 	email: z.string().min(1, 'E-mail jest wymagany').email('Nieprawidłowy e-mail'),
+	consent: z
+		.boolean()
+		.refine((v) => v === true, {
+			message: 'Wymagana zgoda na powiadomienie e-mail o nowym terminie.',
+		}),
 });
 
 export type GuestWaitingListFormValues = z.infer<typeof guestWaitingListSchema>;

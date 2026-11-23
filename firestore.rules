@@ -151,10 +151,16 @@ service cloud.firestore {
                && request.resource.data.email.size() <= 254;
       }
 
+      function waitingListConsentOk() {
+        return request.resource.data.consentAt is string
+               && request.resource.data.consentAt.size() >= 10;
+      }
+
+      // Clients must not set lastNotifiedTermId (Admin SDK / Cloud Functions only).
       function guestWaitingListCreate() {
         return request.resource.data.keys().hasOnly([
                  'courseId', 'courseName', 'courseSlug',
-                 'userName', 'email', 'createdAt', 'guest'
+                 'userName', 'email', 'createdAt', 'guest', 'consentAt'
                ])
                && request.resource.data.guest == true
                && request.resource.data.courseId is string
@@ -162,6 +168,7 @@ service cloud.firestore {
                && request.resource.data.courseSlug is string
                && request.resource.data.userName is string
                && request.resource.data.createdAt is string
+               && waitingListConsentOk()
                && waitingListEmailOk();
       }
 
@@ -170,9 +177,11 @@ service cloud.firestore {
                && request.resource.data.userId == request.auth.uid
                && request.resource.data.keys().hasAll([
                     'courseId', 'courseName', 'courseSlug', 'userId',
-                    'userName', 'email', 'createdAt'
+                    'userName', 'email', 'createdAt', 'consentAt'
                   ])
-               && !('guest' in request.resource.data);
+               && !('guest' in request.resource.data)
+               && !('lastNotifiedTermId' in request.resource.data)
+               && waitingListConsentOk();
       }
 
       allow get: if isAuthenticated() &&

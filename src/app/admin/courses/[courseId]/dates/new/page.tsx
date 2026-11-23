@@ -1,5 +1,6 @@
 import { AdminCourseDateNewView } from '@views/Admin/AdminCourseDateNewView';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 type Props = {
 	params: Promise<{ courseId: string }>;
@@ -12,5 +13,9 @@ export const metadata: Metadata = {
 
 export default async function AdminCourseDateNewPage({ params }: Props) {
 	const { courseId } = await params;
-	return <AdminCourseDateNewView courseId={courseId} />;
+	return (
+		<Suspense fallback={null}>
+			<AdminCourseDateNewView courseId={courseId} />
+		</Suspense>
+	);
 }
