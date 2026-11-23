@@ -5,6 +5,7 @@ import {
 	formatWaitingListDemand,
 	getFutureCourseDates,
 	isCourseInactive,
+	isFutureDate,
 	isLowSlotsLeft,
 } from './courseDates';
 
@@ -73,16 +74,55 @@ describe('getFutureCourseDates', () => {
 		const courses = [
 			baseCourse({
 				id: 'active',
-				dates: [{ id: 'd1', date: '2099-01-01', timeStart: '10:00', slotsMax: 4, participants: [], instructor: { id: 'i', name: 'A', slug: 'a', bio: '' }, place: { id: 'p', name: 'P', slug: 'p', googleMapsLink: '' } }],
+				dates: [stubDate({ id: 'd1', date: '2099-01-01' })],
 			}),
 			baseCourse({
 				id: 'inactive',
 				inactive: true,
-				dates: [{ id: 'd2', date: '2099-02-01', timeStart: '10:00', slotsMax: 4, participants: [], instructor: { id: 'i', name: 'A', slug: 'a', bio: '' }, place: { id: 'p', name: 'P', slug: 'p', googleMapsLink: '' } }],
+				dates: [stubDate({ id: 'd2', date: '2099-02-01' })],
 			}),
 		];
 		const upcoming = getFutureCourseDates(courses);
 		expect(upcoming).toHaveLength(1);
 		expect(upcoming[0]?.course.id).toBe('active');
+	});
+
+	it('includes a cloned future term and excludes past, unpublished, and canceled', () => {
+		const courses = [
+			baseCourse({
+				id: 'bezstrzalowy',
+				name: 'Trening Bezstrzałowy',
+				kind: 'practice',
+				dates: [
+					stubDate({ id: 'past-source', date: '2020-01-01', timeStart: '18:00' }),
+					stubDate({
+						id: 'clone-future',
+						date: '2099-06-15',
+						timeStart: '18:00',
+						subtitle: 'dry-fire: reset',
+					}),
+					stubDate({ id: 'canceled', date: '2099-07-01', canceled: true }),
+					stubDate({ id: 'bad-date', date: '15.06.2099' as unknown as string }),
+				],
+			}),
+			baseCourse({
+				id: 'hidden-course',
+				inactive: true,
+				name: 'Ukryty',
+				dates: [stubDate({ id: 'hidden-date', date: '2099-08-01' })],
+			}),
+		];
+		const upcoming = getFutureCourseDates(courses);
+		expect(upcoming.map((e) => e.date.id)).toEqual(['clone-future']);
+		expect(upcoming[0]?.course.name).toBe('Trening Bezstrzałowy');
+	});
+});
+
+describe('isFutureDate', () => {
+	it('rejects malformed or non-string dates', () => {
+		expect(isFutureDate('15.06.2099')).toBe(false);
+		expect(isFutureDate('')).toBe(false);
+		expect(isFutureDate(undefined as unknown as string)).toBe(false);
+		expect(isFutureDate('2099-06-15')).toBe(true);
 	});
 });

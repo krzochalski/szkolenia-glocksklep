@@ -8,8 +8,11 @@ export type CourseDateEntry = {
 	date: CourseClass;
 };
 
-export const isFutureDate = (dateStr: string): boolean =>
-	!dayjs(dateStr).isBefore(dayjs().startOf('day'));
+/** True when `dateStr` is `YYYY-MM-DD` and not before today (local start of day). */
+export const isFutureDate = (dateStr: string): boolean => {
+	if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+	return !dayjs(dateStr).isBefore(dayjs().startOf('day'));
+};
 
 export const isCourseClassCanceled = (
 	date: Pick<CourseClass, 'canceled'>

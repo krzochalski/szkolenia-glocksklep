@@ -27,6 +27,7 @@
 		"functions:build": "pnpm --dir functions run build",
 		"bootstrap:admin": "pnpm --dir functions exec tsx scripts/bootstrap-admin.ts",
 		"sync:faq": "pnpm exec tsx functions/scripts/sync-faq-from-seed.ts",
+		"repair:hidden-cloned-dates": "pnpm --dir functions exec tsx scripts/repair-hidden-cloned-dates.ts",
 		"deploy:auth": "npx -y firebase-tools@latest deploy --only auth --project szkolenia-glocksklep",
 		"configure:auth": "pnpm --dir functions exec tsx scripts/configure-auth-settings.ts"
 	},

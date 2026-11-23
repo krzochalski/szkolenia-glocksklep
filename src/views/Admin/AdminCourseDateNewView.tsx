@@ -23,6 +23,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { v4 as uuid } from 'uuid';
 import { cleanDateForFirestore } from './forms/cleanDateForFirestore';
+import { buildNewCourseClass } from './forms/courseClassBuilder';
 import { type DateEntryValues, dateEntrySchema } from './forms/dateEntrySchema';
 import { FormDatePicker } from './forms/FormDatePicker';
 import { FormSelect } from './forms/FormSelect';
@@ -131,34 +132,23 @@ const NewDateInner = ({ courseId }: Props) => {
 										if (!selectedPlace) throw new Error('Wybrane miejsce nie istnieje.');
 										if (!course) throw new Error('Kurs nie istnieje.');
 
-										const subtitle = data.subtitle?.trim();
-										const newDate = {
+										const newDate = buildNewCourseClass({
 											id: uuid(),
 											date: data.date,
 											timeStart: data.timeStart,
 											slotsMax: data.slotsMax,
 											minParticipants: data.minParticipants,
 											minDecisionBy: data.minDecisionBy,
-											participants: [],
-											instructor: {
-												id: selectedInstructor.id,
-												name: selectedInstructor.name,
-												slug: selectedInstructor.slug,
-												bio: selectedInstructor.bio,
-												...(selectedInstructor.email ? { email: selectedInstructor.email } : {}),
-											},
-											place: {
-												id: selectedPlace.id,
-												name: selectedPlace.name,
-												slug: selectedPlace.slug,
-												googleMapsLink: selectedPlace.googleMapsLink,
-												...(selectedPlace.link ? { link: selectedPlace.link } : {}),
-											},
-											...(subtitle ? { subtitle } : {}),
-											...(data.customPrice ? { customPrice: data.customPrice } : {}),
-										};
+											instructor: selectedInstructor,
+											place: selectedPlace,
+											subtitle: data.subtitle,
+											customPrice: data.customPrice,
+										});
 										const existingDates = (course.dates ?? []).map((d) => cleanDateForFirestore(d));
-										await updateCourseDates(courseId, [...existingDates, newDate]);
+										await updateCourseDates(courseId, [
+											...existingDates,
+											cleanDateForFirestore(newDate),
+										]);
 										await invalidateCourseQueries(queryClient);
 										router.push(fillPath(Paths.adminCourseAllDates, { courseId }));
 									} catch (err) {

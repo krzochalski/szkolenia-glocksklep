@@ -36,6 +36,7 @@ import {
 	SESSION_STATUS_LABEL,
 	sessionStatusChipColor,
 } from './dashboard/sessionStatusLabel';
+import { CloneCourseDateDialog } from './forms/CloneCourseDateDialog';
 import { cloneCourseDate, removeCourseDate } from './forms/dateMutations';
 
 type DateTarget = {
@@ -61,9 +62,9 @@ const NearestInner = () => {
 	const invalidate = () => invalidateCourseQueries(queryClient);
 
 	const clone = useMutation({
-		mutationFn: () => {
+		mutationFn: (newDate: string) => {
 			if (!toClone) throw new Error('Brak terminu');
-			return cloneCourseDate(toClone.course, toClone.date);
+			return cloneCourseDate(toClone.course, toClone.date, newDate);
 		},
 		onSuccess: async () => {
 			setToClone(null);
@@ -202,21 +203,14 @@ const NearestInner = () => {
 				) : null}
 			</Stagger>
 
-			<ConfirmDialog
+			<CloneCourseDateDialog
 				open={Boolean(toClone)}
-				title='Potwierdź klonowanie terminu'
-				cancelLabel='Anuluj'
-				confirmLabel='Klonuj'
-				confirmColor='primary'
+				sourceDateLabel={toClone?.date.date ?? ''}
+				courseName={toClone?.course.name}
 				loading={clone.isPending}
 				onCancel={() => setToClone(null)}
-				onConfirm={() => clone.mutate()}
-			>
-				<Typography>
-					Czy na pewno chcesz sklonować termin <strong>{toClone?.date.date}</strong> (
-					{toClone?.course.name})?
-				</Typography>
-			</ConfirmDialog>
+				onConfirm={(newDate) => clone.mutate(newDate)}
+			/>
 
 			<ConfirmDialog
 				open={Boolean(toUncancel)}
