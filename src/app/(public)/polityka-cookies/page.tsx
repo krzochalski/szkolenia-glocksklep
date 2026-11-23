@@ -4,7 +4,7 @@ import { PolitykaCookiesView } from '@views/PolitykaCookies/PolitykaCookiesView'
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('cookiesPolicy');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function PolitykaCookiesPage() {
 	const cookiesResult = await Promise.allSettled([getCookiesPolicy()]);

@@ -1,6 +1,7 @@
 'use client';
 
 import { getPrivacyPolicy } from '@services/privacyPolicy';
+import { staticQueryOptions } from '@services/queryClient';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
@@ -16,6 +17,7 @@ export const PolitykaPrywatnosciView = ({ initialPrivacyPolicy }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['privacyPolicy'],
 		queryFn: getPrivacyPolicy,
+		...staticQueryOptions,
 		...(initialPrivacyPolicy !== undefined ? { initialData: initialPrivacyPolicy } : {}),
 	});
 

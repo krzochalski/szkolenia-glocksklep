@@ -1,5 +1,6 @@
 'use client';
 
+import { staticQueryOptions } from '@services/queryClient';
 import { getRegulamin } from '@services/regulamin';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ export const RegulaminView = ({ initialRegulamin }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['regulamin'],
 		queryFn: getRegulamin,
+		...staticQueryOptions,
 		...(initialRegulamin !== undefined ? { initialData: initialRegulamin } : {}),
 	});
 

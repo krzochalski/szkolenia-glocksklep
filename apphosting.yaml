@@ -53,3 +53,10 @@ env:
     value: https://api-3ulnhgpqbq-ew.a.run.app
     availability:
       - RUNTIME
+  # Shared with Cloud Functions for POST /api/revalidate (see docs/caching.md).
+  # Enable after: firebase apphosting:secrets:set REVALIDATE_SECRET --force
+  # - variable: REVALIDATE_SECRET
+  #   secret: REVALIDATE_SECRET
+  #   availability:
+  #     - RUNTIME
+

@@ -2,6 +2,8 @@ import { PrzypomnijHasloView } from '@views/Auth/PrzypomnijHasloView';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
 	title: 'Przypomnij hasło',
 };

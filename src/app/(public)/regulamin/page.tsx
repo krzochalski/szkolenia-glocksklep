@@ -4,7 +4,7 @@ import { RegulaminView } from '@views/Regulamin/RegulaminView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('regulamin');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function RegulaminPage() {
 	const regulaminResult = await Promise.allSettled([getRegulamin()]);

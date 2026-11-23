@@ -1,6 +1,7 @@
 'use client';
 
 import { getFaqItems } from '@services/faq';
+import { staticQueryOptions } from '@services/queryClient';
 import {
 	Accordion,
 	AccordionDetails,
@@ -37,6 +38,7 @@ export const FaqView = ({ initialItems }: Props) => {
 	const { data: items = [], isLoading } = useQuery({
 		queryKey: ['faq'],
 		queryFn: getFaqItems,
+		...staticQueryOptions,
 		...(initialItems !== undefined ? { initialData: initialItems } : {}),
 	});
 	const [category, setCategory] = useState<string>(ALL_CATEGORY);

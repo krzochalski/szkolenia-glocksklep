@@ -1,3 +1,60 @@
+/** Server-owned proforma e-mail state (Cloud Functions Admin SDK only). */
+export type ParticipantProformaStatus = 'pending' | 'sent' | 'failed' | 'replaced';
+
+export type ParticipantProforma = {
+	status: ParticipantProformaStatus;
+	number: string;
+	amountNet: number;
+	amountGross: number;
+	vatRate: number;
+	dueDate: string;
+	paymentTitle: string;
+	sentAt?: string;
+	error?: string;
+	/** 1-based revision; v1 = enroll, later = price changes. */
+	version?: number;
+	/** Idempotency key of the price change that produced this proforma. */
+	priceChangeId?: string;
+	replacedAt?: string;
+};
+
+export type ManualPriceAdjustmentType = 'finalPrice' | 'percent' | 'fixed';
+
+/** Customer-facing + audit snapshot of the last manual price change. */
+export type ParticipantManualAdjustment = {
+	type: ManualPriceAdjustmentType;
+	value: number;
+	/** Shown to the customer on proforma / e-mail. */
+	reason: string;
+	/** Internal admin note (not shown to customer). */
+	note?: string;
+	adjustedBy: string;
+	adjustedAt: string;
+};
+
+/**
+ * Price breakdown for a signup. `finalPrice` mirrors `customPrice`.
+ * `automaticDiscount` reserved for future tag discounts (always 0 for now).
+ */
+export type ParticipantPriceSnapshot = {
+	basePrice: number;
+	automaticDiscount: number;
+	manualAdjustment?: ParticipantManualAdjustment;
+	discountTotal: number;
+	finalPrice: number;
+};
+
+export type ParticipantPriceHistoryEntry = {
+	id: string;
+	oldFinalPrice: number;
+	newFinalPrice: number;
+	reason: string;
+	adjustedBy: string;
+	adjustedAt: string;
+	type: ManualPriceAdjustmentType;
+	value: number;
+};
+
 export interface Participant {
 	/* Unique ID of the participant from firebase users */
 	id: string;
@@ -14,6 +71,7 @@ export interface Participant {
 	/**
 	 * Optional per-signup price override (PLN netto), same unit as course/date.
 	 * Resolution: `customPrice ?? date.customPrice ?? course.price`.
+	 * Kept in sync with `priceSnapshot.finalPrice` by `/api/adjust-participant-price`.
 	 */
 	customPrice?: number;
 	/** Admin-only reason for the individual price (cleared with the price). */
@@ -22,6 +80,17 @@ export interface Participant {
 	customPriceUpdatedAt?: string;
 	/** Admin uid who last set/cleared the individual price. */
 	customPriceUpdatedBy?: string;
+	/** Structured price breakdown (Functions-owned on adjust). */
+	priceSnapshot?: ParticipantPriceSnapshot;
+	/** Cap ~20 newest entries (Functions). */
+	priceHistory?: ParticipantPriceHistoryEntry[];
+	/**
+	 * Auto proforma e-mail state. Written only by Cloud Functions (Admin SDK).
+	 * Clients must not forge these fields.
+	 */
+	proforma?: ParticipantProforma;
+	/** Prior proforma revisions (replaced). Cap ~20. */
+	proformaVersions?: ParticipantProforma[];
 }
 
 /** Catalog offer type: full course vs practice/training session. */

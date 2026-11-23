@@ -2,6 +2,8 @@ import { ResetHaslaView } from '@views/Auth/ResetHaslaView';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
 	title: 'Reset hasła',
 };

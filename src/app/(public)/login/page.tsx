@@ -2,6 +2,8 @@ import { staticPageMetadata } from '@seo/pageMetadata';
 import { LoginView } from '@views/Auth/LoginView';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = staticPageMetadata('login');
 
 export default function LoginPage() {

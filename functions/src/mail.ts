@@ -4,12 +4,19 @@ export const CONTACT_EMAIL = 'zamowienia@glocksklep.pl';
 export const SITE_NAME = 'GLOCKSKLEP Szkolenia';
 export const SITE_ORIGIN = 'https://szkolenia.glocksklep.pl';
 
+export type MailAttachment = {
+	filename: string;
+	content: Buffer;
+	contentType?: string;
+};
+
 export type OutboundMail = {
 	to: string;
 	subject: string;
 	html: string;
 	text: string;
 	replyTo?: string;
+	attachments?: MailAttachment[];
 };
 
 type MailTransport = {
@@ -60,8 +67,20 @@ export const sendMail = async (
 		subject: message.subject,
 		html: message.html,
 		text: message.text,
+		attachments: message.attachments?.map((a) => ({
+			filename: a.filename,
+			content: a.content,
+			contentType: a.contentType,
+		})),
 	});
 	return { sent: true };
+};
+
+/** Feature flag: auto proforma e-mails after enroll (default on). */
+export const isProformaEmailEnabled = (): boolean => {
+	const raw = process.env.PROFORMA_EMAIL_ENABLED?.trim().toLowerCase();
+	if (!raw) return true;
+	return raw !== 'false' && raw !== '0' && raw !== 'off';
 };
 
 export const escapeHtml = (value: string): string =>

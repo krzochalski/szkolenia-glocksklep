@@ -5,7 +5,7 @@ import { staticPageMetadata } from '@seo/pageMetadata';
 import { ONasView } from '@views/ONas/ONasView';
 
 export const metadata = staticPageMetadata('about');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default function ONasPage() {
 	return (

@@ -3,6 +3,7 @@
 import { PageHeading } from '@components';
 import { getCourses } from '@services/courses';
 import { getDevelopmentPath } from '@services/developmentPath';
+import { liveInitialData, staticQueryOptions } from '@services/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import {
 	Box,
@@ -33,12 +34,13 @@ export const SciezkaRozwojuView = ({ initialPath, initialCourses }: Props) => {
 	} = useQuery({
 		queryKey: ['developmentPath'],
 		queryFn: getDevelopmentPath,
+		...staticQueryOptions,
 		...(initialPath !== undefined ? { initialData: initialPath } : {}),
 	});
 	const { data: courses = [], isLoading: coursesLoading } = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
-		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
+		...liveInitialData(initialCourses),
 	});
 
 	const courseBySlug = useMemo(() => {

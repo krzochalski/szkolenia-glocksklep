@@ -1,6 +1,7 @@
 'use client';
 
 import { getHomepage } from '@services/homepage';
+import { staticQueryOptions } from '@services/queryClient';
 import { Box, CircularProgress, ContentSwap, Stack } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import type { Course } from '@/types/course';
@@ -21,6 +22,7 @@ export const HomeView = ({ initialHomepage, initialCourses }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['homepage'],
 		queryFn: getHomepage,
+		...staticQueryOptions,
 		...(initialHomepage !== undefined ? { initialData: initialHomepage } : {}),
 	});
 

@@ -18,6 +18,12 @@ import {
 } from './enrollment';
 import { sendCourseCompletionThankYou } from './courseCompletionMail';
 import { sendEnrollmentConfirmation } from './enrollmentMail';
+import {
+	adjustParticipantPrice,
+	adjustParticipantPriceBodySchema,
+} from './proforma/adjustPrice';
+import { sendEnrollmentProforma } from './proforma/send';
+import { requestCatalogRevalidation } from './revalidateCatalog';
 import { syncCourseWaitingListCount } from './waitingListCount';
 import { sendWaitingListConfirmation } from './waitingListMail';
 import { sendDateNotify, dateNotifyBodySchema } from './dateNotifyMail';
@@ -55,9 +61,16 @@ const notifyEnrollmentBodySchema = z.object({
 	courseId: z.string().min(1),
 	dateId: z.string().min(1),
 	participant: z.object({
+		id: z.string().min(1),
 		name: z.string().min(1),
 		email: z.string().email(),
 	}),
+});
+
+const resendProformaBodySchema = z.object({
+	courseId: z.string().min(1),
+	dateId: z.string().min(1),
+	participantId: z.string().min(1),
 });
 
 const notifyCourseCompletionBodySchema = z.object({
@@ -114,11 +127,18 @@ app.post(['/api/enroll', '/enroll'], async (req, res) => {
 		}
 		const body = enrollBodySchema.parse(req.body);
 		await enrollInCourseTx(getFirestore(), uid, body);
+		void requestCatalogRevalidation();
 		void sendEnrollmentConfirmation({
 			db: getFirestore(),
 			courseId: body.courseId,
 			dateId: body.dateId,
 			participant: body.participant,
+		});
+		void sendEnrollmentProforma({
+			db: getFirestore(),
+			courseId: body.courseId,
+			dateId: body.dateId,
+			participantId: body.participant.id,
 		});
 		res.status(200).json({ ok: true });
 	} catch (err) {
@@ -128,6 +148,30 @@ app.post(['/api/enroll', '/enroll'], async (req, res) => {
 		}
 		const message = err instanceof Error ? err.message : 'Błąd zapisu.';
 		res.status(400).json({ error: message });
+	}
+});
+
+/** Admin-only: purge Next catalog ISR after client-side course/date writes. */
+app.post(['/api/revalidate-catalog', '/revalidate-catalog'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const slug =
+			typeof req.body?.slug === 'string' && req.body.slug.trim()
+				? req.body.slug.trim()
+				: undefined;
+		await requestCatalogRevalidation({ slug });
+		res.status(200).json({ ok: true });
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się odświeżyć cache.' });
 	}
 });
 
@@ -150,6 +194,12 @@ app.post(['/api/notify-enrollment', '/notify-enrollment'], async (req, res) => {
 			dateId: body.dateId,
 			participant: body.participant,
 		});
+		void sendEnrollmentProforma({
+			db: getFirestore(),
+			courseId: body.courseId,
+			dateId: body.dateId,
+			participantId: body.participant.id,
+		});
 		res.status(200).json({ ok: true });
 	} catch (err) {
 		if (err instanceof ZodError) {
@@ -158,6 +208,95 @@ app.post(['/api/notify-enrollment', '/notify-enrollment'], async (req, res) => {
 		}
 		console.error(err);
 		res.status(500).json({ error: 'Nie udało się wysłać e-maila.' });
+	}
+});
+
+/** Admin-only: manual per-participant price change + updated proforma e-mail. */
+app.post(
+	['/api/adjust-participant-price', '/adjust-participant-price'],
+	async (req, res) => {
+		try {
+			const uid = await bearerUid(req);
+			if (!uid) {
+				res.status(401).json({ error: 'Wymagane logowanie.' });
+				return;
+			}
+			if (!(await isAdminUid(uid))) {
+				res.status(403).json({ error: 'Brak uprawnień.' });
+				return;
+			}
+			const body = adjustParticipantPriceBodySchema.parse(req.body);
+			const result = await adjustParticipantPrice({
+				db: getFirestore(),
+				adminUid: uid,
+				body,
+			});
+			if (!result.ok) {
+				const status =
+					result.code === 'paid_confirm_required'
+						? 409
+						: result.code === 'not_found'
+							? 404
+							: result.code === 'proforma_failed'
+								? 502
+								: 400;
+				res.status(status).json({ error: result.error, code: result.code });
+				return;
+			}
+			res.status(200).json(result);
+		} catch (err) {
+			if (err instanceof ZodError) {
+				res.status(400).json({ error: 'Nieprawidłowe dane.', code: 'validation' });
+				return;
+			}
+			console.error(err);
+			res.status(500).json({ error: 'Nie udało się zmienić ceny.' });
+		}
+	}
+);
+
+/** Admin-only: resend (or retry) enrollment proforma PDF e-mail. */
+app.post(['/api/resend-proforma', '/resend-proforma'], async (req, res) => {
+	try {
+		const uid = await bearerUid(req);
+		if (!uid) {
+			res.status(401).json({ error: 'Wymagane logowanie.' });
+			return;
+		}
+		if (!(await isAdminUid(uid))) {
+			res.status(403).json({ error: 'Brak uprawnień.' });
+			return;
+		}
+		const body = resendProformaBodySchema.parse(req.body);
+		const result = await sendEnrollmentProforma({
+			db: getFirestore(),
+			courseId: body.courseId,
+			dateId: body.dateId,
+			participantId: body.participantId,
+			forceResend: true,
+		});
+		if (!result.ok) {
+			res.status(502).json({
+				error: 'Nie udało się wysłać proformy.',
+				detail: result.error,
+			});
+			return;
+		}
+		if (result.status === 'skipped') {
+			res.status(400).json({
+				error: 'Proforma nie została wysłana (pominięta).',
+				reason: result.reason,
+			});
+			return;
+		}
+		res.status(200).json({ ok: true, number: result.number });
+	} catch (err) {
+		if (err instanceof ZodError) {
+			res.status(400).json({ error: 'Nieprawidłowe dane.' });
+			return;
+		}
+		console.error(err);
+		res.status(500).json({ error: 'Nie udało się wysłać proformy.' });
 	}
 });
 
@@ -265,6 +404,7 @@ app.post(['/api/unenroll', '/unenroll'], async (req, res) => {
 		const body = unenrollBodySchema.parse(req.body);
 		const admin = await isAdminUid(uid);
 		await unenrollFromCourseTx(getFirestore(), uid, body, admin);
+		void requestCatalogRevalidation();
 		res.status(200).json({ ok: true });
 	} catch (err) {
 		if (err instanceof ZodError) {
@@ -367,6 +507,7 @@ export const onWaitingListCreated = onDocumentCreated(
 					})
 				: Promise.resolve(),
 		]);
+		void requestCatalogRevalidation(courseSlug ? { slug: courseSlug } : undefined);
 	}
 );
 
@@ -382,5 +523,6 @@ export const onWaitingListDeleted = onDocumentDeleted(
 		const courseId = typeof data?.courseId === 'string' ? data.courseId : '';
 		if (!courseId) return;
 		await syncCourseWaitingListCount(getFirestore(), courseId);
+		void requestCatalogRevalidation();
 	}
 );

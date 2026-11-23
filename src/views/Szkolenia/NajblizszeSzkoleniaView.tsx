@@ -1,6 +1,7 @@
 'use client';
 
 import { getCourses } from '@services/courses';
+import { liveInitialData } from '@services/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import {
 	Alert,
@@ -30,7 +31,7 @@ export const NajblizszeSzkoleniaView = ({ initialCourses }: Props) => {
 	const { data: courses = [], isLoading } = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
-		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
+		...liveInitialData(initialCourses),
 	});
 
 	const upcoming = getFutureCourseDates(courses);

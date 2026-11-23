@@ -48,7 +48,7 @@ export const FAQ_SEED_ITEMS: FaqSeedItem[] = [
 		answer: [
 			'1. Wybierz termin na stronie (najbliższe szkolenia albo karta konkretnego kursu).',
 			'2. Załóż konto albo zaloguj się — wrócisz do tego samego terminu.',
-			'3. Potwierdź zapis w oknie dialogowym. Płatności nie robisz w trakcie zapisu; po potwierdzeniu dostajesz proformę i dane do przelewu.',
+			'3. Potwierdź zapis w oknie dialogowym. Płatności nie robisz w trakcie zapisu; po potwierdzeniu dostajesz proformę (w panelu i mailem z PDF) oraz dane do przelewu.',
 		].join('\n\n'),
 		order: 2,
 		category: 'rekrutacja',
@@ -87,7 +87,7 @@ export const FAQ_SEED_ITEMS: FaqSeedItem[] = [
 	{
 		question: 'Jak wygląda płatność?',
 		answer: [
-			'Po zapisie dostajesz proformę (w Moje szkolenia i zwykle też mailem) z kwotą i numerem konta.',
+			'Po zapisie na płatny termin dostajesz proformę w Moje szkolenia oraz e-mail z PDF, kwotą i numerem konta.',
 			'Płacisz przelewem bankowym. Gotówka — tylko jeśli wcześniej dogadamy i oznaczymy to w systemie. Nie ma bramki online (BLIK, karty, Przelewy24) w trakcie zapisu.',
 			'Termin zapłaty wynika z proformy i wynosi zasadniczo do 5 dni przed datą Terminu. Status „opłacone” ustawia Organizator po wpływie.',
 		].join('\n\n'),

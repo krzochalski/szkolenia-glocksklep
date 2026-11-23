@@ -3,6 +3,7 @@
 import { COURSE_LEVEL_LABEL } from '@constants/courses';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import { getCourseBySlug, getCourses } from '@services/courses';
+import { liveInitialData, staticQueryOptions } from '@services/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { useMemo } from 'react';
@@ -10,8 +11,8 @@ import { CourseLayout, type CourseSchemaData } from '@/components/CourseLayout/C
 import type { Course } from '@/types/course';
 import type { CourseDescription } from '@/types/courseDescription';
 import { isCourseInactive } from '@/utils/courseDates';
-import { COURSE_KIND_LABEL, getCourseKind, resolvePrerequisiteNames } from '@/utils/courseKind';
 import { resolveCourseHeroFrom } from '@/utils/courseImages';
+import { COURSE_KIND_LABEL, getCourseKind, resolvePrerequisiteNames } from '@/utils/courseKind';
 import { mapDescriptionToSchema } from '@/utils/mapCourseDescription';
 
 type Props = {
@@ -24,13 +25,14 @@ export const SzkolenieDetailView = ({ slug, initialCourse, initialDescription }:
 	const { data: course, isLoading: courseLoading } = useQuery({
 		queryKey: ['course', slug],
 		queryFn: () => getCourseBySlug(slug),
-		...(initialCourse !== undefined ? { initialData: initialCourse } : {}),
+		...liveInitialData(initialCourse ?? undefined),
 	});
 
 	const { data: description, isLoading: descriptionLoading } = useQuery({
 		queryKey: ['courseDescription', slug],
 		queryFn: () => getCourseDescriptionBySlug(slug),
 		enabled: Boolean(slug),
+		...staticQueryOptions,
 		...(initialDescription !== undefined ? { initialData: initialDescription } : {}),
 	});
 

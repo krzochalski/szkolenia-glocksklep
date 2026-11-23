@@ -69,6 +69,7 @@ export {
 } from './badges';
 export {
 	adminEnrollParticipant,
+	adminResendProforma,
 	createCourse,
 	deleteCourse,
 	enrollInCourse,

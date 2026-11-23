@@ -8,6 +8,7 @@ import {
 } from '@services/courseCompletions';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
 import {
+	adminResendProforma,
 	getCourse,
 	setCourseDateCanceled,
 	setCourseDateRunConfirmed,
@@ -100,6 +101,11 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	} | null>(null);
 	const [removeTarget, setRemoveTarget] = useState<Participant | null>(null);
 	const [priceTarget, setPriceTarget] = useState<Participant | null>(null);
+	const [proformaTarget, setProformaTarget] = useState<Participant | null>(null);
+	const [proformaMsg, setProformaMsg] = useState<{
+		severity: 'success' | 'error';
+		text: string;
+	} | null>(null);
 	const [composeOpen, setComposeOpen] = useState(false);
 	const [confirmDraft, setConfirmDraft] = useState<DateNotifyComposePayload | null>(null);
 	const [notifyResult, setNotifyResult] = useState<string | null>(null);
@@ -242,16 +248,56 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	const setCustomPrice = useMutation({
 		mutationFn: ({
 			participantId,
-			customPrice,
+			adjustment,
+			reason,
 			note,
+			confirmPaidAdjustment,
 		}: {
 			participantId: string;
-			customPrice: number | null;
+			adjustment: { type: 'finalPrice' | 'percent' | 'fixed'; value: number } | null;
+			reason?: string;
 			note?: string;
-		}) => setParticipantCustomPrice(courseId, dateId, participantId, { customPrice, note }),
+			confirmPaidAdjustment?: boolean;
+		}) =>
+			setParticipantCustomPrice(courseId, dateId, participantId, {
+				adjustment,
+				reason,
+				note,
+				confirmPaidAdjustment,
+				priceChangeId: uuidv4(),
+			}),
 		onSuccess: async () => {
 			setPriceTarget(null);
+			setProformaMsg({
+				severity: 'success',
+				text: 'Cena zapisana. Zaktualizowana proforma została wysłana (jeśli wymagana).',
+			});
 			await invalidate();
+		},
+		onError: (err: Error) => {
+			setProformaMsg({
+				severity: 'error',
+				text: err.message || 'Nie udało się zmienić ceny.',
+			});
+		},
+	});
+
+	const resendProforma = useMutation({
+		mutationFn: (participantId: string) =>
+			adminResendProforma(courseId, dateId, participantId),
+		onSuccess: async () => {
+			setProformaTarget(null);
+			setProformaMsg({
+				severity: 'success',
+				text: 'Proforma została wysłana ponownie.',
+			});
+			await invalidate();
+		},
+		onError: (err: Error) => {
+			setProformaMsg({
+				severity: 'error',
+				text: err.message || 'Nie udało się wysłać proformy.',
+			});
 		},
 	});
 
@@ -398,6 +444,14 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						)}
 						)
 					</Typography>
+					{proformaMsg ? (
+						<Alert
+							severity={proformaMsg.severity}
+							onClose={() => setProformaMsg(null)}
+						>
+							{proformaMsg.text}
+						</Alert>
+					) : null}
 					<Stagger sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 						{participants.map((p) => {
 							const isCompleted = completedByUid.get(p.id) ?? false;
@@ -450,6 +504,59 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 														{p.customPriceNote}
 													</Typography>
 												) : null}
+												{p.proforma ? (
+													<Typography
+														variant='caption'
+														color={
+															p.proforma.status === 'failed'
+																? 'error'
+																: p.proforma.status === 'sent'
+																	? 'success.dark'
+																	: 'text.secondary'
+														}
+														sx={{ display: 'block', width: '100%' }}
+													>
+														{p.proforma.status === 'sent'
+															? `Proforma: ${p.proforma.number}${p.proforma.version && p.proforma.version > 1 ? ` (v${p.proforma.version})` : ''}${p.proforma.sentAt ? ` · ${p.proforma.sentAt.slice(0, 10)}` : ''}`
+															: p.proforma.status === 'pending'
+																? 'Proforma: wysyłanie…'
+																: p.proforma.status === 'replaced'
+																	? `Proforma zastąpiona: ${p.proforma.number}`
+																	: `Proforma: błąd${p.proforma.error ? ` (${p.proforma.error})` : ''}${p.proforma.number && p.proforma.number !== '—' ? ` · ${p.proforma.number}` : ''}`}
+													</Typography>
+												) : null}
+												{(p.proformaVersions?.length ?? 0) > 0 ? (
+													<Typography
+														variant='caption'
+														color='text.secondary'
+														sx={{ display: 'block', width: '100%' }}
+													>
+														Wcześniejsze proformy:{' '}
+														{p.proformaVersions
+															?.map(
+																(v) =>
+																	`${v.number} (${v.status}${v.amountNet != null ? `, ${v.amountNet.toFixed(2)} zł n.` : ''})`
+															)
+															.join(' · ')}
+													</Typography>
+												) : null}
+												{(p.priceHistory?.length ?? 0) > 0 ? (
+													<Typography
+														variant='caption'
+														color='text.secondary'
+														sx={{ display: 'block', width: '100%' }}
+													>
+														Historia cen:{' '}
+														{[...(p.priceHistory ?? [])]
+															.slice(-3)
+															.reverse()
+															.map(
+																(h) =>
+																	`${h.oldFinalPrice.toFixed(2)}→${h.newFinalPrice.toFixed(2)} (${h.reason})`
+															)
+															.join(' · ')}
+													</Typography>
+												) : null}
 											</Box>
 										</Box>
 										<Button
@@ -458,8 +565,21 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 											disabled={setCustomPrice.isPending}
 											onClick={() => setPriceTarget(p)}
 										>
-											Cena
+											Zmień cenę
 										</Button>
+										{!p.paysByCash && payable > 0 ? (
+											<Button
+												size='small'
+												variant='outlined'
+												disabled={resendProforma.isPending}
+												onClick={() => {
+													setProformaMsg(null);
+													setProformaTarget(p);
+												}}
+											>
+												Wyślij ponownie proformę
+											</Button>
+										) : null}
 										<FormControlLabel
 											control={
 												<Switch checked={Boolean(p.paid)} onChange={() => setPaidTarget(p)} />
@@ -587,6 +707,27 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 					</ConfirmDialog>
 
 					<ConfirmDialog
+						open={Boolean(proformaTarget)}
+						title='Wyślij ponownie proformę'
+						cancelLabel='Anuluj'
+						confirmLabel='Wyślij'
+						confirmColor='primary'
+						loading={resendProforma.isPending}
+						onCancel={() => setProformaTarget(null)}
+						onConfirm={() => {
+							if (proformaTarget) resendProforma.mutate(proformaTarget.id);
+						}}
+					>
+						<Typography>
+							Wysłać ponownie proformę do{' '}
+							<strong>{proformaTarget?.name}</strong> ({proformaTarget?.email})?
+							{proformaTarget?.proforma?.number
+								? ` Numer: ${proformaTarget.proforma.number}.`
+								: ''}
+						</Typography>
+					</ConfirmDialog>
+
+					<ConfirmDialog
 						open={Boolean(paidTarget)}
 						title='Potwierdź zmianę płatności'
 						cancelLabel='Anuluj'
@@ -671,19 +812,11 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						listNetto={listNetto}
 						loading={setCustomPrice.isPending}
 						onClose={() => setPriceTarget(null)}
-						onSave={({ customPrice, note }) => {
+						onSave={(payload) => {
 							if (!priceTarget) return;
 							setCustomPrice.mutate({
 								participantId: priceTarget.id,
-								customPrice,
-								note,
-							});
-						}}
-						onClear={() => {
-							if (!priceTarget) return;
-							setCustomPrice.mutate({
-								participantId: priceTarget.id,
-								customPrice: null,
+								...payload,
 							});
 						}}
 					/>

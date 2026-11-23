@@ -4,7 +4,7 @@ import { PolitykaPrywatnosciView } from '@views/PolitykaPrywatnosci/PolitykaPryw
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('privacyPolicy');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function PolitykaPrywatnosciPage() {
 	const privacyResult = await Promise.allSettled([getPrivacyPolicy()]);

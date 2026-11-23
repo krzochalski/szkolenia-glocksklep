@@ -7,7 +7,7 @@ import { NajblizszeSzkoleniaView } from '@views/Szkolenia/NajblizszeSzkoleniaVie
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('nearest');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function NajblizszePage() {
 	const coursesResult = await Promise.allSettled([getCourses()]);

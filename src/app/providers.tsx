@@ -12,12 +12,12 @@ import {
 import { completeGoogleRedirectSignIn } from '@services/auth';
 import { queryClient } from '@services/queryClient';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { brand, UiProvider } from '@ui';
+import { Alert, Box, Button, brand, UiProvider } from '@ui';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect } from 'react';
 import { CookieConsent, getCookieConsentValue } from 'react-cookie-consent';
-import { PriceModeProvider } from '@/hooks';
+import { PriceModeProvider, useAppFreshness } from '@/hooks';
 import { initPwaInstallCapture, registerPwaServiceWorker } from '@/utils/pwaInstallPrompt';
 
 const pagePath = (pathname: string): string => {
@@ -33,6 +33,48 @@ const startAnalyticsForPath = (pathname: string) => {
 			void logAnalyticsPageView(pagePath(pathname));
 		}
 	});
+};
+
+const AppFreshnessBanners = () => {
+	const { updateAvailable, offline, reloadForUpdate } = useAppFreshness();
+
+	return (
+		<Box
+			sx={{
+				position: 'fixed',
+				left: 0,
+				right: 0,
+				bottom: 0,
+				zIndex: (theme) => theme.zIndex.snackbar,
+				display: 'flex',
+				flexDirection: 'column',
+				gap: 1,
+				p: 1.5,
+				pb: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
+				pointerEvents: 'none',
+				'& > *': { pointerEvents: 'auto' },
+			}}
+		>
+			{offline ? (
+				<Alert severity='warning' sx={{ boxShadow: 3 }}>
+					Jesteś offline — dane mogą być nieaktualne.
+				</Alert>
+			) : null}
+			{updateAvailable ? (
+				<Alert
+					severity='info'
+					sx={{ boxShadow: 3 }}
+					action={
+						<Button color='inherit' size='small' onClick={reloadForUpdate}>
+							Odśwież
+						</Button>
+					}
+				>
+					Dostępna nowa wersja – odśwież
+				</Alert>
+			) : null}
+		</Box>
+	);
 };
 
 export const AppProviders = ({ children }: { readonly children: ReactNode }) => {
@@ -59,6 +101,7 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 				<PriceModeProvider>
 					<QueryClientProvider client={queryClient}>
 						{children}
+						<AppFreshnessBanners />
 						<CookieConsent
 							buttonStyle={{
 								color: brand.accentDark,

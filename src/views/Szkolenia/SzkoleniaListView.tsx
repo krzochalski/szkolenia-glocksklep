@@ -3,6 +3,7 @@
 import { PageHeading } from '@components';
 import { getCourseDescriptions } from '@services/courseDescriptions';
 import { getCourses } from '@services/courses';
+import { liveInitialData, staticQueryOptions } from '@services/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { Box, ContentSwap, Stagger, StaggerItem, Typography } from '@ui';
 import { useMemo } from 'react';
@@ -74,11 +75,12 @@ export const SzkoleniaListView = ({ initialCourses, initialDescriptions }: Props
 	} = useQuery({
 		queryKey: ['courses'],
 		queryFn: getCourses,
-		...(initialCourses !== undefined ? { initialData: initialCourses } : {}),
+		...liveInitialData(initialCourses),
 	});
 	const { data: descriptions = [] } = useQuery({
 		queryKey: ['courseDescriptions'],
 		queryFn: getCourseDescriptions,
+		...staticQueryOptions,
 		...(initialDescriptions !== undefined ? { initialData: initialDescriptions } : {}),
 	});
 

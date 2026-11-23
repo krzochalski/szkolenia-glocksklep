@@ -1,6 +1,7 @@
 'use client';
 
 import { getCookiesPolicy } from '@services/cookiesPolicy';
+import { staticQueryOptions } from '@services/queryClient';
 import { Box, CircularProgress, ContentSwap, Typography } from '@ui';
 import { useQuery } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
@@ -16,6 +17,7 @@ export const PolitykaCookiesView = ({ initialCookiesPolicy }: Props) => {
 	const { data, isLoading } = useQuery({
 		queryKey: ['cookiesPolicy'],
 		queryFn: getCookiesPolicy,
+		...staticQueryOptions,
 		...(initialCookiesPolicy !== undefined ? { initialData: initialCookiesPolicy } : {}),
 	});
 

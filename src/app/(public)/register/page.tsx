@@ -2,6 +2,8 @@ import { staticPageMetadata } from '@seo/pageMetadata';
 import { RegisterView } from '@views/Auth/RegisterView';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = staticPageMetadata('register');
 
 export default function RegisterPage() {

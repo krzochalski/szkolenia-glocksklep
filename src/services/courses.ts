@@ -5,11 +5,16 @@ import {
 	deleteField,
 	doc,
 	getDoc,
+	getDocFromServer,
 	getDocs,
+	getDocsFromServer,
 	query,
 	updateDoc,
 	where,
 	writeBatch,
+	type DocumentData,
+	type DocumentReference,
+	type Query,
 } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
 import type { Course, CourseKind, Participant } from '@/types/course';
@@ -20,6 +25,28 @@ import { toOptimizedImagePath } from '@/utils/optimizedImagePath';
 import type { CourseFormValues } from '@/utils/schemas';
 import { auth } from './auth';
 import { db } from './firestore';
+
+const isBrowserOffline = (): boolean =>
+	typeof navigator !== 'undefined' && navigator.onLine === false;
+
+/** Prefer server for live seats/prices; fall back to cache when offline or server fails. */
+const getDocsPreferServer = async <T extends DocumentData>(q: Query<T>) => {
+	if (isBrowserOffline()) return getDocs(q);
+	try {
+		return await getDocsFromServer(q);
+	} catch {
+		return getDocs(q);
+	}
+};
+
+const getDocPreferServer = async <T extends DocumentData>(ref: DocumentReference<T>) => {
+	if (isBrowserOffline()) return getDoc(ref);
+	try {
+		return await getDocFromServer(ref);
+	} catch {
+		return getDoc(ref);
+	}
+};
 
 const normalizeImagePath = (value: string | undefined): string | undefined => {
 	const trimmed = value?.trim();
@@ -102,7 +129,7 @@ export const updateCourse = async (id: string, data: CourseFormValues): Promise<
 };
 
 export const getCourses = async (): Promise<Course[]> => {
-	const snap = await getDocs(collection(db, 'courses'));
+	const snap = await getDocsPreferServer(collection(db, 'courses'));
 	return sortCoursesByOrder(snap.docs.map((d) => mapCourseDoc(d.id, d.data())));
 };
 
@@ -117,14 +144,14 @@ export const reorderCourses = async (orderedIds: string[]): Promise<void> => {
 };
 
 export const getCourse = async (id: string): Promise<Course | null> => {
-	const snap = await getDoc(doc(db, 'courses', id));
+	const snap = await getDocPreferServer(doc(db, 'courses', id));
 	if (!snap.exists()) return null;
 	return mapCourseDoc(snap.id, snap.data());
 };
 
 export const getCourseBySlug = async (slug: string): Promise<Course | null> => {
 	const q = query(collection(db, 'courses'), where('slug', '==', slug));
-	const snap = await getDocs(q);
+	const snap = await getDocsPreferServer(q);
 	if (snap.empty) return null;
 	const d = snap.docs[0];
 	return mapCourseDoc(d.id, d.data());
@@ -228,61 +255,92 @@ export const setParticipantPaysByCash = async (
 	await updateDoc(doc(db, 'courses', courseId), { dates });
 };
 
+export type ManualPriceAdjustmentPayload = {
+	readonly type: 'finalPrice' | 'percent' | 'fixed';
+	readonly value: number;
+};
+
 export type SetParticipantCustomPriceInput = {
-	/** PLN netto; `null` clears the override (keeps audit fields). */
-	readonly customPrice: number | null;
+	/**
+	 * Manual adjustment, or `null` to clear back to list price.
+	 * Prefer this over legacy `customPrice`.
+	 */
+	readonly adjustment?: ManualPriceAdjustmentPayload | null;
+	/** @deprecated Prefer `adjustment: { type: 'finalPrice', value }`. */
+	readonly customPrice?: number | null;
+	/** Customer-facing reason (required when setting an adjustment). */
+	readonly reason?: string;
+	/** Internal admin note. */
 	readonly note?: string;
+	/** Required when participant.paid and the final price changes. */
+	readonly confirmPaidAdjustment?: boolean;
+	/** Idempotency key (UUID). Generated when omitted. */
+	readonly priceChangeId?: string;
+};
+
+export type AdjustParticipantPriceResult = {
+	ok: true;
+	status: 'applied' | 'idempotent' | 'skipped_proforma';
+	priceChangeId: string;
+	oldFinalPrice: number;
+	newFinalPrice: number;
+	proformaNumber?: string;
+	proformaSkipped?: boolean;
 };
 
 /**
- * Sets or clears a per-signup custom price (PLN netto).
- * Clear removes `customPrice` + `customPriceNote` but still stamps audit fields.
+ * Admin-only: set/clear per-signup price via Cloud Function.
+ * Issues an updated proforma e-mail when the payable amount changes.
  */
 export const setParticipantCustomPrice = async (
 	courseId: string,
 	dateId: string,
 	participantId: string,
 	input: SetParticipantCustomPriceInput
-): Promise<void> => {
-	const admin = auth.currentUser;
-	if (!admin) throw new Error('Brak zalogowanego użytkownika.');
-	const snap = await getDoc(doc(db, 'courses', courseId));
-	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
-	const course = { id: snap.id, ...snap.data() } as Course;
-	const now = new Date().toISOString();
-	const note = input.note?.trim() || undefined;
-	const dates = (course.dates ?? []).map((d) => {
-		if (d.id !== dateId && d.date !== dateId) return d;
-		return {
-			...d,
-			participants: (d.participants ?? []).map((p) => {
-				if (p.id !== participantId) return p;
-				if (input.customPrice === null) {
-					const next: Participant = {
-						id: p.id,
-						name: p.name,
-						email: p.email,
-						customPriceUpdatedAt: now,
-						customPriceUpdatedBy: admin.uid,
-					};
-					if (p.phoneNumber) next.phoneNumber = p.phoneNumber;
-					if (p.paid != null) next.paid = p.paid;
-					if (p.paysByCash != null) next.paysByCash = p.paysByCash;
-					return next;
-				}
-				const next: Participant = {
-					...p,
-					customPrice: input.customPrice,
-					customPriceUpdatedAt: now,
-					customPriceUpdatedBy: admin.uid,
-				};
-				if (note) next.customPriceNote = note;
-				else delete next.customPriceNote;
-				return next;
-			}),
-		};
+): Promise<AdjustParticipantPriceResult> => {
+	const user = auth.currentUser;
+	if (!user) throw new Error('Wymagane logowanie.');
+	const token = await user.getIdToken();
+
+	let adjustment: ManualPriceAdjustmentPayload | null;
+	if (input.adjustment !== undefined) {
+		adjustment = input.adjustment;
+	} else if (input.customPrice === null || input.customPrice === undefined) {
+		adjustment = null;
+	} else {
+		adjustment = { type: 'finalPrice', value: input.customPrice };
+	}
+
+	const priceChangeId = input.priceChangeId?.trim() || uuid();
+	const res = await fetch('/api/adjust-participant-price', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			courseId,
+			dateId,
+			participantId,
+			priceChangeId,
+			adjustment,
+			reason: input.reason,
+			note: input.note,
+			confirmPaidAdjustment: input.confirmPaidAdjustment === true,
+		}),
 	});
-	await updateDoc(doc(db, 'courses', courseId), { dates: stripUndefined(dates) });
+	const data = (await res.json().catch(() => null)) as
+		| (AdjustParticipantPriceResult & { error?: string; code?: string })
+		| { error?: string; code?: string }
+		| null;
+	if (!res.ok) {
+		const err = new Error(data?.error ?? 'Nie udało się zmienić ceny.') as Error & {
+			code?: string;
+		};
+		if (data && 'code' in data && data.code) err.code = data.code;
+		throw err;
+	}
+	return data as AdjustParticipantPriceResult;
 };
 
 /**
@@ -376,11 +434,38 @@ export const adminEnrollParticipant = async (
 				body: JSON.stringify({
 					courseId,
 					dateId,
-					participant: { name: participant.name, email: participant.email },
+					participant: {
+						id: participant.id,
+						name: participant.name,
+						email: participant.email,
+					},
 				}),
 			});
 		} catch {
 			/* Enrollment already succeeded. */
 		}
+	}
+};
+
+/** Admin-only: resend / retry auto proforma PDF e-mail for a participant. */
+export const adminResendProforma = async (
+	courseId: string,
+	dateId: string,
+	participantId: string
+): Promise<void> => {
+	const user = auth.currentUser;
+	if (!user) throw new Error('Wymagane logowanie.');
+	const token = await user.getIdToken();
+	const res = await fetch('/api/resend-proforma', {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ courseId, dateId, participantId }),
+	});
+	if (!res.ok) {
+		const data = (await res.json().catch(() => null)) as { error?: string } | null;
+		throw new Error(data?.error ?? 'Nie udało się wysłać proformy.');
 	}
 };

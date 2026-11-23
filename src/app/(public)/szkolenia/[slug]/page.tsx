@@ -11,7 +11,7 @@ import { getCourseBySlug } from '@services/courses';
 import { SzkolenieDetailView } from '@views/Szkolenia/SzkolenieDetailView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 type Props = {
 	params: Promise<{ slug: string }>;

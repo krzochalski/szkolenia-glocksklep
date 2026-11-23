@@ -5,7 +5,7 @@ import { SciezkaRozwojuView } from '@views/SciezkaRozwoju/SciezkaRozwojuView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('sciezkaRozwoju');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function SciezkaRozwojuPage() {
 	const [pathResult, coursesResult] = await Promise.allSettled([

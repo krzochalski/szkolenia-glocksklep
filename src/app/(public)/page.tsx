@@ -7,7 +7,7 @@ import { HomeView } from '@views/Home/HomeView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('home');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function HomePage() {
 	const [homepageResult, coursesResult] = await Promise.allSettled([

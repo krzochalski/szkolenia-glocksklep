@@ -9,11 +9,11 @@ import type { Metadata } from 'next';
 import { absoluteUrl, canonicalPath, defaultOgImageUrl, pageTitle } from './meta';
 
 /**
- * Catalog ISR window in seconds.
+ * Catalog / CMS ISR window in seconds.
  * Next.js requires `export const revalidate = <literal>` in route files —
- * do not reference this identifier in segment config exports.
+ * do not reference this identifier in segment config exports (use `60`).
  */
-export const CATALOG_REVALIDATE_SECONDS = 300;
+export const CATALOG_REVALIDATE_SECONDS = 60;
 
 export const seoToMetadata = (
 	cfg: StaticSeoConfig,

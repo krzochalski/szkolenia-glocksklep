@@ -7,6 +7,9 @@ const appBuildId =
 	process.env.GITHUB_SHA?.slice(0, 12) ??
 	`local-${Date.now().toString(36)}`;
 
+const NO_CACHE = 'private, no-cache, max-age=0, must-revalidate';
+const NO_CACHE_PUBLIC = 'no-cache, max-age=0, must-revalidate';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	env: {
@@ -27,10 +30,31 @@ const nextConfig = {
 	},
 	experimental: {
 		useTypeScriptCli: true,
+		staleTimes: {
+			dynamic: 0,
+			static: 30,
+		},
 	},
 	agentRules: false,
 	turbopack: {
 		resolveAlias: turbopackAlias,
+	},
+	async headers() {
+		return [
+			{
+				source: '/sw.js',
+				headers: [{ key: 'Cache-Control', value: NO_CACHE_PUBLIC }],
+			},
+			{
+				source: '/manifest.webmanifest',
+				headers: [{ key: 'Cache-Control', value: NO_CACHE_PUBLIC }],
+			},
+			{
+				// App documents / RSC — exclude hashed static assets and common public files.
+				source: '/((?!_next/static|_next/image|.*\\..*).*)',
+				headers: [{ key: 'Cache-Control', value: NO_CACHE }],
+			},
+		];
 	},
 	async redirects() {
 		return [

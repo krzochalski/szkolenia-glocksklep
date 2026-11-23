@@ -8,7 +8,7 @@ import { SzkoleniaListView } from '@views/Szkolenia/SzkoleniaListView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('courses');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function SzkoleniaPage() {
 	const [coursesResult, descriptionsResult] = await Promise.allSettled([

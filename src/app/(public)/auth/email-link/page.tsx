@@ -2,6 +2,8 @@ import { staticPageMetadata } from '@seo/pageMetadata';
 import { EmailLinkView } from '@views/Auth/EmailLinkView';
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = staticPageMetadata('auth');
 
 export default function EmailLinkPage() {

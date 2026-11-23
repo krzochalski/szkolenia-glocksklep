@@ -6,7 +6,7 @@ import { FaqView } from '@views/Faq/FaqView';
 import { serializeForClient } from '@/utils/serializeForClient';
 
 export const metadata = staticPageMetadata('faq');
-export const revalidate = 300;
+export const revalidate = 60;
 
 export default async function FaqPage() {
 	const faqResult = await Promise.allSettled([getFaqItems()]);
