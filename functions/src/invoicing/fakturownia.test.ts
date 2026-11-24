@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	buildReceiptViewUrl,
 	buildRegistrationReceiptPayload,
+	parseStoredReceipt,
 	warsawDateString,
 } from './fakturownia';
 import { FALLBACK_BILLING } from '../proforma/build';
@@ -38,6 +39,25 @@ describe('buildReceiptViewUrl', () => {
 		expect(buildReceiptViewUrl('acme', 'TokEn123')).toBe(
 			'https://acme.fakturownia.pl/invoice/TokEn123'
 		);
+	});
+});
+
+describe('parseStoredReceipt', () => {
+	it('ignores issuing lock', () => {
+		expect(
+			parseStoredReceipt({ status: 'issuing', issuingAt: new Date().toISOString() })
+		).toBeNull();
+	});
+
+	it('parses completed receipt', () => {
+		expect(
+			parseStoredReceipt({
+				receiptId: 12,
+				number: 'P/1',
+				viewUrl: 'https://x',
+				createdAt: '2026-01-01',
+			})
+		).toMatchObject({ receiptId: 12, number: 'P/1' });
 	});
 });
 

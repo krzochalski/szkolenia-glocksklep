@@ -7,7 +7,10 @@ import {
 	adminSetCourseCompletion,
 } from '@services/courseCompletions';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
-import { createFakturowniaReceiptForRegistration } from '@services/invoicingApi';
+import {
+	createFakturowniaReceiptForRegistration,
+	resendFakturowniaReceiptEmail,
+} from '@services/invoicingApi';
 import {
 	adminResendProforma,
 	getCourse,
@@ -28,6 +31,7 @@ import {
 	Alert,
 	Box,
 	Button,
+	Checkbox,
 	Chip,
 	CircularProgress,
 	ConfirmDialog,
@@ -35,6 +39,7 @@ import {
 	FormControlLabel,
 	Price,
 	Stack,
+	Tooltip,
 	Stagger,
 	StaggerItem,
 	Switch,
@@ -59,6 +64,17 @@ import {
 	signedUpCount,
 } from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
+import { getCourseKind } from '@/utils/courseKind';
+import { expandEnrollmentReceiptPositions } from '@/utils/enrollmentReceiptPositions';
+import {
+	buildRegistrationServiceLine,
+	paragonChipColor,
+	paragonIssueBlockReason,
+	paragonIssueBlockTooltip,
+	PARAGON_PANEL_CHIP_LABEL,
+	receiptEmailStatusLabel,
+	resolveParagonPanelChip,
+} from '@/utils/paragonAdmin';
 import { effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
 import { prepareExternalTab } from '@/utils/externalTab';
@@ -118,6 +134,9 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	const [confirmDraft, setConfirmDraft] = useState<DateNotifyComposePayload | null>(null);
 	const [notifyResult, setNotifyResult] = useState<string | null>(null);
 	const [waitlistResendMsg, setWaitlistResendMsg] = useState<string | null>(null);
+	const [paragonTarget, setParagonTarget] = useState<Participant | null>(null);
+	const [paragonSendEmail, setParagonSendEmail] = useState(true);
+	const [paragonResendTarget, setParagonResendTarget] = useState<Participant | null>(null);
 
 	const date = course?.dates?.find((d) => d.id === dateId);
 	const participants = date?.participants ?? [];
@@ -328,39 +347,94 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 	});
 
 	const issueParagon = useMutation({
-		mutationFn: async (participantId: string) => {
+		mutationFn: async ({
+			participantId,
+			sendEmail,
+		}: {
+			participantId: string;
+			sendEmail: boolean;
+		}) => {
 			const tab = prepareExternalTab();
 			const result = await createFakturowniaReceiptForRegistration({
 				courseId,
 				dateId,
 				participantId,
+				sendEmail,
 			});
 			const viewUrl = result.receipt.viewUrl;
 			if (viewUrl && tab) tab.navigate(viewUrl);
-			return { participantId, alreadyExists: result.alreadyExists };
+			return { participantId, alreadyExists: result.alreadyExists, email: result.email };
 		},
-		onSuccess: async ({ participantId, alreadyExists }) => {
+		onSuccess: async ({ participantId, alreadyExists, email }) => {
+			setParagonTarget(null);
 			await invalidate();
+			const emailNote =
+				email?.sent === true
+					? ' Wysłano e-mail do uczestnika.'
+					: email && email.sent === false
+						? ' Nie wysłano e-maila z paragonem.'
+						: '';
 			setProformaMsg({
 				severity: 'success',
 				text: alreadyExists
 					? 'Paragon już istnieje w Fakturowni.'
-					: 'Paragon wystawiony w Fakturowni.',
+					: `Paragon wystawiony w Fakturowni.${emailNote}`,
 			});
-			redirectAfterFakturowniaCreate(
-				(href) => router.push(href),
-				courseId,
-				dateId,
-				participantId
-			);
+			if (!alreadyExists) {
+				redirectAfterFakturowniaCreate(
+					(href) => router.push(href),
+					courseId,
+					dateId,
+					participantId
+				);
+			}
 		},
 		onError: (err: Error) => {
+			setParagonTarget(null);
 			setProformaMsg({
 				severity: 'error',
 				text: err.message || 'Nie udało się wystawić paragonu.',
 			});
 		},
 	});
+
+	const resendParagonEmail = useMutation({
+		mutationFn: (participantId: string) =>
+			resendFakturowniaReceiptEmail({ courseId, dateId, participantId }),
+		onSuccess: async (result) => {
+			setParagonResendTarget(null);
+			await invalidate();
+			setProformaMsg({
+				severity: result.email.sent ? 'success' : 'error',
+				text: result.email.sent
+					? 'Wysłano ponownie e-mail z paragonem.'
+					: 'Nie udało się wysłać e-maila z paragonem.',
+			});
+		},
+		onError: (err: Error) => {
+			setParagonResendTarget(null);
+			setProformaMsg({
+				severity: 'error',
+				text: err.message || 'Nie udało się wysłać e-maila z paragonem.',
+			});
+		},
+	});
+
+	const paragonPreviewLine = useMemo(() => {
+		if (!paragonTarget || !course || !date) return null;
+		const net = effectiveEnrollmentNetto(course, date, paragonTarget);
+		const finalNet = paragonTarget.priceSnapshot?.finalPrice ?? net;
+		const serviceLine = buildRegistrationServiceLine(course.name, getCourseKind(course), date);
+		const [line] = expandEnrollmentReceiptPositions({
+			serviceLine,
+			amountNet: finalNet,
+			baseAmountNet: paragonTarget.priceSnapshot?.basePrice,
+			discountTotal: paragonTarget.priceSnapshot?.discountTotal,
+			discountReason: paragonTarget.priceSnapshot?.manualAdjustment?.reason,
+			vatRatePercent: 23,
+		});
+		return line ?? null;
+	}, [paragonTarget, course, date]);
 
 	const deleteDate = useMutation({
 		mutationFn: async () => {
@@ -554,6 +628,12 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 							const rowBg = p.paid ? 'success.light' : overdue ? 'error.light' : undefined;
 							const payable = effectiveEnrollmentNetto(course, date, p);
 							const hasCustom = p.customPrice != null;
+							const paragonChip =
+								p.documentType !== 'invoice'
+									? resolveParagonPanelChip(p, p.fiscalStatus ?? null)
+									: null;
+							const paragonBlock = paragonIssueBlockReason(p, payable);
+							const paragonEmailStatus = receiptEmailStatusLabel(p);
 							return (
 								<StaggerItem key={p.id}>
 									<Stack
@@ -654,6 +734,34 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 															.join(' · ')}
 													</Typography>
 												) : null}
+												{paragonChip ? (
+													<Chip
+														size='small'
+														label={PARAGON_PANEL_CHIP_LABEL[paragonChip]}
+														color={paragonChipColor(paragonChip)}
+														variant={paragonChip === 'none' ? 'outlined' : 'filled'}
+													/>
+												) : null}
+												{p.fiscalError ? (
+													<Typography variant='caption' color='error' sx={{ width: '100%' }}>
+														Paragon: {p.fiscalError}
+													</Typography>
+												) : null}
+												{paragonEmailStatus ? (
+													<Typography
+														variant='caption'
+														color={
+															p.receiptEmail?.sentAt
+																? 'success.dark'
+																: p.receiptEmail?.error
+																	? 'error'
+																	: 'text.secondary'
+														}
+														sx={{ width: '100%' }}
+													>
+														{paragonEmailStatus}
+													</Typography>
+												) : null}
 											</Box>
 										</Box>
 										<Button
@@ -677,9 +785,12 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 												Wyślij ponownie proformę
 											</Button>
 										) : null}
-										{p.documentType !== 'invoice' && p.paid && payable > 0 ? (
+										{p.documentType !== 'invoice' ? (
 											p.fakturownia?.receiptId ? (
 												<>
+													<Typography variant='caption' color='text.secondary'>
+														{p.fakturownia.number ?? 'Paragon'}
+													</Typography>
 													<Button
 														size='small'
 														variant='outlined'
@@ -702,22 +813,47 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 															rel='noopener noreferrer'
 														>
 															Fakturownia
-															{p.fakturownia.number ? ` (${p.fakturownia.number})` : ''}
 														</Button>
 													) : null}
+													<Button
+														size='small'
+														variant='outlined'
+														disabled={resendParagonEmail.isPending}
+														onClick={() => {
+															setProformaMsg(null);
+															setParagonResendTarget(p);
+														}}
+													>
+														Wyślij ponownie e-mail
+													</Button>
 												</>
 											) : (
-												<Button
-													size='small'
-													variant='outlined'
-													disabled={issueParagon.isPending}
-													onClick={() => {
-														setProformaMsg(null);
-														issueParagon.mutate(p.id);
-													}}
+												<Tooltip
+													title={
+														paragonBlock
+															? paragonIssueBlockTooltip(paragonBlock)
+															: 'Wystaw paragon w Fakturowni'
+													}
 												>
-													Wystaw paragon
-												</Button>
+													<span>
+														<Button
+															size='small'
+															variant='outlined'
+															disabled={
+																Boolean(paragonBlock) ||
+																issueParagon.isPending ||
+																paragonChip === 'issuing'
+															}
+															onClick={() => {
+																setProformaMsg(null);
+																setParagonSendEmail(true);
+																setParagonTarget(p);
+															}}
+														>
+															Wystaw paragon
+														</Button>
+													</span>
+												</Tooltip>
 											)
 										) : null}
 										<FormControlLabel
@@ -843,6 +979,64 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 									Ten termin ma {participants.length} zapisanych uczestników!
 								</Typography>
 							) : null}
+						</Typography>
+					</ConfirmDialog>
+
+					<ConfirmDialog
+						open={Boolean(paragonTarget)}
+						title='Wystaw paragon w Fakturowni'
+						cancelLabel='Anuluj'
+						confirmLabel='Wystaw paragon'
+						confirmColor='primary'
+						loading={issueParagon.isPending}
+						onCancel={() => setParagonTarget(null)}
+						onConfirm={() => {
+							if (!paragonTarget) return;
+							issueParagon.mutate({
+								participantId: paragonTarget.id,
+								sendEmail: paragonSendEmail,
+							});
+						}}
+					>
+						<Stack spacing={1.5}>
+							<Typography>
+								Uczestnik: <strong>{paragonTarget?.name}</strong>
+							</Typography>
+							{paragonPreviewLine ? (
+								<Typography variant='body2' color='text.secondary'>
+									Pozycja: {paragonPreviewLine.title}
+									<br />
+									Kwota brutto: {paragonPreviewLine.brutto.toFixed(2)} zł
+								</Typography>
+							) : null}
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={paragonSendEmail}
+										onChange={(_, checked) => setParagonSendEmail(checked)}
+									/>
+								}
+								label='Wyślij paragon e-mailem do uczestnika'
+							/>
+						</Stack>
+					</ConfirmDialog>
+
+					<ConfirmDialog
+						open={Boolean(paragonResendTarget)}
+						title='Wyślij ponownie e-mail z paragonem'
+						cancelLabel='Anuluj'
+						confirmLabel='Wyślij'
+						confirmColor='primary'
+						loading={resendParagonEmail.isPending}
+						onCancel={() => setParagonResendTarget(null)}
+						onConfirm={() => {
+							if (paragonResendTarget) resendParagonEmail.mutate(paragonResendTarget.id);
+						}}
+					>
+						<Typography>
+							Wysłać ponownie link do paragonu na adres{' '}
+							<strong>{paragonResendTarget?.email}</strong> (
+							{paragonResendTarget?.fakturownia?.number ?? 'paragon'})?
 						</Typography>
 					</ConfirmDialog>
 

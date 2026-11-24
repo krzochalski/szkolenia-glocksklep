@@ -196,8 +196,8 @@ export const AdminParticipantParagonPrintView = ({
 		return (
 			<Stack spacing={2}>
 				<Alert severity='warning'>
-					Ten zapis nie ma jeszcze paragonu w Fakturowni. Wystaw paragon na liście uczestników
-					terminu (po oznaczeniu opłacenia lub przyciskiem „Wystaw paragon”).
+					Ten zapis nie ma jeszcze paragonu w Fakturowni. Wystaw paragon ręcznie na liście
+					uczestników terminu (przycisk „Wystaw paragon” po oznaczeniu opłacenia).
 				</Alert>
 				<Button
 					component={Link}

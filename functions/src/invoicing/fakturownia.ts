@@ -88,6 +88,18 @@ export class RegistrationNotFoundError extends Error {
 	}
 }
 
+export class ReceiptIssuingConflictError extends Error {
+	readonly status = 409;
+
+	constructor(message: string) {
+		super(message);
+		this.name = 'ReceiptIssuingConflictError';
+	}
+}
+
+/** Active issuing locks older than this may be reclaimed (stale admin tab / crash). */
+const ISSUING_LOCK_STALE_MS = 5 * 60 * 1000;
+
 /** Calendar date in Europe/Warsaw as YYYY-MM-DD. */
 export const warsawDateString = (date: Date = new Date()): string =>
 	new Intl.DateTimeFormat('en-CA', {
@@ -100,9 +112,10 @@ export const warsawDateString = (date: Date = new Date()): string =>
 export const buildReceiptViewUrl = (domain: string, token: string): string =>
 	`https://${domain}.fakturownia.pl/invoice/${token}`;
 
-const parseStoredReceipt = (raw: unknown): FakturowniaReceiptRef | null => {
+export const parseStoredReceipt = (raw: unknown): FakturowniaReceiptRef | null => {
 	if (!raw || typeof raw !== 'object') return null;
 	const data = raw as Record<string, unknown>;
+	if (data.status === 'issuing') return null;
 	const receiptId = Number(data.receiptId);
 	if (!Number.isFinite(receiptId) || receiptId <= 0) return null;
 	return {
@@ -111,6 +124,16 @@ const parseStoredReceipt = (raw: unknown): FakturowniaReceiptRef | null => {
 		viewUrl: data.viewUrl == null ? null : String(data.viewUrl),
 		createdAt: data.createdAt == null ? new Date().toISOString() : String(data.createdAt),
 	};
+};
+
+const isActiveIssuingLock = (raw: unknown): boolean => {
+	if (!raw || typeof raw !== 'object') return false;
+	const data = raw as Record<string, unknown>;
+	if (data.status !== 'issuing') return false;
+	if (parseStoredReceipt(raw)) return false;
+	const at = data.issuingAt == null ? NaN : Date.parse(String(data.issuingAt));
+	if (!Number.isFinite(at)) return true;
+	return Date.now() - at < ISSUING_LOCK_STALE_MS;
 };
 
 const getFakturowniaConfig = (): { domain: string; apiToken: string } => {
@@ -272,42 +295,23 @@ export const buildRegistrationReceiptPayload = (input: {
 	return payload;
 };
 
-export const createReceiptForRegistration = async (
-	db: Firestore,
-	params: CreateReceiptForRegistrationParams,
-	fetchImpl: typeof fetch = fetch
-): Promise<CreateReceiptResult> => {
-	const courseRef = db.collection('courses').doc(params.courseId);
-	const courseSnap = await courseRef.get();
-	if (!courseSnap.exists) {
-		throw new RegistrationNotFoundError(`Course not found: ${params.courseId}`);
-	}
-	const course = courseSnap.data() as CourseDoc;
-	const date = (course.dates ?? []).find((d) => matchDate(d, params.dateId));
-	if (!date) {
-		throw new RegistrationNotFoundError(`Date not found: ${params.dateId}`);
-	}
-	const participant = (date.participants ?? []).find((p) => p.id === params.participantId);
-	if (!participant) {
-		throw new RegistrationNotFoundError(`Participant not found: ${params.participantId}`);
-	}
-
-	const existing = parseStoredReceipt(participant.fakturownia);
-	if (existing) {
-		return { alreadyExists: true, receipt: existing };
-	}
-
+const validateReceiptParticipant = (
+	course: CourseDoc,
+	date: CourseDate,
+	participant: Record<string, unknown>
+): { amountNet: number } => {
 	const documentType = participant.documentType;
 	if (documentType === 'invoice') {
 		throw new FakturowniaApiError('Ten zapis wymaga faktury VAT, nie paragonu.', 400);
 	}
-
+	if (participant.paid !== true) {
+		throw new FakturowniaApiError('Uczestnik musi być oznaczony jako opłacony.', 400);
+	}
 	const amountNet = effectiveEnrollmentNetto(
 		typeof course.price === 'number' ? course.price : 0,
 		date.customPrice,
 		typeof participant.customPrice === 'number' ? participant.customPrice : undefined
 	);
-
 	if (
 		shouldSkipProforma({
 			amountNet,
@@ -316,6 +320,83 @@ export const createReceiptForRegistration = async (
 	) {
 		throw new FakturowniaApiError('Brak kwoty do paragonu (gotówka lub 0 zł).', 400);
 	}
+	return { amountNet };
+};
+
+const patchParticipantOnDate = (
+	course: CourseDoc,
+	dateId: string,
+	participantId: string,
+	patch: (p: Record<string, unknown>) => Record<string, unknown>
+): CourseDate[] =>
+	(course.dates ?? []).map((d) => {
+		if (!matchDate(d, dateId)) return d;
+		const participants = (d.participants ?? []).map((p) =>
+			p.id === participantId ? patch(p) : p
+		);
+		return { ...d, participants };
+	});
+
+export const createReceiptForRegistration = async (
+	db: Firestore,
+	params: CreateReceiptForRegistrationParams,
+	fetchImpl: typeof fetch = fetch
+): Promise<CreateReceiptResult> => {
+	const courseRef = db.collection('courses').doc(params.courseId);
+
+	type ClaimResult =
+		| { kind: 'exists'; receipt: FakturowniaReceiptRef }
+		| { kind: 'claimed'; course: CourseDoc; date: CourseDate; participant: Record<string, unknown> };
+
+	const claimed = await db.runTransaction(async (tx): Promise<ClaimResult> => {
+		const snap = await tx.get(courseRef);
+		if (!snap.exists) {
+			throw new RegistrationNotFoundError(`Course not found: ${params.courseId}`);
+		}
+		const course = snap.data() as CourseDoc;
+		const date = (course.dates ?? []).find((d) => matchDate(d, params.dateId));
+		if (!date) {
+			throw new RegistrationNotFoundError(`Date not found: ${params.dateId}`);
+		}
+		const participant = (date.participants ?? []).find((p) => p.id === params.participantId);
+		if (!participant) {
+			throw new RegistrationNotFoundError(`Participant not found: ${params.participantId}`);
+		}
+
+		const existing = parseStoredReceipt(participant.fakturownia);
+		if (existing) {
+			return { kind: 'exists', receipt: existing };
+		}
+		if (isActiveIssuingLock(participant.fakturownia)) {
+			throw new ReceiptIssuingConflictError(
+				'Trwa wystawianie paragonu. Odśwież za chwilę.'
+			);
+		}
+
+		validateReceiptParticipant(course, date, participant);
+
+		const issuingAt = new Date().toISOString();
+		const dates = patchParticipantOnDate(
+			course,
+			params.dateId,
+			params.participantId,
+			(p) => ({
+				...p,
+				fakturownia: { status: 'issuing', issuingAt },
+				fiscalError: null,
+			})
+		);
+		tx.update(courseRef, { dates });
+
+		return { kind: 'claimed', course, date, participant };
+	});
+
+	if (claimed.kind === 'exists') {
+		return { alreadyExists: true, receipt: claimed.receipt };
+	}
+
+	const { course, date, participant } = claimed;
+	const { amountNet } = validateReceiptParticipant(course, date, participant);
 
 	const { domain, apiToken } = getFakturowniaConfig();
 	const billing = await loadBilling(db, course.instructor?.id);
@@ -384,38 +465,63 @@ export const createReceiptForRegistration = async (
 		throw new FakturowniaApiError('Brak pozycji do paragonu', 400);
 	}
 
-	const created = await postFakturowniaReceipt(domain, apiToken, invoice, fetchImpl);
-	const createdAt = new Date().toISOString();
-	const receipt: FakturowniaReceiptRef = {
-		receiptId: created.id,
-		number: created.number,
-		viewUrl: created.token ? buildReceiptViewUrl(domain, created.token) : null,
-		createdAt,
+	const clearIssuingLock = async (fiscalError: string) => {
+		await db.runTransaction(async (tx) => {
+			const snap = await tx.get(courseRef);
+			if (!snap.exists) return;
+			const fresh = snap.data() as CourseDoc;
+			const dates = patchParticipantOnDate(
+				fresh,
+				params.dateId,
+				params.participantId,
+				(p) => {
+					const { fakturownia: _lock, ...rest } = p as Record<string, unknown> & {
+						fakturownia?: unknown;
+					};
+					return { ...rest, fiscalError };
+				}
+			);
+			tx.update(courseRef, { dates });
+		});
 	};
 
-	await db.runTransaction(async (tx) => {
-		const snap = await tx.get(courseRef);
-		if (!snap.exists) return;
-		const fresh = snap.data() as CourseDoc;
-		const dates = (fresh.dates ?? []).map((d) => {
-			if (!matchDate(d, params.dateId)) return d;
-			const participants = (d.participants ?? []).map((p) => {
-				if (p.id !== params.participantId) return p;
-				return {
+	try {
+		const created = await postFakturowniaReceipt(domain, apiToken, invoice, fetchImpl);
+		const createdAt = new Date().toISOString();
+		const receipt: FakturowniaReceiptRef = {
+			receiptId: created.id,
+			number: created.number,
+			viewUrl: created.token ? buildReceiptViewUrl(domain, created.token) : null,
+			createdAt,
+		};
+
+		await db.runTransaction(async (tx) => {
+			const snap = await tx.get(courseRef);
+			if (!snap.exists) return;
+			const fresh = snap.data() as CourseDoc;
+			const dates = patchParticipantOnDate(
+				fresh,
+				params.dateId,
+				params.participantId,
+				(p) => ({
 					...p,
 					fakturownia: receipt,
 					fiscalStatus: 'pending',
 					fiscalPrintedAt: null,
 					fiscalError: null,
 					printAttempts: 0,
-				};
-			});
-			return { ...d, participants };
+				})
+			);
+			tx.update(courseRef, { dates });
 		});
-		tx.update(courseRef, { dates });
-	});
 
-	return { alreadyExists: false, receipt };
+		return { alreadyExists: false, receipt };
+	} catch (err) {
+		const message =
+			err instanceof Error ? err.message : 'Nie udało się wystawić paragonu w Fakturowni.';
+		await clearIssuingLock(message);
+		throw err;
+	}
 };
 
 export const DEFAULT_SELLER = FALLBACK_BILLING;

@@ -114,10 +114,13 @@ export interface Participant {
 
 /** Fakturownia receipt metadata (mirrors shop `OrderFakturowniaReceipt`). */
 export type ParticipantFakturowniaReceipt = {
-	receiptId: number;
-	number: string | null;
-	viewUrl: string | null;
-	createdAt: string;
+	receiptId?: number;
+	number?: string | null;
+	viewUrl?: string | null;
+	createdAt?: string;
+	/** Transaction lock while Cloud Functions calls Fakturownia API. */
+	status?: 'issuing';
+	issuingAt?: string;
 };
 
 export type FiscalStatus = 'pending' | 'printing' | 'printed' | 'failed';
