@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
+	AdminAuthError,
 	buildReceiptViewUrl,
 	buildRegistrationReceiptPayload,
 	parseStoredReceipt,
+	requireAdmin,
 	warsawDateString,
 } from './fakturownia';
 import { FALLBACK_BILLING } from '../proforma/build';
@@ -66,5 +68,49 @@ describe('warsawDateString', () => {
 		expect(warsawDateString(new Date('2026-10-26T12:00:00+02:00'))).toMatch(
 			/^\d{4}-\d{2}-\d{2}$/
 		);
+	});
+});
+
+describe('requireAdmin', () => {
+	const auth = {
+		verifyIdToken: vi.fn(async (token: string) => {
+			if (token === 'google-id-token') {
+				throw new Error('wrong audience');
+			}
+			if (token !== 'firebase-id-token') {
+				throw new Error('bad token');
+			}
+			return { uid: 'admin-1', email: 'a@example.com' };
+		}),
+	};
+	const db = {
+		doc: (path: string) => ({
+			get: async () => ({ exists: path === 'admins/admin-1' }),
+		}),
+	};
+
+	it('prefers X-Firebase-Authorization over Google Authorization (proxy)', async () => {
+		const admin = await requireAdmin(
+			{
+				headers: {
+					authorization: 'Bearer google-id-token',
+					'x-firebase-authorization': 'Bearer firebase-id-token',
+				},
+			},
+			auth as never,
+			db as never
+		);
+		expect(admin).toEqual({ uid: 'admin-1', email: 'a@example.com' });
+		expect(auth.verifyIdToken).toHaveBeenCalledWith('firebase-id-token');
+	});
+
+	it('rejects Google ID token when Firebase header missing', async () => {
+		await expect(
+			requireAdmin(
+				{ headers: { authorization: 'Bearer google-id-token' } },
+				auth as never,
+				db as never
+			)
+		).rejects.toBeInstanceOf(AdminAuthError);
 	});
 });

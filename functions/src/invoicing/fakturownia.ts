@@ -147,18 +147,27 @@ const getFakturowniaConfig = (): { domain: string; apiToken: string } => {
 	return { domain, apiToken };
 };
 
+/** Prefer X-Firebase-Authorization when App Hosting proxies with a Google ID token in Authorization. */
+const firebaseBearerFromHeaders = (headers: Request['headers']): string | null => {
+	const raw = headers['x-firebase-authorization'] ?? headers.authorization ?? '';
+	const header = Array.isArray(raw) ? raw[0] : raw;
+	if (typeof header !== 'string') return null;
+	const match = /^Bearer\s+(.+)$/i.exec(header);
+	return match?.[1]?.trim() || null;
+};
+
 export const requireAdmin = async (
 	req: Pick<Request, 'headers'>,
 	auth: Auth,
 	db: Firestore
 ): Promise<{ uid: string; email: string | undefined }> => {
-	const header = req.headers.authorization;
-	if (typeof header !== 'string' || !header.startsWith('Bearer ')) {
+	const token = firebaseBearerFromHeaders(req.headers);
+	if (!token) {
 		throw new AdminAuthError('Missing bearer token', 401);
 	}
 	let decoded: { uid: string; email?: string };
 	try {
-		decoded = await auth.verifyIdToken(header.slice('Bearer '.length));
+		decoded = await auth.verifyIdToken(token);
 	} catch {
 		throw new AdminAuthError('Invalid token', 401);
 	}
