@@ -3,6 +3,7 @@ export { useAppFreshness } from './useAppFreshness';
 export { useAuthUser } from './useAuthUser';
 export { useCourseEligibility } from './useCourseEligibility';
 export { useIsAdmin } from './useIsAdmin';
-export { usePwaInstall } from './usePwaInstall';
 export { PriceModeProvider, usePriceMode } from './usePriceMode';
+export { usePwaInstall } from './usePwaInstall';
 export { useSlowActionHint } from './useSlowActionHint';
+export { useWaitlist } from './useWaitlist';

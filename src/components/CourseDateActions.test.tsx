@@ -18,6 +18,17 @@ const eligibilityMock = vi.fn(() => ({
 vi.mock('@hooks', () => ({
 	useAuthUser: () => authUserMock(),
 	useCourseEligibility: () => eligibilityMock(),
+	useWaitlist: () => ({
+		user: authUserMock(),
+		uid: authUserMock()?.uid,
+		isJoined: false,
+		isLoading: false,
+		isPending: false,
+		join: vi.fn(),
+		leave: vi.fn(),
+		joinAsync: vi.fn(),
+		leaveAsync: vi.fn(),
+	}),
 }));
 
 vi.mock('@services/courses', () => ({
@@ -27,12 +38,6 @@ vi.mock('@services/courses', () => ({
 
 vi.mock('@services/courseCompletions', () => ({
 	getMyCourseCompletions: vi.fn(async () => []),
-}));
-
-vi.mock('@services/courseWaitingList', () => ({
-	addToWaitingList: vi.fn(),
-	getUserWaitingListEntries: vi.fn(async () => []),
-	removeFromWaitingList: vi.fn(),
 }));
 
 vi.mock('@services/users', () => ({

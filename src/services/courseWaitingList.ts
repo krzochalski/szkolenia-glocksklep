@@ -44,6 +44,7 @@ export const addToWaitingList = async (params: {
 	}
 	const email = normalizeWaitingListEmail(params.email);
 	const now = new Date().toISOString();
+	const phone = params.phoneNumber?.trim();
 	const entry: Omit<CourseWaitingListEntry, 'id' | 'lastNotifiedTermId'> = {
 		courseId: params.courseId,
 		courseName: params.courseName,
@@ -51,7 +52,7 @@ export const addToWaitingList = async (params: {
 		userId: params.userId,
 		userName: params.userName,
 		email,
-		...(params.phoneNumber ? { phoneNumber: params.phoneNumber } : {}),
+		...(phone ? { phoneNumber: phone } : {}),
 		createdAt: now,
 		consentAt: now,
 	};
@@ -60,7 +61,10 @@ export const addToWaitingList = async (params: {
 	return 'created';
 };
 
-/** Unauthenticated waitlist signup by email only. Prerequisites do not block waitlist. */
+/**
+ * Unauthenticated waitlist signup by email only.
+ * Idempotent upsert (no pre-read — guest get is not allowed by rules).
+ */
 export const addGuestToWaitingList = async (params: {
 	courseId: string;
 	courseName: string;
@@ -70,24 +74,23 @@ export const addGuestToWaitingList = async (params: {
 	const email = normalizeWaitingListEmail(params.email);
 	const id = getGuestWaitingListEntryId(params.courseId, email);
 	const ref = doc(db, COLLECTION, id);
-	const existing = await getDoc(ref);
-	if (existing.exists()) {
-		return 'exists';
-	}
 	const now = new Date().toISOString();
-	const entry: Omit<CourseWaitingListEntry, 'id' | 'userId' | 'phoneNumber' | 'lastNotifiedTermId'> =
-		{
-			courseId: params.courseId,
-			courseName: params.courseName,
-			courseSlug: params.courseSlug,
-			userName: 'Gość',
-			email,
-			guest: true,
-			createdAt: now,
-			consentAt: now,
-		};
+	const entry: Omit<
+		CourseWaitingListEntry,
+		'id' | 'userId' | 'phoneNumber' | 'lastNotifiedTermId'
+	> = {
+		courseId: params.courseId,
+		courseName: params.courseName,
+		courseSlug: params.courseSlug,
+		userName: 'Gość',
+		email,
+		guest: true,
+		createdAt: now,
+		consentAt: now,
+	};
+	// Guests may create or update their own course+email doc; skip getDoc (denied unauthenticated).
 	await setDoc(ref, entry);
-	/* Confirmation email: Cloud Function onWaitingListCreated */
+	/* Confirmation email: Cloud Function onWaitingListCreated (create only) */
 	return 'created';
 };
 

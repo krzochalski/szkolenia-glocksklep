@@ -2,15 +2,10 @@
 
 import { Paths } from '@constants/paths';
 import { WAITLIST_SECTION_ID } from '@constants/waitlist';
-import { useAuthUser, useCourseEligibility } from '@hooks';
+import { useAuthUser, useCourseEligibility, useWaitlist } from '@hooks';
 import { enrollInCourse } from '@services/courses';
-import {
-	addToWaitingList,
-	getUserWaitingListEntries,
-	removeFromWaitingList,
-} from '@services/courseWaitingList';
 import { getUserProfile } from '@services/users';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
 	Button,
 	ConfirmDialog,
@@ -102,16 +97,18 @@ export const CourseDateActions = ({
 		setConfirmAction('enroll');
 	}, [autoPromptEnroll, user, enrolled, slots, eligibility.eligible, eligibility.loading]);
 
-	const { data: waitingEntries = [] } = useQuery({
-		queryKey: ['waitingList', uid],
-		queryFn: () => {
-			if (!uid) return Promise.resolve([]);
-			return getUserWaitingListEntries(uid);
+	const waitlist = useWaitlist(course, {
+		onError,
+		onJoined: () => {
+			setConfirmAction(null);
+			onSuccess?.();
 		},
-		enabled: Boolean(uid),
+		onLeft: () => {
+			setConfirmAction(null);
+			onSuccess?.();
+		},
 	});
-
-	const onWaitingList = waitingEntries.some((entry) => entry.courseId === course.id);
+	const onWaitingList = waitlist.isJoined;
 
 	const resolveParticipant = async () => {
 		if (!user) throw new Error('Zaloguj się, aby zapisać się na szkolenie.');
@@ -140,47 +137,7 @@ export const CourseDateActions = ({
 		onError: (err: Error) => onError?.(err.message),
 	});
 
-	const joinWaitlist = useMutation({
-		mutationFn: async () => {
-			const participant = await resolveParticipant();
-			await addToWaitingList({
-				courseId: course.id,
-				courseName: course.name,
-				courseSlug: course.slug,
-				userId: participant.id,
-				userName: participant.name,
-				email: participant.email,
-				phoneNumber: participant.phoneNumber,
-			});
-		},
-		onSuccess: async () => {
-			setConfirmAction(null);
-			onSuccess?.();
-			await Promise.all([
-				invalidateCourseQueries(queryClient),
-				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
-			]);
-		},
-		onError: (err: Error) => onError?.(err.message),
-	});
-
-	const leaveWaitlist = useMutation({
-		mutationFn: async () => {
-			if (!uid) throw new Error('Zaloguj się.');
-			await removeFromWaitingList(course.id, uid);
-		},
-		onSuccess: async () => {
-			setConfirmAction(null);
-			onSuccess?.();
-			await Promise.all([
-				invalidateCourseQueries(queryClient),
-				queryClient.invalidateQueries({ queryKey: ['waitingList', uid] }),
-			]);
-		},
-		onError: (err: Error) => onError?.(err.message),
-	});
-
-	const pending = enroll.isPending || joinWaitlist.isPending || leaveWaitlist.isPending;
+	const pending = enroll.isPending || waitlist.isPending;
 
 	const waitlistConfirmCopy: Record<
 		Exclude<ConfirmAction, 'enroll'>,
@@ -255,8 +212,8 @@ export const CourseDateActions = ({
 				loading={pending}
 				onCancel={() => setConfirmAction(null)}
 				onConfirm={() => {
-					if (confirmAction === 'joinWaitlist') joinWaitlist.mutate();
-					else leaveWaitlist.mutate();
+					if (confirmAction === 'joinWaitlist') waitlist.join();
+					else waitlist.leave();
 				}}
 			>
 				{waitlistConfirmCopy[confirmAction].message}

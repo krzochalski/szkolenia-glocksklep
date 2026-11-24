@@ -20,6 +20,7 @@
 		"test": "biome lint . && vitest --run",
 		"test:unit": "vitest --run",
 		"test:watch": "biome lint . && vitest",
+		"test:rules": "npx -y firebase-tools@latest emulators:exec --only firestore --project szkolenia-glocksklep \"vitest --run src/rules/waitlist.rules.test.ts\"",
 		"verify": "biome lint . && tsc --noEmit && vitest --run",
 		"deploy:all": "pnpm run build && pnpm --dir functions run build && npx -y firebase-tools@latest deploy --only apphosting,functions,firestore --project szkolenia-glocksklep",
 		"deploy:functions": "pnpm --dir functions run build && npx -y firebase-tools@latest deploy --only functions --project szkolenia-glocksklep",
@@ -65,6 +66,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.13",
+		"@firebase/rules-unit-testing": "^5.0.0",
 		"@testing-library/dom": "^10.4.2",
 		"@testing-library/jest-dom": "^7.0.1",
 		"@testing-library/react": "^16.3.3",

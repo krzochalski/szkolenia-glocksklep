@@ -1,23 +1,10 @@
 'use client';
 
 import { Paths } from '@constants/paths';
-import { useAuthUser, useCourseEligibility } from '@hooks';
-import {
-	addGuestToWaitingList,
-	addToWaitingList,
-	ALREADY_ON_WAITING_LIST,
-	GUEST_ALREADY_ON_WAITING_LIST,
-	getUserWaitingListEntries,
-	removeFromWaitingList,
-} from '@services/courseWaitingList';
-import { getUserProfile } from '@services/users';
-import type { Course } from '@/types/course';
-import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
-import {
-	type GuestWaitingListFormValues,
-	guestWaitingListSchema,
-} from '@/utils/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCourseEligibility, useWaitlist } from '@hooks';
+import { addGuestToWaitingList } from '@services/courseWaitingList';
+import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import {
 	Button,
 	Checkbox,
@@ -28,10 +15,13 @@ import {
 	TextField,
 	Typography,
 } from '@ui';
-import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import type { Course } from '@/types/course';
+import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import { type GuestWaitingListFormValues, guestWaitingListSchema } from '@/utils/schemas';
+import { mapWaitlistError, WAITLIST_JOIN_ERROR } from '@/utils/waitlistErrors';
 
 type Props = {
 	readonly course: Course;
@@ -72,25 +62,19 @@ const GuestWaitingListForm = ({ course, onError, onSuccess }: Props) => {
 	const onSubmit = async (values: GuestWaitingListFormValues) => {
 		setLocalError(null);
 		try {
-			const result = await addGuestToWaitingList({
+			await addGuestToWaitingList({
 				courseId: course.id,
 				courseName: course.name,
 				courseSlug: course.slug,
 				email: values.email,
 			});
-			if (result === 'exists') {
-				setLocalError(GUEST_ALREADY_ON_WAITING_LIST);
-				onError?.(GUEST_ALREADY_ON_WAITING_LIST);
-				return;
-			}
 			setSubmittedEmail(values.email.trim());
 			bumpCourseWaitingListCount(queryClient, course.slug, 1);
 			onSuccess?.(
 				`Dziękujemy — powiadomimy Cię na ${values.email.trim()}, gdy pojawi się nowy termin.`
 			);
 		} catch (err) {
-			const message =
-				err instanceof Error ? err.message : 'Nie udało się zapisać na listę oczekujących.';
+			const message = mapWaitlistError(err, WAITLIST_JOIN_ERROR);
 			setLocalError(message);
 			onError?.(message);
 		}
@@ -103,8 +87,7 @@ const GuestWaitingListForm = ({ course, onError, onSuccess }: Props) => {
 					Dziękujemy — powiadomimy Cię na {submittedEmail}, gdy pojawi się nowy termin.
 				</Typography>
 				<Typography variant='body2' color='text.secondary'>
-					Załóż konto, żeby łatwiej zarządzać zapisami i kontaktem przy kolejnych
-					szkoleniach.{' '}
+					Załóż konto, żeby łatwiej zarządzać zapisami i kontaktem przy kolejnych szkoleniach.{' '}
 					<Link component={NextLink} href={Paths.register} underline='hover'>
 						Utwórz konto
 					</Link>
@@ -184,69 +167,26 @@ const GuestWaitingListForm = ({ course, onError, onSuccess }: Props) => {
 
 /** Join / leave course-level waitlist when there are no open seats (or no dates). */
 export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) => {
-	const user = useAuthUser();
-	const queryClient = useQueryClient();
-	const uid = user?.uid;
 	const eligibility = useCourseEligibility(course);
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 	const [joinSuccess, setJoinSuccess] = useState(false);
 
-	const { data: waitingEntries = [] } = useQuery({
-		queryKey: ['waitingList', uid],
-		queryFn: () => {
-			if (!uid) return Promise.resolve([]);
-			return getUserWaitingListEntries(uid);
-		},
-		enabled: Boolean(uid),
-	});
-
-	const onWaitingList = waitingEntries.some((entry) => entry.courseId === course.id);
-
-	const joinWaitlist = useMutation({
-		mutationFn: async () => {
-			if (!user) throw new Error('Zaloguj się, aby dołączyć do listy oczekujących.');
-			const profile = await getUserProfile();
-			return addToWaitingList({
-				courseId: course.id,
-				courseName: course.name,
-				courseSlug: course.slug,
-				userId: user.uid,
-				userName: profile?.displayName || user.displayName || user.email || 'Uczestnik',
-				email: profile?.email || user.email || '',
-				phoneNumber: profile?.phoneNumber ?? user.phoneNumber ?? undefined,
-			});
-		},
-		onSuccess: async (result) => {
+	const waitlist = useWaitlist(course, {
+		onError,
+		onJoined: (result) => {
 			setConfirmAction(null);
-			if (result === 'exists') {
-				onError?.(ALREADY_ON_WAITING_LIST);
-				await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
-				return;
-			}
+			if (result === 'exists') return;
 			setJoinSuccess(true);
-			bumpCourseWaitingListCount(queryClient, course.slug, 1);
 			onSuccess?.('Dołączono do listy oczekujących. Powiadomimy Cię o nowym terminie.');
-			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
 		},
-		onError: (err: Error) => onError?.(err.message),
-	});
-
-	const leaveWaitlist = useMutation({
-		mutationFn: async () => {
-			if (!uid) throw new Error('Zaloguj się.');
-			await removeFromWaitingList(course.id, uid);
-		},
-		onSuccess: async () => {
+		onLeft: () => {
 			setConfirmAction(null);
 			setJoinSuccess(false);
-			bumpCourseWaitingListCount(queryClient, course.slug, -1);
 			onSuccess?.('Opuszczono listę oczekujących.');
-			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
 		},
-		onError: (err: Error) => onError?.(err.message),
 	});
 
-	const pending = joinWaitlist.isPending || leaveWaitlist.isPending;
+	const pending = waitlist.isPending;
 
 	const dialog =
 		confirmAction === 'join' ? (
@@ -258,7 +198,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 				confirmColor='primary'
 				loading={pending}
 				onCancel={() => setConfirmAction(null)}
-				onConfirm={() => joinWaitlist.mutate()}
+				onConfirm={() => waitlist.join()}
 			>
 				{`Czy na pewno chcesz dołączyć do listy oczekujących na „${course.name}”? Powiadomimy Cię e-mailem, gdy pojawi się nowy termin.`}
 			</ConfirmDialog>
@@ -270,7 +210,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 				confirmLabel='Opuść listę'
 				loading={pending}
 				onCancel={() => setConfirmAction(null)}
-				onConfirm={() => leaveWaitlist.mutate()}
+				onConfirm={() => waitlist.leave()}
 			>
 				{`Czy na pewno chcesz opuścić listę oczekujących na „${course.name}”?`}
 			</ConfirmDialog>
@@ -288,7 +228,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 			</Typography>
 		) : null;
 
-	if (!user) {
+	if (!waitlist.user) {
 		return (
 			<>
 				<GuestWaitingListForm course={course} onError={onError} onSuccess={onSuccess} />
@@ -297,7 +237,7 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 		);
 	}
 
-	if (onWaitingList || joinSuccess) {
+	if (waitlist.isJoined || joinSuccess) {
 		return (
 			<>
 				<Stack spacing={0.5}>

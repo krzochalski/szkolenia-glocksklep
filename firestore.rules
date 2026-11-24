@@ -156,6 +156,20 @@ service cloud.firestore {
                && request.resource.data.consentAt.size() >= 10;
       }
 
+      function waitingListPhoneOk() {
+        return !('phoneNumber' in request.resource.data)
+               || (request.resource.data.phoneNumber is string
+                   && request.resource.data.phoneNumber.size() <= 40);
+      }
+
+      // Deterministic auth id: `${courseId}_${uid}`. Allows get when resource
+      // is null (existence probe) — rules that only read resource.data deny.
+      function isOwnAuthWaitingListDocId() {
+        return isAuthenticated()
+               && entryId.matches('^.+_' + request.auth.uid + '$')
+               && !entryId.matches('^.+_guest_.+$');
+      }
+
       // Clients must not set lastNotifiedTermId (Admin SDK / Cloud Functions only).
       function guestWaitingListCreate() {
         return request.resource.data.keys().hasOnly([
@@ -163,6 +177,8 @@ service cloud.firestore {
                  'userName', 'email', 'createdAt', 'guest', 'consentAt'
                ])
                && request.resource.data.guest == true
+               && entryId == request.resource.data.courseId + '_guest_'
+                            + request.resource.data.email
                && request.resource.data.courseId is string
                && request.resource.data.courseName is string
                && request.resource.data.courseSlug is string
@@ -175,17 +191,27 @@ service cloud.firestore {
       function authWaitingListCreate() {
         return isAuthenticated()
                && request.resource.data.userId == request.auth.uid
-               && request.resource.data.keys().hasAll([
+               && entryId == request.resource.data.courseId + '_' + request.auth.uid
+               && request.resource.data.keys().hasOnly([
                     'courseId', 'courseName', 'courseSlug', 'userId',
-                    'userName', 'email', 'createdAt', 'consentAt'
+                    'userName', 'email', 'createdAt', 'consentAt', 'phoneNumber'
                   ])
-               && !('guest' in request.resource.data)
-               && !('lastNotifiedTermId' in request.resource.data)
+               && request.resource.data.courseId is string
+               && request.resource.data.courseName is string
+               && request.resource.data.courseSlug is string
+               && request.resource.data.userName is string
+               && request.resource.data.createdAt is string
+               && waitingListPhoneOk()
+               && waitingListEmailOk()
                && waitingListConsentOk();
       }
 
-      allow get: if isAuthenticated() &&
-                   (resource.data.userId == request.auth.uid || isAdmin());
+      // resource == null: allow owner existence checks on deterministic auth ids.
+      allow get: if isAdmin()
+                   || (isAuthenticated()
+                       && resource != null
+                       && resource.data.userId == request.auth.uid)
+                   || (resource == null && isOwnAuthWaitingListDocId());
       allow list: if isAdmin() ||
                     (isAuthenticated() && resource.data.userId == request.auth.uid);
       allow create: if authWaitingListCreate() || guestWaitingListCreate();

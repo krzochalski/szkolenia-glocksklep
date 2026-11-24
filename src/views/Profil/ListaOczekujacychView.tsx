@@ -2,12 +2,8 @@
 
 import { Paths } from '@constants/paths';
 import { useAuthUser } from '@hooks';
-import {
-	getUserWaitingListEntries,
-	removeFromWaitingList,
-} from '@services/courseWaitingList';
-import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
-import { fillPath } from '@/utils/paths';
+import { getUserWaitingListEntries, removeFromWaitingList } from '@services/courseWaitingList';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
 	Box,
 	Button,
@@ -20,14 +16,17 @@ import {
 	StaggerItem,
 	Typography,
 } from '@ui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import type { CourseWaitingListEntry } from '@/types/courseWaitingList';
+import { fillPath } from '@/utils/paths';
+import { mapWaitlistError, WAITLIST_LEAVE_ERROR } from '@/utils/waitlistErrors';
 
 export const ListaOczekujacychView = () => {
 	const user = useAuthUser();
 	const queryClient = useQueryClient();
 	const [toRemove, setToRemove] = useState<CourseWaitingListEntry | null>(null);
+	const [removeError, setRemoveError] = useState<string | null>(null);
 
 	const uid = user?.uid;
 
@@ -39,7 +38,6 @@ export const ListaOczekujacychView = () => {
 		},
 		enabled: Boolean(uid),
 	});
-
 	const remove = useMutation({
 		mutationFn: (courseId: string) => {
 			if (!uid) throw new Error('Brak użytkownika.');
@@ -47,7 +45,11 @@ export const ListaOczekujacychView = () => {
 		},
 		onSuccess: async () => {
 			setToRemove(null);
+			setRemoveError(null);
 			await queryClient.invalidateQueries({ queryKey: ['waitingList', uid] });
+		},
+		onError: (err: unknown) => {
+			setRemoveError(mapWaitlistError(err, WAITLIST_LEAVE_ERROR));
 		},
 	});
 
@@ -64,6 +66,11 @@ export const ListaOczekujacychView = () => {
 					<Typography variant='h5' component='h1' gutterBottom>
 						Lista oczekujących
 					</Typography>
+					{removeError ? (
+						<Typography color='error' sx={{ mb: 2, fontSize: '0.875rem' }}>
+							{removeError}
+						</Typography>
+					) : null}
 					<ContentSwap state={listState}>
 						{entries.length === 0 ? (
 							<Typography color='text.secondary'>
@@ -82,7 +89,11 @@ export const ListaOczekujacychView = () => {
 											>
 												{entry.courseName}
 											</Link>
-											<Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+											<Typography
+												variant='caption'
+												color='text.secondary'
+												sx={{ display: 'block' }}
+											>
 												Dodano: {new Date(entry.createdAt).toLocaleString('pl-PL')}
 											</Typography>
 											<Button
@@ -108,7 +119,10 @@ export const ListaOczekujacychView = () => {
 						cancelLabel='Anuluj'
 						confirmLabel='Usuń'
 						loading={remove.isPending}
-						onCancel={() => setToRemove(null)}
+						onCancel={() => {
+							setToRemove(null);
+							setRemoveError(null);
+						}}
 						onConfirm={() => {
 							if (toRemove) remove.mutate(toRemove.courseId);
 						}}
