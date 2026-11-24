@@ -226,6 +226,7 @@ service cloud.firestore {
 
     // Enrollment mutates dates only via Admin SDK (Cloud Functions).
     // participants[].proforma is Functions-owned (claim/sent/failed/replaced);
+    // participants[].fakturownia / fiscalStatus / receiptEmail — Functions + admin fiscal UI;
     // participants[].documentType + invoice* set by /api/enroll or admin enroll;
     // priceSnapshot / priceHistory / priceChanges via /api/adjust-participant-price.
     // Non-admins cannot write courses at all, so they cannot forge price/proforma fields.

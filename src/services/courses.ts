@@ -214,6 +214,42 @@ export const unenrollFromCourse = async (
 	}
 };
 
+export type ParticipantFiscalPrintPatch = {
+	fiscalStatus: 'pending' | 'printing' | 'printed' | 'failed';
+	fiscalPrintedAt: string | null;
+	fiscalError: string | null;
+	printAttempts: number;
+};
+
+export const updateParticipantFiscalPrintState = async (
+	courseId: string,
+	dateId: string,
+	participantId: string,
+	patch: ParticipantFiscalPrintPatch
+): Promise<void> => {
+	const snap = await getDoc(doc(db, 'courses', courseId));
+	if (!snap.exists()) throw new Error('Kurs nie istnieje.');
+	const course = { id: snap.id, ...snap.data() } as Course;
+	const dates = (course.dates ?? []).map((d) => {
+		if (d.id !== dateId && d.date !== dateId) return d;
+		return {
+			...d,
+			participants: (d.participants ?? []).map((p) =>
+				p.id === participantId
+					? {
+							...p,
+							fiscalStatus: patch.fiscalStatus,
+							fiscalPrintedAt: patch.fiscalPrintedAt,
+							fiscalError: patch.fiscalError,
+							printAttempts: patch.printAttempts,
+						}
+					: p
+			),
+		};
+	});
+	await updateDoc(doc(db, 'courses', courseId), { dates });
+};
+
 export const toggleParticipantPaid = async (
 	courseId: string,
 	dateId: string,

@@ -28,6 +28,12 @@ export const cleanDateForFirestore = (d: CourseClass): Record<string, unknown> =
 			if (p.invoiceNip) cp.invoiceNip = p.invoiceNip;
 			if (p.invoiceCompanyName) cp.invoiceCompanyName = p.invoiceCompanyName;
 			if (p.invoiceCompanyAddress) cp.invoiceCompanyAddress = p.invoiceCompanyAddress;
+			if (p.fakturownia) cp.fakturownia = p.fakturownia;
+			if (p.fiscalStatus) cp.fiscalStatus = p.fiscalStatus;
+			if (p.fiscalPrintedAt) cp.fiscalPrintedAt = p.fiscalPrintedAt;
+			if (p.fiscalError) cp.fiscalError = p.fiscalError;
+			if (p.printAttempts != null) cp.printAttempts = p.printAttempts;
+			if (p.receiptEmail) cp.receiptEmail = p.receiptEmail;
 			return cp;
 		}),
 	};

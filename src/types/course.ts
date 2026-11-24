@@ -103,7 +103,38 @@ export interface Participant {
 	invoiceNip?: string;
 	invoiceCompanyName?: string;
 	invoiceCompanyAddress?: string;
+	/** Fakturownia paragon after payment (Cloud Functions). */
+	fakturownia?: ParticipantFakturowniaReceipt;
+	fiscalStatus?: FiscalStatus | null;
+	fiscalPrintedAt?: string | null;
+	fiscalError?: string | null;
+	printAttempts?: number;
+	receiptEmail?: ParticipantReceiptEmailState;
 }
+
+/** Fakturownia receipt metadata (mirrors shop `OrderFakturowniaReceipt`). */
+export type ParticipantFakturowniaReceipt = {
+	receiptId: number;
+	number: string | null;
+	viewUrl: string | null;
+	createdAt: string;
+};
+
+export type FiscalStatus = 'pending' | 'printing' | 'printed' | 'failed';
+
+export const FISCAL_STATUSES: FiscalStatus[] = ['pending', 'printing', 'printed', 'failed'];
+
+export const FISCAL_STATUS_LABELS: Record<FiscalStatus, string> = {
+	pending: 'Do druku',
+	printing: 'Drukowanie…',
+	printed: 'Wydrukowano',
+	failed: 'Błąd druku',
+};
+
+export type ParticipantReceiptEmailState = {
+	sentAt?: string;
+	error?: string;
+};
 
 /** Catalog offer type: full course vs practice/training session. */
 export type CourseKind = 'course' | 'practice';

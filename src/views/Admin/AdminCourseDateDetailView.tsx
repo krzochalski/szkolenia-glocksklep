@@ -1,12 +1,13 @@
 'use client';
 
-import { Paths } from '@constants/paths';
+import { adminCourseDateParticipantParagonPath, Paths } from '@constants/paths';
 import {
 	adminGetUserCourseCompletions,
 	adminRemoveCourseCompletion,
 	adminSetCourseCompletion,
 } from '@services/courseCompletions';
 import { getCourseDescriptionBySlug } from '@services/courseDescriptions';
+import { createFakturowniaReceiptForRegistration } from '@services/invoicingApi';
 import {
 	adminResendProforma,
 	getCourse,
@@ -60,6 +61,8 @@ import {
 import { fillPath } from '@/utils/paths';
 import { bruttoFromNetto, effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
+import { prepareExternalTab } from '@/utils/externalTab';
+import { redirectAfterFakturowniaCreate } from '@/utils/fiscalPrint';
 import { salesDocumentLabel } from '@/utils/salesDocument';
 import {
 	SESSION_STATUS_LABEL,
@@ -320,6 +323,41 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 			setProformaMsg({
 				severity: 'error',
 				text: err.message || 'Nie udało się wysłać proformy.',
+			});
+		},
+	});
+
+	const issueParagon = useMutation({
+		mutationFn: async (participantId: string) => {
+			const tab = prepareExternalTab();
+			const result = await createFakturowniaReceiptForRegistration({
+				courseId,
+				dateId,
+				participantId,
+			});
+			const viewUrl = result.receipt.viewUrl;
+			if (viewUrl && tab) tab.navigate(viewUrl);
+			return { participantId, alreadyExists: result.alreadyExists };
+		},
+		onSuccess: async ({ participantId, alreadyExists }) => {
+			await invalidate();
+			setProformaMsg({
+				severity: 'success',
+				text: alreadyExists
+					? 'Paragon już istnieje w Fakturowni.'
+					: 'Paragon wystawiony w Fakturowni.',
+			});
+			redirectAfterFakturowniaCreate(
+				(href) => router.push(href),
+				courseId,
+				dateId,
+				participantId
+			);
+		},
+		onError: (err: Error) => {
+			setProformaMsg({
+				severity: 'error',
+				text: err.message || 'Nie udało się wystawić paragonu.',
 			});
 		},
 	});
@@ -642,6 +680,49 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 											>
 												Wyślij ponownie proformę
 											</Button>
+										) : null}
+										{p.documentType !== 'invoice' && p.paid && payable > 0 ? (
+											p.fakturownia?.receiptId ? (
+												<>
+													<Button
+														size='small'
+														variant='outlined'
+														component={NextLink}
+														href={adminCourseDateParticipantParagonPath(
+															courseId,
+															dateId,
+															p.id
+														)}
+													>
+														Druk paragonu
+													</Button>
+													{p.fakturownia.viewUrl ? (
+														<Button
+															size='small'
+															variant='text'
+															component='a'
+															href={p.fakturownia.viewUrl}
+															target='_blank'
+															rel='noopener noreferrer'
+														>
+															Fakturownia
+															{p.fakturownia.number ? ` (${p.fakturownia.number})` : ''}
+														</Button>
+													) : null}
+												</>
+											) : (
+												<Button
+													size='small'
+													variant='outlined'
+													disabled={issueParagon.isPending}
+													onClick={() => {
+														setProformaMsg(null);
+														issueParagon.mutate(p.id);
+													}}
+												>
+													Wystaw paragon
+												</Button>
+											)
 										) : null}
 										<FormControlLabel
 											control={

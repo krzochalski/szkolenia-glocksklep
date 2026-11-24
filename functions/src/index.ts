@@ -38,6 +38,20 @@ import {
 	waitlistTermNotifyBodySchema,
 } from './waitlistTermNotify';
 import {
+	AdminAuthError,
+	createReceiptForRegistration,
+	FakturowniaApiError,
+	FakturowniaConfigError,
+	RegistrationNotFoundError,
+	requireAdmin,
+} from './invoicing/fakturownia';
+import { findParticipantsNewlyPaid } from './invoicing/detectPaidTransitions';
+import {
+	sendParticipantReceiptMail,
+	updateParticipantReceiptEmail,
+} from './invoicing/receiptMail';
+import { issueSalesDocumentAfterPayment } from './invoicing/issueSalesDocument';
+import {
 	unsubscribeWaitlistByToken,
 	waitlistUnsubscribeBodySchema,
 } from './waitlistUnsubscribe';
@@ -508,6 +522,78 @@ app.post(['/api/delete-user', '/delete-user'], async (req, res) => {
 	}
 });
 
+const fakturowniaReceiptBodySchema = z.object({
+	courseId: z.string().min(1),
+	dateId: z.string().min(1),
+	participantId: z.string().min(1),
+});
+
+/** Admin: create Fakturownia receipt (paragon) for a course registration; idempotent. */
+app.post(
+	[
+		'/api/admin/registrations/fakturownia-receipt',
+		'/admin/registrations/fakturownia-receipt',
+	],
+	async (req, res) => {
+		res.set('Cache-Control', 'no-store');
+		try {
+			const db = getFirestore();
+			await requireAdmin(req, getAuth(), db);
+			const body = fakturowniaReceiptBodySchema.parse(req.body);
+			const result = await createReceiptForRegistration(db, body);
+			if (!result.alreadyExists) {
+				const courseSnap = await db.collection('courses').doc(body.courseId).get();
+				const course = courseSnap.data() as { name?: string; dates?: Array<{ id?: string; date?: string; participants?: Array<{ id?: string; email?: string }> }> };
+				const date = (course?.dates ?? []).find(
+					(d) => d.id === body.dateId || d.date === body.dateId
+				);
+				const participant = (date?.participants ?? []).find((p) => p.id === body.participantId);
+				const email = participant?.email?.trim();
+				if (email && result.receipt.viewUrl) {
+					const mail = await sendParticipantReceiptMail({
+						to: email,
+						courseName: course?.name?.trim() || 'Szkolenie',
+						classDateYmd: date?.date ?? '',
+						receipt: result.receipt,
+					});
+					await updateParticipantReceiptEmail(db, {
+						...body,
+						sent: mail.sent,
+						error: mail.reason,
+					});
+				}
+			}
+			if (result.alreadyExists) {
+				res.status(409).json({
+					error: 'Paragon już istnieje w Fakturowni',
+					receipt: result.receipt,
+				});
+				return;
+			}
+			res.status(201).json({ receipt: result.receipt });
+		} catch (err) {
+			console.error(err);
+			if (err instanceof ZodError) {
+				res.status(400).json({ error: 'Nieprawidłowe dane.' });
+				return;
+			}
+			if (
+				err instanceof AdminAuthError ||
+				err instanceof RegistrationNotFoundError ||
+				err instanceof FakturowniaConfigError ||
+				err instanceof FakturowniaApiError
+			) {
+				res.status(err.status).json({
+					error: err.message,
+					...('details' in err && err.details != null ? { details: err.details } : {}),
+				});
+				return;
+			}
+			res.status(500).json({ error: 'Nie udało się wystawić paragonu.' });
+		}
+	}
+);
+
 app.post(['/api/bootstrap', '/bootstrap'], async (req, res) => {
 	try {
 		const result = await runBootstrap(getFirestore(), req.body);
@@ -597,6 +683,50 @@ export const onCourseUpdatedWaitlistNotify = onDocumentUpdated(
 			before: before as Parameters<typeof autoNotifyWaitlistOnCourseUpdate>[1]['before'],
 			after: after as Parameters<typeof autoNotifyWaitlistOnCourseUpdate>[1]['after'],
 		});
+	}
+);
+
+/** Auto-issue Fakturownia paragon when admin marks participant paid (documentType receipt). */
+export const onCourseUpdatedIssueReceipt = onDocumentUpdated(
+	{
+		document: 'courses/{courseId}',
+		region: 'europe-west1',
+		memory: '512MiB',
+		timeoutSeconds: 120,
+	},
+	async (event) => {
+		const before = event.data?.before.data() as
+			| Parameters<typeof findParticipantsNewlyPaid>[0]
+			| undefined;
+		const after = event.data?.after.data() as Parameters<typeof findParticipantsNewlyPaid>[1];
+		if (!after) return;
+		const courseId = event.params.courseId;
+		const db = getFirestore();
+		const transitions = findParticipantsNewlyPaid(before, after);
+		if (transitions.length === 0) return;
+
+		const courseSnap = await db.collection('courses').doc(courseId).get();
+		const course = courseSnap.data() as {
+			dates?: Array<{
+				id?: string;
+				date?: string;
+				participants?: Array<{ id?: string; documentType?: string }>;
+			}>;
+		};
+
+		for (const t of transitions) {
+			const date = (course?.dates ?? []).find((d) => d.id === t.dateId || d.date === t.dateId);
+			const participant = (date?.participants ?? []).find((p) => p.id === t.participantId);
+			const documentType = participant?.documentType === 'invoice' ? 'invoice' : 'receipt';
+			await issueSalesDocumentAfterPayment({
+				db,
+				courseId,
+				dateId: t.dateId,
+				participantId: t.participantId,
+				documentType,
+				paid: true,
+			});
+		}
 	}
 );
 

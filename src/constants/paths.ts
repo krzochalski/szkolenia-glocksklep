@@ -38,6 +38,8 @@ export const Paths = {
 	adminEnrollmentEmail: '/admin/enrollment-email',
 	adminContactRequests: '/admin/contact-requests',
 	adminBillingData: '/admin/billing-data',
+	adminCourseDateParticipantParagon:
+		'/admin/courses/$courseId/dates/$dateId/participants/$participantId/paragon',
 	profil: '/profil',
 	mojeShkolenia: '/profil/moje-szkolenia',
 	harmonogram: '/profil/harmonogram',
@@ -54,3 +56,12 @@ export const Paths = {
 	politykaPrywatnosci: '/polityka-prywatnosci',
 	politykaCookies: '/polityka-cookies',
 };
+
+import { fillPath } from '@/utils/paths';
+
+export const adminCourseDateParticipantParagonPath = (
+	courseId: string,
+	dateId: string,
+	participantId: string
+): string =>
+	fillPath(Paths.adminCourseDateParticipantParagon, { courseId, dateId, participantId });

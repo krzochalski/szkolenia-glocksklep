@@ -16,6 +16,7 @@ describe('firestore rules — courses / proforma / priceChanges', () => {
 			'utf8'
 		);
 		expect(rules).toContain('participants[].proforma is Functions-owned');
+		expect(rules).toContain('participants[].fakturownia');
 		expect(rules).toMatch(/match \/courses\/\{courseId\}/);
 		expect(rules).toMatch(/allow create, update, delete: if isAdmin\(\);/);
 	});
