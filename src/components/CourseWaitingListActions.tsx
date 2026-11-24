@@ -18,6 +18,7 @@ import {
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { publicTouchTargetSx } from '@/components/publicResponsive';
 import type { Course } from '@/types/course';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { type GuestWaitingListFormValues, guestWaitingListSchema } from '@/utils/schemas';
@@ -102,7 +103,7 @@ const GuestWaitingListForm = ({ course, onError, onSuccess }: Props) => {
 			spacing={1.5}
 			onSubmit={handleSubmit(onSubmit)}
 			noValidate
-			sx={{ maxWidth: 420 }}
+			sx={{ maxWidth: 420, width: '100%', minWidth: 0 }}
 		>
 			{localError ? (
 				<Typography color='error' sx={{ fontSize: '0.875rem' }}>
@@ -147,7 +148,7 @@ const GuestWaitingListForm = ({ course, onError, onSuccess }: Props) => {
 					{errors.consent.message}
 				</Typography>
 			) : null}
-			<Button type='submit' variant='contained' disabled={isSubmitting}>
+			<Button type='submit' variant='contained' disabled={isSubmitting} sx={publicTouchTargetSx}>
 				Zapisz na listę oczekujących
 			</Button>
 			<Typography variant='body2' color='text.secondary'>
@@ -250,9 +251,10 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 					<Button
 						variant='outlined'
 						color='inherit'
-						size='small'
 						disabled={pending}
 						onClick={() => setConfirmAction('leave')}
+						sx={publicTouchTargetSx}
+						fullWidth
 					>
 						Opuść listę
 					</Button>
@@ -268,6 +270,8 @@ export const CourseWaitingListActions = ({ course, onError, onSuccess }: Props) 
 				variant='contained'
 				disabled={pending || eligibility.loading}
 				onClick={() => setConfirmAction('join')}
+				sx={publicTouchTargetSx}
+				fullWidth
 			>
 				Dołącz do listy oczekujących
 			</Button>

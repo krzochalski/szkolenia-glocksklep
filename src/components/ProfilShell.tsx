@@ -27,36 +27,42 @@ import { withRedirectQuery } from '@/utils/paths';
 const NAV = [
 	{
 		label: 'Profil',
+		shortLabel: 'Profil',
 		href: Paths.profil,
 		exact: true,
 		icon: PersonOutlined,
 	},
 	{
 		label: 'Moje szkolenia',
+		shortLabel: 'Szkolenia',
 		href: Paths.mojeShkolenia,
 		exact: false,
 		icon: EventAvailableIcon,
 	},
 	{
 		label: 'Ścieżka',
+		shortLabel: 'Ścieżka',
 		href: Paths.profilSciezkaRozwoju,
 		exact: true,
 		icon: MilitaryTechIcon,
 	},
 	{
 		label: 'Po szkoleniu',
+		shortLabel: 'Po kursie',
 		href: Paths.profilDebriefing,
 		exact: false,
 		icon: FitnessCenter,
 	},
 	{
 		label: 'Harmonogram',
+		shortLabel: 'Terminy',
 		href: Paths.harmonogram,
 		exact: false,
 		icon: CalendarMonthIcon,
 	},
 	{
 		label: 'Lista oczekujących',
+		shortLabel: 'Oczekiwanie',
 		href: Paths.listaOczekujacych,
 		exact: true,
 		icon: HowToRegIcon,
@@ -100,6 +106,7 @@ export const ProfilShell = ({ children }: ProfilShellProps) => {
 		return {
 			href: item.href,
 			label: item.label,
+			shortLabel: item.shortLabel,
 			active: isNavActive(pathname, item),
 			icon: <Icon />,
 		};

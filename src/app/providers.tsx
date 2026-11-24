@@ -17,7 +17,7 @@ import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect } from 'react';
 import { CookieConsent, getCookieConsentValue } from 'react-cookie-consent';
-import { PriceModeProvider, useAppFreshness } from '@/hooks';
+import { PriceModeProvider, useAppFreshness, usePhoneLayout } from '@/hooks';
 import { initPwaInstallCapture, registerPwaServiceWorker } from '@/utils/pwaInstallPrompt';
 
 const pagePath = (pathname: string): string => {
@@ -77,6 +77,69 @@ const AppFreshnessBanners = () => {
 	);
 };
 
+const isProfilPath = (pathname: string | null) =>
+	pathname === Paths.profil || Boolean(pathname?.startsWith(`${Paths.profil}/`));
+
+const CookieConsentBar = ({ onPathAccepted }: { readonly onPathAccepted: () => void }) => {
+	const pathname = usePathname();
+	const phone = usePhoneLayout();
+	const liftAboveProfilNav = phone && isProfilPath(pathname);
+
+	return (
+		<CookieConsent
+			buttonStyle={{
+				color: brand.accentDark,
+				background: 'transparent',
+				fontSize: '1rem',
+				border: `2px solid ${brand.accentDark}`,
+				height: '3rem',
+				minHeight: '48px',
+				padding: '0 2rem',
+			}}
+			buttonText='Spoko'
+			declineButtonText='Odrzuć'
+			enableDeclineButton
+			declineButtonStyle={{
+				color: brand.ink,
+				background: 'transparent',
+				fontSize: '1rem',
+				border: `2px solid ${brand.borderMuted}`,
+				height: '3rem',
+				minHeight: '48px',
+				padding: '0 1.5rem',
+				marginRight: '0.75rem',
+			}}
+			cookieName={COOKIES_CONSENT_COOKIE}
+			expires={150}
+			location='bottom'
+			onAccept={onPathAccepted}
+			onDecline={() => {
+				void disableAnalytics();
+			}}
+			style={{
+				color: brand.ink,
+				background: brand.paper,
+				borderTop: `2px solid ${brand.borderMuted}`,
+				padding: 0,
+				paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+				marginBottom: liftAboveProfilNav ? 56 : 0,
+				fontWeight: 'bold',
+			}}
+		>
+			Ta strona używa cookies, w tym analitycznych (Firebase Analytics) po akceptacji. Możesz
+			zaakceptować albo odrzucić — wybór zapisujemy w cookie, żeby nie pytać przy każdej wizycie.
+			Szczegóły:{' '}
+			<NextLink
+				href={Paths.politykaCookies}
+				style={{ color: brand.accentDark, textDecoration: 'underline' }}
+			>
+				polityka cookies
+			</NextLink>
+			.
+		</CookieConsent>
+	);
+};
+
 export const AppProviders = ({ children }: { readonly children: ReactNode }) => {
 	const pathname = usePathname();
 
@@ -102,58 +165,7 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 					<QueryClientProvider client={queryClient}>
 						{children}
 						<AppFreshnessBanners />
-						<CookieConsent
-							buttonStyle={{
-								color: brand.accentDark,
-								background: 'transparent',
-								fontSize: '1rem',
-								border: `2px solid ${brand.accentDark}`,
-								height: '3rem',
-								minHeight: '48px',
-								padding: '0 2rem',
-							}}
-							buttonText='Spoko'
-							declineButtonText='Odrzuć'
-							enableDeclineButton
-							declineButtonStyle={{
-								color: brand.ink,
-								background: 'transparent',
-								fontSize: '1rem',
-								border: `2px solid ${brand.borderMuted}`,
-								height: '3rem',
-								minHeight: '48px',
-								padding: '0 1.5rem',
-								marginRight: '0.75rem',
-							}}
-							cookieName={COOKIES_CONSENT_COOKIE}
-							expires={150}
-							location='bottom'
-							onAccept={() => {
-								startAnalyticsForPath(pathname);
-							}}
-							onDecline={() => {
-								void disableAnalytics();
-							}}
-							style={{
-								color: brand.ink,
-								background: brand.paper,
-								borderTop: `2px solid ${brand.borderMuted}`,
-								padding: 0,
-								paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-								fontWeight: 'bold',
-							}}
-						>
-							Ta strona używa cookies, w tym analitycznych (Firebase Analytics) po akceptacji.
-							Możesz zaakceptować albo odrzucić — wybór zapisujemy w cookie, żeby nie pytać przy
-							każdej wizycie. Szczegóły:{' '}
-							<NextLink
-								href={Paths.politykaCookies}
-								style={{ color: brand.accentDark, textDecoration: 'underline' }}
-							>
-								polityka cookies
-							</NextLink>
-							.
-						</CookieConsent>
+						<CookieConsentBar onPathAccepted={() => startAnalyticsForPath(pathname)} />
 					</QueryClientProvider>
 				</PriceModeProvider>
 			</UiProvider>

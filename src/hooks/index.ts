@@ -5,5 +5,7 @@ export { useCourseEligibility } from './useCourseEligibility';
 export { useIsAdmin } from './useIsAdmin';
 export { PriceModeProvider, usePriceMode } from './usePriceMode';
 export { usePwaInstall } from './usePwaInstall';
+export { usePhoneLayout } from './usePhoneLayout';
+export { usePublicDialogProps } from './usePublicDialogProps';
 export { useSlowActionHint } from './useSlowActionHint';
 export { useWaitlist } from './useWaitlist';

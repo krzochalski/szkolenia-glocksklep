@@ -54,7 +54,7 @@ export const RegisterView = () => {
 	};
 
 	return (
-		<Box sx={{ px: 2, py: 6, maxWidth: 420, mx: 'auto' }}>
+		<Box sx={{ py: { xs: 2, sm: 6 }, maxWidth: 420, mx: 'auto', width: '100%', minWidth: 0 }}>
 			{hasEnrollment ? (
 				<AuthModeSwitch active='register' redirect={authRedirect} termin={termin} />
 			) : null}
@@ -103,10 +103,13 @@ export const RegisterView = () => {
 						<TextField
 							{...field}
 							label='Telefon'
+							type='tel'
+							autoComplete='tel'
 							fullWidth
 							required
 							error={Boolean(errors.phone)}
 							helperText={errors.phone?.message ?? 'do kontaktu w dniu szkolenia'}
+							slotProps={{ input: { inputMode: 'tel' } }}
 						/>
 					)}
 				/>

@@ -117,11 +117,13 @@ export const MarkdownContent = ({ content }: Props) => (
 			'& pre': {
 				p: 2,
 				overflow: 'auto',
+				maxWidth: '100%',
 				bgcolor: 'surface.muted',
 				border: '1px solid',
 				borderColor: 'divider',
 				mb: 2,
 			},
+			overflowWrap: 'anywhere',
 		}}
 	>
 		<ReactMarkdown

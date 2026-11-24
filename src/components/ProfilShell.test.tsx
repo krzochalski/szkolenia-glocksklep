@@ -56,10 +56,10 @@ describe('ProfilShell', () => {
 			'href',
 			'/profil/lista-oczekujacych'
 		);
-		expect(bottom.getByText('Moje szkolenia')).toBeInTheDocument();
-		expect(bottom.getByText('Lista oczekujących')).toBeInTheDocument();
-		expect(bottom.queryByText('Szkolenia')).toBeNull();
-		expect(bottom.queryByText('Oczekujące')).toBeNull();
+		expect(bottom.getByText('Szkolenia')).toBeInTheDocument();
+		expect(bottom.getByText('Oczekiwanie')).toBeInTheDocument();
+		expect(bottom.queryByText('Moje szkolenia')).toBeNull();
+		expect(bottom.queryByText('Lista oczekujących')).toBeNull();
 		expect(bottom.getByRole('link', { name: 'Profil' })).toHaveAttribute(
 			'aria-current',
 			'page'

@@ -6,9 +6,9 @@ import { getCourses } from '@services/courses';
 import { fillPath } from '@/utils/paths';
 import {
 	Box,
+	Button,
 	CircularProgress,
 	ContentSwap,
-	Link,
 	Stagger,
 	StaggerItem,
 	Typography,
@@ -65,17 +65,18 @@ export const MojeSzkoleniaView = () => {
 												dateId: date.id,
 											})}
 											action={
-												<Link
+												<Button
 													component={NextLink}
 													href={fillPath(Paths.proforma, {
 														slug: course.slug,
 														dateId: date.id,
 													})}
-													underline='hover'
-													sx={{ fontWeight: 600 }}
+													variant='outlined'
+													size='small'
+													sx={{ minHeight: 44, alignSelf: { xs: 'stretch', sm: 'center' } }}
 												>
 													Proforma
-												</Link>
+												</Button>
 											}
 										/>
 									</StaggerItem>

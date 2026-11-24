@@ -15,21 +15,25 @@ const eligibilityMock = vi.fn(() => ({
 	missingNames: [] as string[],
 }));
 
-vi.mock('@hooks', () => ({
-	useAuthUser: () => authUserMock(),
-	useCourseEligibility: () => eligibilityMock(),
-	useWaitlist: () => ({
-		user: authUserMock(),
-		uid: authUserMock()?.uid,
-		isJoined: false,
-		isLoading: false,
-		isPending: false,
-		join: vi.fn(),
-		leave: vi.fn(),
-		joinAsync: vi.fn(),
-		leaveAsync: vi.fn(),
-	}),
-}));
+vi.mock('@hooks', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@hooks')>();
+	return {
+		...actual,
+		useAuthUser: () => authUserMock(),
+		useCourseEligibility: () => eligibilityMock(),
+		useWaitlist: () => ({
+			user: authUserMock(),
+			uid: authUserMock()?.uid,
+			isJoined: false,
+			isLoading: false,
+			isPending: false,
+			join: vi.fn(),
+			leave: vi.fn(),
+			joinAsync: vi.fn(),
+			leaveAsync: vi.fn(),
+		}),
+	};
+});
 
 vi.mock('@services/courses', () => ({
 	enrollInCourse: vi.fn(),

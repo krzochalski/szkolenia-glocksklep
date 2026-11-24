@@ -318,14 +318,24 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 						</>
 					) : null}
 
-					<Stack direction='row' spacing={2} sx={{ alignItems: 'center', mt: 2 }}>
+					<Stack
+						direction={{ xs: 'column', sm: 'row' }}
+						spacing={2}
+						sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mt: 2 }}
+					>
 						<Typography>
 							Status płatności: {participant?.paid ? 'Opłacone' : 'Nieopłacone'}
 							{participant?.paysByCash ? ' (gotówka)' : ''}
 						</Typography>
-						<Link component={NextLink} href={fillPath(Paths.proforma, { slug, dateId })}>
+						<Button
+							component={NextLink}
+							href={fillPath(Paths.proforma, { slug, dateId })}
+							variant='outlined'
+							size='small'
+							sx={{ minHeight: 44, alignSelf: { xs: 'stretch', sm: 'center' } }}
+						>
 							Proforma
-						</Link>
+						</Button>
 					</Stack>
 
 					{participant ? (

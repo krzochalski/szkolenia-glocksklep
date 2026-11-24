@@ -69,7 +69,16 @@ export const AuthActionView = () => {
 	}, [continueUrl, mode, oobCode, router]);
 
 	return (
-		<Box sx={{ px: 2, py: 6, maxWidth: 480, mx: 'auto', textAlign: 'center' }}>
+		<Box
+			sx={{
+				py: { xs: 2, sm: 6 },
+				maxWidth: 480,
+				mx: 'auto',
+				width: '100%',
+				minWidth: 0,
+				textAlign: 'center',
+			}}
+		>
 			{error ? (
 				<MotionAlert show severity='error'>
 					{error}
