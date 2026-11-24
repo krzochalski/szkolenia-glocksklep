@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
 				'/reset-hasla',
 				'/auth/',
 				'/konto-utworzone',
+				'/lista-oczekujacych/',
 			],
 		},
 		sitemap: `${SITE_ORIGIN}/sitemap.xml`,
