@@ -1,6 +1,7 @@
 'use client';
 
 import { CourseDateMeta } from '@components/CourseDateMeta';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { getCourseBySlug } from '@services/courses';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Price, Typography } from '@ui';
@@ -48,6 +49,7 @@ export const AuthEnrollmentSummary = () => {
 				size='sm'
 				sx={{ mt: 1, display: 'block' }}
 			/>
+			<PaymentDocumentInfo compact sx={{ mt: 1.5 }} />
 		</Box>
 	);
 };

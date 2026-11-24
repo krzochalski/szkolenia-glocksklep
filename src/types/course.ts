@@ -44,6 +44,9 @@ export type ParticipantPriceSnapshot = {
 	finalPrice: number;
 };
 
+/** Sales document issued after payment: VAT invoice (with NIP) or receipt (paragon). */
+export type SalesDocumentType = 'invoice' | 'receipt';
+
 export type ParticipantPriceHistoryEntry = {
 	id: string;
 	oldFinalPrice: number;
@@ -91,6 +94,15 @@ export interface Participant {
 	proforma?: ParticipantProforma;
 	/** Prior proforma revisions (replaced). Cap ~20. */
 	proformaVersions?: ParticipantProforma[];
+	/**
+	 * Auto-derived at enrollment: `invoice` when `invoiceNip` provided, else `receipt`.
+	 * Written by `/api/enroll` or admin enroll.
+	 */
+	documentType?: SalesDocumentType;
+	/** Polish tax ID for company invoice (validated checksum at enroll). */
+	invoiceNip?: string;
+	invoiceCompanyName?: string;
+	invoiceCompanyAddress?: string;
 }
 
 /** Catalog offer type: full course vs practice/training session. */

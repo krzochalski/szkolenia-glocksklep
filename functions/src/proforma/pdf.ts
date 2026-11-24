@@ -45,6 +45,7 @@ export const renderProformaPdf = (invoice: BuiltProforma): Promise<Buffer> =>
 		doc.fontSize(12).fillColor(accent).text('Nabywca');
 		doc.fontSize(11).fillColor(ink);
 		doc.text(invoice.buyer.name);
+		if (invoice.buyer.address) doc.text(invoice.buyer.address);
 		if (invoice.buyer.email) doc.text(invoice.buyer.email);
 		if (invoice.buyer.phone) doc.text(invoice.buyer.phone);
 		if (invoice.buyer.nip) doc.text(`NIP: ${invoice.buyer.nip}`);

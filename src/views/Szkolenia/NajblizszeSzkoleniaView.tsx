@@ -17,6 +17,7 @@ import {
 } from '@ui';
 import { useState } from 'react';
 import { CourseDateActions } from '@/components/CourseDateActions';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { CourseDateRow } from '@/components/CourseDateRow';
 import type { Course } from '@/types/course';
 import { getFutureCourseDates } from '@/utils/courseDates';
@@ -50,6 +51,8 @@ export const NajblizszeSzkoleniaView = ({ initialCourses }: Props) => {
 					<Typography color='text.secondary' sx={{ mb: 3 }}>
 						Nadchodzące terminy — zapisz się lub dołącz do listy oczekujących, gdy brak miejsc.
 					</Typography>
+
+					<PaymentDocumentInfo sx={{ mb: 3 }} />
 
 					<Alert severity='warning' sx={{ borderRadius: 0, mb: 3 }}>
 						<AlertTitle>Sezon jesienny — kalendarz bywa rzadszy</AlertTitle>

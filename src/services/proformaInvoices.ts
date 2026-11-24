@@ -11,6 +11,7 @@ export type ProformaBuyerInfo = {
 	email?: string;
 	phone?: string;
 	nip?: string;
+	address?: string;
 	paid?: boolean;
 };
 
@@ -131,6 +132,7 @@ export const buildProformaFromBilling = (
 					email: buyer?.email,
 					phone: buyer?.phone,
 					nip: buyer?.nip,
+					address: buyer?.address,
 				}
 			: undefined,
 	};

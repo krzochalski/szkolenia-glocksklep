@@ -1,6 +1,7 @@
 'use client';
 
 import { CourseDateActions } from '@/components/CourseDateActions';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { CourseDateRow } from '@/components/CourseDateRow';
 import { CourseWaitingListSection } from '@/components/CourseLayout/CourseWaitingListSection';
 import { SectionLabel } from '@/components/CourseLayout/SectionLabel';
@@ -82,6 +83,8 @@ export const CourseDatesSection = ({ slug }: CourseDatesSectionProps) => {
 			<Typography variant='h2' sx={{ fontSize: { xs: '1.75rem', md: '2.5rem' }, mb: 2 }}>
 				Dostępne terminy
 			</Typography>
+
+			<PaymentDocumentInfo sx={{ mb: 3 }} />
 
 			<MotionAlert show={Boolean(error)} severity='error' sx={{ borderRadius: 0, mb: 3 }}>
 				{error}

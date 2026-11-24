@@ -1,6 +1,7 @@
 'use client';
 
 import { CourseDateActions } from '@/components/CourseDateActions';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { CourseDateRow } from '@/components/CourseDateRow';
 import { getCourses } from '@services/courses';
 import { getFutureCourseDates } from '@/utils/courseDates';
@@ -39,6 +40,7 @@ export const HarmonogramView = () => {
 					<Typography variant='h5' component='h1' gutterBottom>
 						Harmonogram
 					</Typography>
+					<PaymentDocumentInfo sx={{ mb: 2 }} />
 					<MotionAlert show={Boolean(error)} severity='error' sx={{ mb: 2 }}>
 						{error}
 					</MotionAlert>

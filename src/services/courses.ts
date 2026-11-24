@@ -415,6 +415,10 @@ export const adminEnrollParticipant = async (
 					name: participant.name,
 					email: participant.email,
 					phoneNumber: participant.phoneNumber,
+					documentType: participant.documentType ?? 'receipt',
+					invoiceNip: participant.invoiceNip,
+					invoiceCompanyName: participant.invoiceCompanyName,
+					invoiceCompanyAddress: participant.invoiceCompanyAddress,
 				}),
 			],
 		};

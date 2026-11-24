@@ -4,6 +4,7 @@ import {
 	DEFAULT_MIN_DECISION_DAYS_BEFORE,
 } from '@constants/courses';
 import { z } from 'zod';
+import { isValidPolishNip } from '@/utils/nip';
 
 export const loginSchema = z.object({
 	email: z.string().min(1, 'E-mail jest wymagany').email('Nieprawidłowy e-mail'),
@@ -176,3 +177,33 @@ export const guestWaitingListSchema = z.object({
 });
 
 export type GuestWaitingListFormValues = z.infer<typeof guestWaitingListSchema>;
+
+/** Optional company invoice fields on course enrollment confirm dialog. */
+export const enrollInvoiceSchema = z
+	.object({
+		wantInvoice: z.boolean(),
+		nip: z.string(),
+		companyName: z.string(),
+		companyAddress: z.string(),
+	})
+	.superRefine((data, ctx) => {
+		if (!data.wantInvoice) return;
+		const nip = data.nip.trim();
+		if (!nip) {
+			ctx.addIssue({ code: 'custom', message: 'NIP jest wymagany.', path: ['nip'] });
+		} else if (!isValidPolishNip(nip)) {
+			ctx.addIssue({ code: 'custom', message: 'Nieprawidłowy NIP.', path: ['nip'] });
+		}
+		if (!data.companyName.trim()) {
+			ctx.addIssue({ code: 'custom', message: 'Nazwa firmy jest wymagana.', path: ['companyName'] });
+		}
+		if (!data.companyAddress.trim()) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'Adres firmy jest wymagany.',
+				path: ['companyAddress'],
+			});
+		}
+	});
+
+export type EnrollInvoiceFormValues = z.infer<typeof enrollInvoiceSchema>;

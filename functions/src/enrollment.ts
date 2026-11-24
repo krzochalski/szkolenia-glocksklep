@@ -1,13 +1,40 @@
 import type { Firestore } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { getUnenrollEligibility, unenrollBlockedMessage } from './cancellationDeadline';
+import { isValidPolishNip, normalizeNip } from './nip';
+import { deriveDocumentType } from './salesDocument';
 
-const participantSchema = z.object({
-	id: z.string().min(1),
-	name: z.string().min(1),
-	email: z.string().email(),
-	phoneNumber: z.string().optional(),
-});
+const participantSchema = z
+	.object({
+		id: z.string().min(1),
+		name: z.string().min(1),
+		email: z.string().email(),
+		phoneNumber: z.string().optional(),
+		invoiceNip: z.string().optional(),
+		invoiceCompanyName: z.string().optional(),
+		invoiceCompanyAddress: z.string().optional(),
+	})
+	.superRefine((data, ctx) => {
+		const nip = data.invoiceNip?.trim();
+		if (!nip) return;
+		if (!isValidPolishNip(nip)) {
+			ctx.addIssue({ code: 'custom', message: 'Nieprawidłowy NIP.', path: ['invoiceNip'] });
+		}
+		if (!data.invoiceCompanyName?.trim()) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'Nazwa firmy jest wymagana przy fakturze.',
+				path: ['invoiceCompanyName'],
+			});
+		}
+		if (!data.invoiceCompanyAddress?.trim()) {
+			ctx.addIssue({
+				code: 'custom',
+				message: 'Adres firmy jest wymagany przy fakturze.',
+				path: ['invoiceCompanyAddress'],
+			});
+		}
+	});
 
 export const enrollBodySchema = z.object({
 	courseId: z.string().min(1),
@@ -34,6 +61,10 @@ type CourseDate = {
 		phoneNumber?: string;
 		paid?: boolean;
 		paysByCash?: boolean;
+		documentType?: string;
+		invoiceNip?: string;
+		invoiceCompanyName?: string;
+		invoiceCompanyAddress?: string;
 	}>;
 };
 
@@ -56,6 +87,25 @@ const getPrerequisiteIds = (course: CourseDoc): string[] => {
 	return course.prerequisiteCourseIds.filter(
 		(id): id is string => typeof id === 'string' && id.length > 0
 	);
+};
+
+const buildParticipantRecord = (input: z.infer<typeof participantSchema>) => {
+	const nip = input.invoiceNip?.trim();
+	const documentType = deriveDocumentType(nip);
+	return {
+		id: input.id,
+		name: input.name,
+		email: input.email,
+		...(input.phoneNumber ? { phoneNumber: input.phoneNumber } : {}),
+		documentType,
+		...(nip
+			? {
+					invoiceNip: normalizeNip(nip),
+					invoiceCompanyName: input.invoiceCompanyName!.trim(),
+					invoiceCompanyAddress: input.invoiceCompanyAddress!.trim(),
+				}
+			: {}),
+	};
 };
 
 export const enrollInCourseTx = async (
@@ -100,14 +150,7 @@ export const enrollInCourseTx = async (
 		if (participants.length >= slotsMax) {
 			throw new Error('Brak wolnych miejsc.');
 		}
-		participants.push({
-			id: input.participant.id,
-			name: input.participant.name,
-			email: input.participant.email,
-			...(input.participant.phoneNumber
-				? { phoneNumber: input.participant.phoneNumber }
-				: {}),
-		});
+		participants.push(buildParticipantRecord(input.participant));
 		dates[idx] = { ...target, participants };
 		tx.update(ref, { dates });
 	});

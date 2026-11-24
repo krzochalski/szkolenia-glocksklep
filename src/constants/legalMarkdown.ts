@@ -4,7 +4,7 @@
  * Draft for lawyer review — not a substitute for legal advice.
  */
 
-const EFFECTIVE_FROM = '23-11-2026';
+const EFFECTIVE_FROM = '24-11-2026';
 const SITE_URL = 'https://szkolenia.glocksklep.pl';
 const FIRM = 'Stay Frosty Piotr Krzoska';
 const NIP = '8291724148';
@@ -70,10 +70,10 @@ Użyte w Regulaminie pojęcia oznaczają:
 
 1. Ceny Szkolenia w systemie Serwisu są podawane w złotych polskich (PLN). W interfejsie kwota **brutto** jest prezentowana jako główna, a kwota **netto** — obok lub poniżej; podstawą rozliczenia pozostaje kwota netto. Podatek VAT wynosi zasadniczo **23%**, o ile przepisy lub oznaczenie przy danym Terminie nie stanowią inaczej. Dla konkretnego Terminu może obowiązywać cena indywidualna wskazana przy Terminie. Organizator może także ustalić lub zmienić **cenę indywidualną dla konkretnego zapisu** Uczestnika (niewidoczną na publicznej liście Terminów), podając powód widoczny dla Uczestnika; wówczas rozliczenie tego zapisu (w tym Proforma) opiera się na tej cenie. Zmiana ceny po opłaceniu nie uruchamia automatycznego zwrotu — rozliczenie nadpłaty następuje w porozumieniu z Organizatorem.
 2. Po zapisie na płatny Termin Uczestnik otrzymuje dostęp do **Proformy** z danymi sprzedawcy, rachunkiem bankowym i kwotą w sekcji „Moje szkolenia” / Proforma oraz — w miarę możliwości technicznych — wiadomość e-mail z proformą PDF i danymi do przelewu. Przy późniejszej zmianie ceny indywidualnej Organizator może wystawić **zaktualizowaną Proformę** (wcześniejsza traci ważność) i przesłać ją e-mailem. Zapisów bezpłatnych, na listę oczekujących oraz oznaczonych jako płatność gotówką nie obejmuje automatyczna proforma. Proforma jest dokumentem informacyjnym do zapłaty; status „opłacone” w Serwisie ustawia Organizator po potwierdzeniu wpływu lub uzgodnieniu gotówki.
-3. Akceptowane metody płatności: **przelew bankowy** na rachunek wskazany w Proformie oraz — za uzgodnieniem z Organizatorem — **gotówka** (oznaczenie w systemie przez Organizatora).
+3. **Preferowaną** metodą płatności jest **przelew bankowy** na rachunek wskazany w Proformie. Dodatkowo — za uzgodnieniem z Organizatorem — możliwa jest **gotówka** (oznaczenie w systemie przez Organizatora).
 4. Serwis **nie** obsługuje bramek płatności online (np. BLIK, karty, Przelewy24). Użytkownik nie opłaca Terminu w trakcie zapisu w Serwisie.
 5. Termin zapłaty wynika z Proformy i wynosi zasadniczo **do 5 dni przed** datą Terminu (data Terminu minus 5 dni), chyba że Organizator wskaże inaczej. Brak wpłaty w terminie może skutkować skreśleniem z listy Uczestników bez obowiązku świadczenia usługi, z zastrzeżeniem sekcji VIII w zakresie już dokonanych wpłat.
-6. Na życzenie Uczestnika (w tym po podaniu NIP w profilu) Organizator może wystawić fakturę zgodnie z obowiązującymi przepisami (wystawienie faktury VAT może odbywać się poza Serwisem).
+6. **Dokument sprzedaży:** przy zapisie na Termin Uczestnik może opcjonalnie podać dane firmy (NIP, nazwa, adres). Gdy poda **prawidłowy NIP**, po opłaceniu otrzyma **fakturę VAT**; w przeciwnym razie — **paragon**. Typ dokumentu jest przypisywany automatycznie przy zapisie i widoczny w Koncie Uczestnika oraz dla Organizatora. Wystawienie faktury VAT lub paragonu może odbywać się poza interfejsem Serwisu zgodnie z obowiązującymi przepisami.
 
 ## VII. Wymogi uczestnictwa w szkoleniu strzeleckim
 

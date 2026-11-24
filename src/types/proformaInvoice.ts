@@ -6,6 +6,7 @@ export type ProformaBuyer = {
 	email?: string;
 	phone?: string;
 	nip?: string;
+	address?: string;
 };
 
 /** Proforma invoice — generated on-the-fly from billing data + course info */

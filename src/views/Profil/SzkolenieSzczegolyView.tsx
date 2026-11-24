@@ -22,6 +22,8 @@ import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { CourseDateMeta } from '@/components/CourseDateMeta';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
+import { salesDocumentLabel } from '@/utils/salesDocument';
 import { CourseFacts } from '@/components/CourseFacts';
 import { ListItem } from '@/components/CourseLayout/ListItem';
 import { ModuleCard } from '@/components/CourseLayout/ModuleCard';
@@ -318,6 +320,18 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 						</>
 					) : null}
 
+					<PaymentDocumentInfo
+						documentType={participant?.documentType}
+						sx={{ mt: 3, mb: 2 }}
+					/>
+					{participant?.documentType ? (
+						<Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
+							Dokument po opłaceniu: {salesDocumentLabel(participant.documentType)}
+							{participant.invoiceCompanyName
+								? ` · ${participant.invoiceCompanyName}${participant.invoiceNip ? ` (NIP ${participant.invoiceNip})` : ''}`
+								: ''}
+						</Typography>
+					) : null}
 					<Stack direction='row' spacing={2} sx={{ alignItems: 'center', mt: 2 }}>
 						<Typography>
 							Status płatności: {participant?.paid ? 'Opłacone' : 'Nieopłacone'}

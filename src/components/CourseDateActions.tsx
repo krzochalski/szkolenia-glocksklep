@@ -12,23 +12,31 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	FormControlLabel,
 	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
+	MotionAlert,
 	Price,
 	Stack,
+	Switch,
+	TextField,
 	Typography,
 } from '@ui';
 import NextLink from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
-import type { Course, CourseClass } from '@/types/course';
+import type { Course, CourseClass, Participant } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
+import { normalizeNip } from '@/utils/nip';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
 import { bruttoFromNetto, formatPlnNettoBrutto } from '@/utils/pricing';
+import { enrollInvoiceSchema, type EnrollInvoiceFormValues } from '@/utils/schemas';
+import { deriveDocumentType } from '@/utils/salesDocument';
 
 type Props = {
 	readonly course: Course;
@@ -40,6 +48,13 @@ type Props = {
 };
 
 type ConfirmAction = 'enroll' | 'joinWaitlist' | 'leaveWaitlist';
+
+const defaultInvoiceForm: EnrollInvoiceFormValues = {
+	wantInvoice: false,
+	nip: '',
+	companyName: '',
+	companyAddress: '',
+};
 
 const ENROLL_PAYMENT_HINT =
 	'Po zapisie wyślemy potwierdzenie e-mailem. Proformę i dane do przelewu znajdziesz w Moje szkolenia.';
@@ -60,6 +75,10 @@ export const CourseDateActions = ({
 	const eligibility = useCourseEligibility(course);
 	const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 	const [authGateOpen, setAuthGateOpen] = useState(false);
+	const [invoiceForm, setInvoiceForm] = useState<EnrollInvoiceFormValues>(defaultInvoiceForm);
+	const [invoiceErrors, setInvoiceErrors] = useState<Partial<Record<keyof EnrollInvoiceFormValues, string>>>(
+		{}
+	);
 	const autoPromptedRef = useRef(false);
 
 	const courseUrl = fillPath(Paths.coursePage, { slug: course.slug });
@@ -80,6 +99,16 @@ export const CourseDateActions = ({
 			<PlaceNameLink place={date.place} />, {priceLabel}
 		</>
 	);
+
+	const resetInvoiceForm = () => {
+		setInvoiceForm(defaultInvoiceForm);
+		setInvoiceErrors({});
+	};
+
+	const closeEnrollDialog = () => {
+		setConfirmAction(null);
+		resetInvoiceForm();
+	};
 
 	useEffect(() => {
 		if (
@@ -110,24 +139,48 @@ export const CourseDateActions = ({
 	});
 	const onWaitingList = waitlist.isJoined;
 
-	const resolveParticipant = async () => {
+	const resolveParticipant = async (): Promise<Participant> => {
 		if (!user) throw new Error('Zaloguj się, aby zapisać się na szkolenie.');
 		const profile = await getUserProfile();
-		return {
+		const base: Participant = {
 			id: user.uid,
 			name: profile?.displayName || user.displayName || user.email || 'Uczestnik',
 			email: profile?.email || user.email || '',
 			phoneNumber: profile?.phoneNumber ?? user.phoneNumber ?? undefined,
 		};
+		if (!invoiceForm.wantInvoice) {
+			return { ...base, documentType: 'receipt' };
+		}
+		const nip = normalizeNip(invoiceForm.nip);
+		return {
+			...base,
+			documentType: deriveDocumentType(nip),
+			invoiceNip: nip,
+			invoiceCompanyName: invoiceForm.companyName.trim(),
+			invoiceCompanyAddress: invoiceForm.companyAddress.trim(),
+		};
 	};
 
 	const enroll = useMutation({
 		mutationFn: async () => {
+			const parsed = enrollInvoiceSchema.safeParse(invoiceForm);
+			if (!parsed.success) {
+				const fieldErrors: Partial<Record<keyof EnrollInvoiceFormValues, string>> = {};
+				for (const issue of parsed.error.issues) {
+					const key = issue.path[0];
+					if (typeof key === 'string') {
+						fieldErrors[key as keyof EnrollInvoiceFormValues] = issue.message;
+					}
+				}
+				setInvoiceErrors(fieldErrors);
+				throw new Error('Uzupełnij poprawnie dane faktury lub wyłącz sekcję „Faktura na firmę”.');
+			}
+			setInvoiceErrors({});
 			const participant = await resolveParticipant();
 			await enrollInCourse(course.id, date.id, participant);
 		},
 		onSuccess: async () => {
-			setConfirmAction(null);
+			closeEnrollDialog();
 			onSuccess?.();
 			await Promise.all([
 				invalidateCourseQueries(queryClient),
@@ -161,7 +214,7 @@ export const CourseDateActions = ({
 		confirmAction === 'enroll' ? (
 			<HardShadowDialog
 				open
-				onClose={pending ? undefined : () => setConfirmAction(null)}
+				onClose={pending ? undefined : closeEnrollDialog}
 				fullWidth
 				maxWidth='sm'
 			>
@@ -170,6 +223,58 @@ export const CourseDateActions = ({
 					<Stack spacing={1.5}>
 						<Typography sx={{ fontWeight: 600 }}>{bookingSummary}</Typography>
 						<Typography color='text.secondary'>{ENROLL_PAYMENT_HINT}</Typography>
+						<PaymentDocumentInfo compact />
+						<FormControlLabel
+							control={
+								<Switch
+									checked={invoiceForm.wantInvoice}
+									onChange={(_, checked) => {
+										setInvoiceForm((prev) => ({ ...prev, wantInvoice: checked }));
+										setInvoiceErrors({});
+									}}
+									size='small'
+								/>
+							}
+							label='Faktura na firmę (opcjonalnie)'
+						/>
+						{invoiceForm.wantInvoice ? (
+							<Stack spacing={1.5}>
+								<TextField
+									label='NIP'
+									value={invoiceForm.nip}
+									onChange={(e) => setInvoiceForm((prev) => ({ ...prev, nip: e.target.value }))}
+									error={Boolean(invoiceErrors.nip)}
+									helperText={invoiceErrors.nip}
+									slotProps={{ input: { inputMode: 'numeric' } }}
+									fullWidth
+								/>
+								<TextField
+									label='Nazwa firmy'
+									value={invoiceForm.companyName}
+									onChange={(e) =>
+										setInvoiceForm((prev) => ({ ...prev, companyName: e.target.value }))
+									}
+									error={Boolean(invoiceErrors.companyName)}
+									helperText={invoiceErrors.companyName}
+									fullWidth
+								/>
+								<TextField
+									label='Adres firmy'
+									value={invoiceForm.companyAddress}
+									onChange={(e) =>
+										setInvoiceForm((prev) => ({ ...prev, companyAddress: e.target.value }))
+									}
+									error={Boolean(invoiceErrors.companyAddress)}
+									helperText={invoiceErrors.companyAddress}
+									fullWidth
+									multiline
+									minRows={2}
+								/>
+							</Stack>
+						) : null}
+						<MotionAlert show={Boolean(enroll.error)} severity='error'>
+							{enroll.error instanceof Error ? enroll.error.message : ''}
+						</MotionAlert>
 					</Stack>
 				</DialogContent>
 				<DialogActions
@@ -186,7 +291,7 @@ export const CourseDateActions = ({
 						size='sm'
 						sx={{ mr: 'auto' }}
 					/>
-					<Button onClick={() => setConfirmAction(null)} disabled={pending} variant='outlined'>
+					<Button onClick={closeEnrollDialog} disabled={pending} variant='outlined'>
 						Anuluj
 					</Button>
 					<Button
@@ -236,10 +341,13 @@ export const CourseDateActions = ({
 		>
 			<DialogTitle sx={hardShadowDialogTitleSx}>Zapisz się na szkolenie</DialogTitle>
 			<DialogContent sx={hardShadowDialogContentSx}>
-				<Typography>
-					Żeby zająć miejsce na {bookingSummary}, zaloguj się albo załóż konto. Potem wrócisz na
-					stronę szkolenia i dokończysz zapis.
-				</Typography>
+				<Stack spacing={1.5}>
+					<Typography>
+						Żeby zająć miejsce na {bookingSummary}, zaloguj się albo załóż konto. Potem wrócisz na
+						stronę szkolenia i dokończysz zapis.
+					</Typography>
+					<PaymentDocumentInfo compact />
+				</Stack>
 			</DialogContent>
 			<DialogActions sx={hardShadowDialogActionsSx}>
 				<Button onClick={() => setAuthGateOpen(false)} variant='outlined'>

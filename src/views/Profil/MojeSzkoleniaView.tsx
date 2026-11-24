@@ -16,6 +16,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { CourseDateRow } from '@/components/CourseDateRow';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 
 export const MojeSzkoleniaView = () => {
 	const user = useAuthUser();
@@ -47,6 +48,7 @@ export const MojeSzkoleniaView = () => {
 					<Typography variant='h5' component='h1' gutterBottom>
 						Moje szkolenia
 					</Typography>
+					<PaymentDocumentInfo sx={{ mb: 3 }} />
 					<ContentSwap state={listState}>
 						{mine.length === 0 ? (
 							<Typography color='text.secondary'>

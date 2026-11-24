@@ -7,6 +7,7 @@ import { ArrowBack, Block, CheckCircle } from '@ui/icons';
 import NextLink from 'next/link';
 import { Suspense, useState } from 'react';
 import { CourseFacts, type CourseFactsMeta } from '@/components/CourseFacts';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { CourseDatesSection } from '@/components/CourseLayout/CourseDatesSection';
 import type { CourseSchemaData } from '@/components/CourseLayout/CourseLayout.types';
 import { CourseRequirementsStrip } from '@/components/CourseLayout/CourseRequirementsStrip';
@@ -193,6 +194,7 @@ export const CourseLayout = ({
 						{description}
 					</Typography>
 					{courseMeta ? <CourseFacts meta={courseMeta} /> : null}
+					{courseMeta ? <PaymentDocumentInfo compact sx={{ mt: 2 }} /> : null}
 				</Box>
 			</HardShadow>
 

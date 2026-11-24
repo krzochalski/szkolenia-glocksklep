@@ -59,6 +59,7 @@ import {
 import { fillPath } from '@/utils/paths';
 import { bruttoFromNetto, effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
+import { salesDocumentLabel } from '@/utils/salesDocument';
 import {
 	SESSION_STATUS_LABEL,
 	sessionStatusChipColor,
@@ -529,6 +530,9 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 											<Typography sx={{ fontWeight: 600 }}>{p.name}</Typography>
 											<Typography variant='body2' color='text.secondary'>
 												{p.email} {p.phoneNumber ? `· ${p.phoneNumber}` : ''}
+												{p.documentType
+													? ` · Dokument: ${salesDocumentLabel(p.documentType)}${p.invoiceNip ? ` (NIP ${p.invoiceNip})` : ''}`
+													: ''}
 											</Typography>
 											<Box sx={{ mt: 0.75, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
 												<Price

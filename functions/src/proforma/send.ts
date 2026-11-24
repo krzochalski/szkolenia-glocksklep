@@ -14,6 +14,7 @@ import {
 	type ParticipantProformaState,
 	updateParticipantProforma,
 } from './claim';
+import { resolveProformaBuyer, type SalesDocumentType, salesDocumentLabel } from '../salesDocument';
 import { sendProformaMail } from './mail';
 import { renderProformaPdf } from './pdf';
 
@@ -31,6 +32,10 @@ type CourseDate = {
 		paysByCash?: boolean;
 		customPrice?: number;
 		proforma?: ParticipantProformaState;
+		documentType?: SalesDocumentType;
+		invoiceNip?: string;
+		invoiceCompanyName?: string;
+		invoiceCompanyAddress?: string;
 	}>;
 };
 
@@ -165,6 +170,9 @@ export const sendEnrollmentProforma = async (
 		const kind: ProformaCourseKind =
 			course.kind === 'practice' ? 'practice' : 'course';
 
+		const buyer = resolveProformaBuyer(participant, user);
+		const documentType = participant.documentType ?? (buyer.nip ? 'invoice' : 'receipt');
+
 		const invoice = buildProforma({
 			kind,
 			courseName: course.name?.trim() || 'Szkolenie',
@@ -177,14 +185,9 @@ export const sendEnrollmentProforma = async (
 			amountNet,
 			billing,
 			buyer: {
-				displayName:
-					participant.name?.trim() ||
-					user.fullName?.trim() ||
-					user.displayName?.trim() ||
-					undefined,
+				...buyer,
 				email: participant.email.trim(),
 				phone: participant.phoneNumber ?? user.phoneNumber,
-				nip: user.nip?.trim() || undefined,
 			},
 			existingNumber: participant.proforma?.number,
 		});
@@ -226,10 +229,9 @@ export const sendEnrollmentProforma = async (
 						amountNet: claim.state.amountNet,
 						billing,
 						buyer: {
-							displayName: participant.name?.trim(),
+							...resolveProformaBuyer(participant, user),
 							email: participant.email.trim(),
 							phone: participant.phoneNumber ?? user.phoneNumber,
-							nip: user.nip?.trim() || undefined,
 						},
 						existingNumber: claim.state.number,
 					})
@@ -242,6 +244,7 @@ export const sendEnrollmentProforma = async (
 			invoice: activeInvoice,
 			pdf,
 			courseUrl: coursePageUrl(slug),
+			documentType,
 		});
 
 		if (!mailResult.sent) {

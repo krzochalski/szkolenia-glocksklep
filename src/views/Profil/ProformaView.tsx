@@ -22,7 +22,9 @@ import {
 } from '@ui';
 import { Download } from '@ui/icons';
 import dayjs from 'dayjs';
+import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import type { ProformaInvoice } from '@/types/proformaInvoice';
+import { resolveProformaBuyer } from '@/utils/salesDocument';
 import { downloadProformaPdf } from '@/utils/downloadProformaPdf';
 import { formatMoney } from '@/utils/pricing';
 import 'dayjs/locale/pl';
@@ -233,6 +235,12 @@ const ProformaDocument = ({
 								{invoice.buyer.phone ? (
 									<>
 										Tel: {invoice.buyer.phone}
+										<br />
+									</>
+								) : null}
+								{invoice.buyer.address ? (
+									<>
+										{invoice.buyer.address}
 										<br />
 									</>
 								) : null}
@@ -456,24 +464,19 @@ export const ProformaView = ({ slug, dateId }: Props) => {
 	}
 
 	const participant = date.participants?.find((p) => p.id === user?.uid);
-	const invoice = buildProformaFromBilling(
-		course,
-		date,
-		billing,
-		{
-			displayName:
-				participant?.name ??
-				profile?.fullName ??
-				profile?.displayName ??
-				user?.displayName ??
-				undefined,
-			email: participant?.email ?? profile?.email ?? user?.email ?? undefined,
-			phone: participant?.phoneNumber ?? profile?.phoneNumber ?? user?.phoneNumber ?? undefined,
-			nip: profile?.nip,
-			paid: participant?.paid,
-		},
-		participant
-	);
+	const buyerInfo = participant
+		? {
+				...resolveProformaBuyer(participant, profile?.nip),
+				paid: participant.paid,
+			}
+		: {
+				displayName:
+					profile?.fullName ?? profile?.displayName ?? user?.displayName ?? undefined,
+				email: profile?.email ?? user?.email ?? undefined,
+				phone: profile?.phoneNumber ?? user?.phoneNumber ?? undefined,
+				nip: profile?.nip,
+			};
+	const invoice = buildProformaFromBilling(course, date, billing, buyerInfo, participant);
 
 	const handleDownloadPdf = async () => {
 		const el = documentRef.current;
@@ -521,6 +524,10 @@ export const ProformaView = ({ slug, dateId }: Props) => {
 						{pdfError}
 					</Typography>
 				) : null}
+				<PaymentDocumentInfo
+					documentType={participant?.documentType}
+					compact
+				/>
 				<ProformaDocument invoice={invoice} exporting={exporting} documentRef={documentRef} />
 			</Stack>
 		</ContentSwap>

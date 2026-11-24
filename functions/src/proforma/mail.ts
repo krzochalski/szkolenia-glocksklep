@@ -5,8 +5,13 @@ import {
 	SITE_NAME,
 	SITE_ORIGIN,
 } from '../mail';
+import type { SalesDocumentType } from '../salesDocument';
+import { salesDocumentLabel } from '../salesDocument';
 import type { BuiltProforma } from './build';
 import { formatMoney, proformaPdfFileName } from './build';
+
+const paymentDocumentNote = (documentType?: SalesDocumentType): string =>
+	`Preferujemy przelew bankowy (dane poniżej). Po opłaceniu otrzymasz: ${salesDocumentLabel(documentType ?? 'receipt')}.`;
 
 const ink = '#191c1d';
 const paper = '#ffffff';
@@ -28,7 +33,8 @@ const sectionLabel = (label: string): string =>
 
 export const buildProformaEmailHtml = (
 	invoice: BuiltProforma,
-	courseUrl: string
+	courseUrl: string,
+	documentType?: SalesDocumentType
 ): string => {
 	const originHost = escapeHtml(SITE_ORIGIN.replace(/^https?:\/\//, ''));
 	return `<!DOCTYPE html>
@@ -59,6 +65,9 @@ export const buildProformaEmailHtml = (
               <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:${ink};">
                 Potwierdzamy zapis. W załączniku znajdziesz proformę PDF. Poniżej dane do przelewu —
                 możesz zapłacić od razu.
+              </p>
+              <p style="margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:${secondary};">
+                ${escapeHtml(paymentDocumentNote(documentType))}
               </p>
               <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:${secondary};">
                 ${escapeHtml(invoice.serviceLine)}
@@ -126,7 +135,8 @@ export const buildProformaEmailHtml = (
 
 export const buildProformaEmailText = (
 	invoice: BuiltProforma,
-	courseUrl: string
+	courseUrl: string,
+	documentType?: SalesDocumentType
 ): string =>
 	[
 		SITE_NAME,
@@ -134,6 +144,7 @@ export const buildProformaEmailText = (
 		'',
 		`Cześć ${invoice.buyer.name},`,
 		'Potwierdzamy zapis. W załączniku znajdziesz proformę PDF.',
+		paymentDocumentNote(documentType),
 		'',
 		invoice.serviceLine,
 		'',
@@ -158,13 +169,14 @@ export const sendProformaMail = async (params: {
 	invoice: BuiltProforma;
 	pdf: Buffer;
 	courseUrl: string;
+	documentType?: SalesDocumentType;
 }): Promise<{ sent: boolean; reason?: string }> => {
 	const subject = `Proforma ${params.invoice.number} — ${params.invoice.serviceName}`;
 	return sendMail({
 		to: params.to,
 		subject,
-		html: buildProformaEmailHtml(params.invoice, params.courseUrl),
-		text: buildProformaEmailText(params.invoice, params.courseUrl),
+		html: buildProformaEmailHtml(params.invoice, params.courseUrl, params.documentType),
+		text: buildProformaEmailText(params.invoice, params.courseUrl, params.documentType),
 		attachments: [
 			{
 				filename: proformaPdfFileName(params.invoice.number),

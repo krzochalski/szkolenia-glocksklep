@@ -9,6 +9,7 @@ export type ProformaBuyerInput = {
 	email?: string;
 	phone?: string;
 	nip?: string;
+	address?: string;
 };
 
 export type ProformaBillingInput = {
@@ -50,6 +51,7 @@ export type BuiltProforma = {
 		email?: string;
 		phone?: string;
 		nip?: string;
+		address?: string;
 	};
 };
 
@@ -232,6 +234,7 @@ export const buildProforma = (input: {
 		});
 	const buyerName =
 		input.buyer.displayName?.trim() || input.buyer.email?.trim() || 'Uczestnik';
+	const buyerAddress = input.buyer.address?.trim();
 	const paymentTitle = buildPaymentTitle({
 		number,
 		serviceName,
@@ -282,6 +285,7 @@ export const buildProforma = (input: {
 			email: input.buyer.email,
 			phone: input.buyer.phone,
 			nip: input.buyer.nip,
+			...(buyerAddress ? { address: buyerAddress } : {}),
 		},
 	};
 };

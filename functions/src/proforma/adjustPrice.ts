@@ -19,6 +19,7 @@ import {
 	computeManualPrice,
 	type ManualPriceAdjustmentType,
 } from './computeManualPrice';
+import { resolveProformaBuyer, type SalesDocumentType } from '../salesDocument';
 import { sendUpdatedProformaMail } from './mail';
 import { renderProformaPdf } from './pdf';
 
@@ -71,6 +72,10 @@ type ParticipantDoc = {
 	priceHistory?: Array<Record<string, unknown>>;
 	proforma?: ParticipantProformaState;
 	proformaVersions?: ParticipantProformaState[];
+	documentType?: SalesDocumentType;
+	invoiceNip?: string;
+	invoiceCompanyName?: string;
+	invoiceCompanyAddress?: string;
 };
 
 type CourseDate = {
@@ -449,14 +454,9 @@ export const adjustParticipantPrice = async (params: {
 			course.kind === 'practice' ? 'practice' : 'course';
 
 		const buyer = {
-			displayName:
-				participant.name?.trim() ||
-				user.fullName?.trim() ||
-				user.displayName?.trim() ||
-				undefined,
+			...resolveProformaBuyer(participant, user),
 			email: participant.email!.trim(),
 			phone: participant.phoneNumber ?? user.phoneNumber,
-			nip: user.nip?.trim() || undefined,
 		};
 
 		const baseNumSource =
