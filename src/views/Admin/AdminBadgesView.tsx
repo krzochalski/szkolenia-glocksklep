@@ -16,6 +16,7 @@ import {
 	Typography,
 } from '@ui';
 import { useState } from 'react';
+import { AdminPageHeader } from '@components';
 import { BadgeFormDialog } from './forms/BadgeFormDialog';
 
 export const AdminBadgesView = () => <BadgesInner />;
@@ -43,29 +44,27 @@ const BadgesInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-				<Box>
-					<Stack
-						direction='row'
-						sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
-					>
-						<Box>
-							<Typography variant='h5'>Odznaki</Typography>
-							<Typography variant='body2' color='text.secondary' sx={{ mt: 0.5 }}>
-								Własne osiągnięcia (poza ukończeniem szkoleń). Przypisujesz je użytkownikom w
-								Uczestnicy → Ukończenia. Grafiki wrzuć do{' '}
-								<code>/public/badges</code> i uruchom <code>pnpm optimize-images</code>.
-							</Typography>
-						</Box>
-						<Button
-							variant='contained'
-							onClick={() => {
-								setEditing(null);
-								setDialogOpen(true);
-							}}
-						>
-							Dodaj
-						</Button>
-					</Stack>
+				<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+					<AdminPageHeader
+						title='Odznaki'
+						actions={
+							<Button
+								variant='contained'
+								fullWidth
+								onClick={() => {
+									setEditing(null);
+									setDialogOpen(true);
+								}}
+							>
+								Dodaj
+							</Button>
+						}
+					/>
+					<Typography variant='body2' color='text.secondary' sx={{ mt: -2, mb: 3 }}>
+						Własne osiągnięcia (poza ukończeniem szkoleń). Przypisujesz je użytkownikom w
+						Uczestnicy → Ukończenia. Grafiki wrzuć do <code>/public/badges</code> i uruchom{' '}
+						<code>pnpm optimize-images</code>.
+					</Typography>
 
 					<BadgeFormDialog
 						open={dialogOpen}
@@ -86,8 +85,8 @@ const BadgesInner = () => {
 								<StaggerItem key={badge.id}>
 									<Paper variant='outlined' sx={{ p: 2 }}>
 										<Stack
-											direction='row'
-											sx={{ alignItems: 'center', gap: 2, justifyContent: 'space-between' }}
+											direction={{ xs: 'column', sm: 'row' }}
+											sx={{ alignItems: { sm: 'center' }, gap: 2, justifyContent: 'space-between' }}
 										>
 											<Stack direction='row' spacing={2} sx={{ alignItems: 'center', minWidth: 0 }}>
 												<Box
@@ -107,13 +106,21 @@ const BadgesInner = () => {
 												/>
 												<Box sx={{ minWidth: 0 }}>
 													<Typography sx={{ fontWeight: 600 }}>{badge.name}</Typography>
-													<Typography variant='body2' color='text.secondary' noWrap>
+													<Typography
+														variant='body2'
+														color='text.secondary'
+														sx={{ overflowWrap: 'anywhere' }}
+													>
 														/{badge.slug}
 														{badge.description ? ` · ${badge.description}` : ''}
 													</Typography>
 												</Box>
 											</Stack>
-											<Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
+											<Stack
+												direction={{ xs: 'column', sm: 'row' }}
+												spacing={1}
+												sx={{ flexShrink: 0, '& .MuiButton-root': { minHeight: 44 } }}
+											>
 												<Button
 													size='small'
 													variant='outlined'

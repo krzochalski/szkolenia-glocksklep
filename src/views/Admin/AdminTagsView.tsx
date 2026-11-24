@@ -16,6 +16,7 @@ import {
 } from '@ui';
 import { useState } from 'react';
 import type { Tag } from '@/types/course';
+import { AdminPageHeader } from '@components';
 import { TagFormDialog } from './forms/TagFormDialog';
 
 export const AdminTagsView = () => <TagsInner />;
@@ -43,19 +44,22 @@ const TagsInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
-				<Typography variant='h5'>Tagi</Typography>
-				<Button
-					variant='contained'
-					onClick={() => {
-						setEditing(null);
-						setDialogOpen(true);
-					}}
-				>
-					Dodaj
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='Tagi'
+				actions={
+					<Button
+						variant='contained'
+						fullWidth
+						onClick={() => {
+							setEditing(null);
+							setDialogOpen(true);
+						}}
+					>
+						Dodaj
+					</Button>
+				}
+			/>
 
 			<TagFormDialog
 				open={dialogOpen}
@@ -74,7 +78,11 @@ const TagsInner = () => {
 						<Typography variant='body2' color='text.secondary'>
 							/{tag.slug}
 						</Typography>
-						<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
+						<Stack
+							direction={{ xs: 'column', sm: 'row' }}
+							spacing={1}
+							sx={{ mt: 1, '& .MuiButton-root': { minHeight: 44 } }}
+						>
 							<Button
 								size='small'
 								variant='outlined'

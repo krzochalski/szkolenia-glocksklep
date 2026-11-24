@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	Button,
@@ -6,7 +7,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -68,7 +68,7 @@ export const AdminFaqDialog = ({
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>{title}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<Typography variant='body2' color='text.secondary'>
@@ -131,6 +131,6 @@ export const AdminFaqDialog = ({
 					{submitting ? <CircularProgress size={16} color='inherit' /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { createPlace, updatePlace } from '@services/places';
 import type { Place } from '@/types/course';
@@ -8,7 +9,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -73,7 +73,7 @@ export const PlaceFormDialog = ({ open, place, onClose, onSaved }: PlaceFormDial
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>{place ? 'Edytuj obiekt' : 'Dodaj obiekt'}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<Typography variant='body2' color='text.secondary'>
@@ -110,6 +110,6 @@ export const PlaceFormDialog = ({ open, place, onClose, onSaved }: PlaceFormDial
 					{saving ? <CircularProgress size={14} /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

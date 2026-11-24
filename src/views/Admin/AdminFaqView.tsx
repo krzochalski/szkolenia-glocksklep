@@ -14,11 +14,11 @@ import {
 	CircularProgress,
 	ConfirmDialog,
 	ContentSwap,
-	Stack,
 	Typography,
 } from '@ui';
 import { Delete } from '@ui/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AdminPageHeader } from '@components';
 import { useMemo, useState } from 'react';
 import { AdminFaqList } from './AdminFaqList';
 import {
@@ -133,22 +133,22 @@ const FaqInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack
-				direction='row'
-				sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
-			>
-				<Typography variant='h5'>FAQ</Typography>
-				<Button
-					variant='contained'
-					onClick={() => {
-						setEditing(null);
-						setDialogOpen(true);
-					}}
-				>
-					Dodaj
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='FAQ'
+				actions={
+					<Button
+						variant='contained'
+						fullWidth
+						onClick={() => {
+							setEditing(null);
+							setDialogOpen(true);
+						}}
+					>
+						Dodaj
+					</Button>
+				}
+			/>
 
 			<AdminFaqDialog
 				open={dialogOpen}

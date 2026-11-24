@@ -17,6 +17,7 @@ import {
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { adminMainPaneSx } from '@components/adminResponsive';
 import { ADMIN_NAV, type AdminNavItem, Paths } from '@constants';
 import { useAuthUser } from '@hooks';
 import { getAdminSettings, saveAdminMenuOrder, signOut } from '@services';
@@ -27,15 +28,16 @@ import {
 	ConfirmDialog,
 	IconButton,
 	Link,
+	SiteNavDrawer,
 	Stack,
 	Tooltip,
 	Typography,
 } from '@ui';
-import { DragHandle } from '@ui/icons';
+import { DragHandle, MenuIcon } from '@ui/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 
 type AdminShellProps = {
 	readonly children: ReactNode;
@@ -71,7 +73,7 @@ const SortableNavLink = ({ item, active }: SortableNavLinkProps) => {
 					{...attributes}
 					{...listeners}
 					aria-label={`Zmień kolejność: ${item.label}`}
-					sx={{ cursor: 'grab', touchAction: 'none', flexShrink: 0 }}
+					sx={{ cursor: 'grab', touchAction: 'none', flexShrink: 0, width: 44, height: 44 }}
 				>
 					<DragHandle fontSize='small' />
 				</IconButton>
@@ -83,11 +85,14 @@ const SortableNavLink = ({ item, active }: SortableNavLinkProps) => {
 				sx={{
 					flex: 1,
 					px: 1,
-					py: 1,
+					py: 1.25,
 					borderRadius: 1,
 					fontSize: '0.875rem',
 					fontWeight: active ? 700 : 500,
 					color: active ? 'primary.main' : 'text.secondary',
+					minHeight: 44,
+					display: 'flex',
+					alignItems: 'center',
 				}}
 			>
 				{item.label}
@@ -102,6 +107,12 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 	const queryClient = useQueryClient();
 	const [logoutOpen, setLogoutOpen] = useState(false);
 	const [loggingOut, setLoggingOut] = useState(false);
+	const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: close drawer after route change
+	useEffect(() => {
+		setMobileNavOpen(false);
+	}, [pathname]);
 
 	const settingsQueryKey = ['adminSettings', user?.uid] as const;
 
@@ -116,6 +127,17 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 	});
 
 	const navItems = useMemo(() => orderAdminNav(ADMIN_NAV, menuOrder), [menuOrder]);
+
+	const drawerLinks = useMemo(
+		() =>
+			navItems.map((item) => ({
+				id: item.id,
+				href: item.href,
+				label: item.label,
+				active: pathname === item.href || pathname.startsWith(`${item.href}/`),
+			})),
+		[navItems, pathname]
+	);
 
 	const persistOrder = useMutation({
 		mutationFn: saveAdminMenuOrder,
@@ -149,49 +171,110 @@ export const AdminShell = ({ children }: AdminShellProps) => {
 	};
 
 	return (
-		<Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
+		<Box
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				height: '100dvh',
+				overflow: 'hidden',
+				maxWidth: '100vw',
+			}}
+		>
 			<Box
-				component='aside'
 				sx={{
-					width: 240,
+					display: { xs: 'flex', md: 'none' },
+					alignItems: 'center',
+					justifyContent: 'space-between',
 					flexShrink: 0,
-					borderRight: 1,
-					borderColor: 'divider',
-					p: 2,
-					display: { xs: 'none', md: 'flex' },
-					flexDirection: 'column',
 					gap: 1,
+					px: 1.5,
+					py: 1,
+					borderBottom: 1,
+					borderColor: 'divider',
 					bgcolor: 'background.paper',
-					overflow: 'auto',
 				}}
 			>
-				<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
+				<Typography variant='subtitle1' sx={{ fontWeight: 700, minWidth: 0 }}>
 					Admin
 				</Typography>
-				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-					<SortableContext
-						items={navItems.map((item) => item.id)}
-						strategy={verticalListSortingStrategy}
+				<IconButton
+					aria-label='Otwórz menu admina'
+					onClick={() => setMobileNavOpen(true)}
+					sx={{ width: 44, height: 44 }}
+				>
+					<MenuIcon />
+				</IconButton>
+			</Box>
+
+			<Box sx={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
+				<Box
+					component='aside'
+					sx={{
+						width: 240,
+						flexShrink: 0,
+						borderRight: 1,
+						borderColor: 'divider',
+						p: 2,
+						display: { xs: 'none', md: 'flex' },
+						flexDirection: 'column',
+						gap: 1,
+						bgcolor: 'background.paper',
+						overflow: 'auto',
+					}}
+				>
+					<Typography variant='subtitle1' sx={{ mb: 1, fontWeight: 700 }}>
+						Admin
+					</Typography>
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCenter}
+						onDragEnd={handleDragEnd}
 					>
-						<Stack component='nav' spacing={0.5} sx={{ flex: 1 }} aria-label='Menu admina'>
-							{navItems.map((item) => {
-								const active =
-									pathname === item.href || pathname.startsWith(`${item.href}/`);
-								return <SortableNavLink key={item.id} item={item} active={active} />;
-							})}
-						</Stack>
-					</SortableContext>
-				</DndContext>
-				<Button component={NextLink} href={Paths.home} size='small' variant='outlined'>
-					Strona główna
-				</Button>
-				<Button size='small' variant='text' onClick={() => setLogoutOpen(true)}>
-					Wyloguj
-				</Button>
+						<SortableContext
+							items={navItems.map((item) => item.id)}
+							strategy={verticalListSortingStrategy}
+						>
+							<Stack component='nav' spacing={0.5} sx={{ flex: 1 }} aria-label='Menu admina'>
+								{navItems.map((item) => {
+									const active =
+										pathname === item.href || pathname.startsWith(`${item.href}/`);
+									return <SortableNavLink key={item.id} item={item} active={active} />;
+								})}
+							</Stack>
+						</SortableContext>
+					</DndContext>
+					<Button component={NextLink} href={Paths.home} size='small' variant='outlined' sx={{ minHeight: 44 }}>
+						Strona główna
+					</Button>
+					<Button size='small' variant='text' onClick={() => setLogoutOpen(true)} sx={{ minHeight: 44 }}>
+						Wyloguj
+					</Button>
+				</Box>
+				<Box component='main' sx={{ ...adminMainPaneSx, p: { xs: 2, md: 3 } }}>
+					{children}
+				</Box>
 			</Box>
-			<Box component='main' sx={{ flex: 1, p: { xs: 2, md: 3 }, overflow: 'auto' }}>
-				{children}
-			</Box>
+
+			<SiteNavDrawer
+				open={mobileNavOpen}
+				onClose={() => setMobileNavOpen(false)}
+				links={drawerLinks}
+				linkComponent={NextLink}
+				title='Admin'
+				ariaLabel='Menu admina'
+				navLabel='Sekcje panelu admina'
+				footer={
+					<Stack spacing={1} sx={{ '& .MuiButton-root': { minHeight: 44 } }}>
+						<Button component={NextLink} href={Paths.home} variant='outlined' fullWidth>
+							Strona główna
+						</Button>
+						<Button variant='text' fullWidth onClick={() => setLogoutOpen(true)}>
+							Wyloguj
+						</Button>
+					</Stack>
+				}
+			/>
+
 			<ConfirmDialog
 				open={logoutOpen}
 				title='Potwierdź wylogowanie'

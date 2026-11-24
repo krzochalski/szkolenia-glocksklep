@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { createBillingData, updateBillingData } from '@services/billingData';
 import type { BillingData } from '@/types/billingData';
@@ -11,7 +12,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -148,7 +148,7 @@ export const BillingDataFormDialog = ({
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>
 				{billingData ? 'Edytuj dane rozliczeniowe' : 'Nowy zestaw danych rozliczeniowych'}
 			</DialogTitle>
@@ -240,6 +240,6 @@ export const BillingDataFormDialog = ({
 					{saving ? <CircularProgress size={14} /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

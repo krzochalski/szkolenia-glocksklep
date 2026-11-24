@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	Box,
@@ -6,7 +7,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -48,7 +48,7 @@ export const WaitlistNotifyDialog = ({ open, target, loading, onClose, onSubmit 
 			: 'E-mail do całej listy oczekujących';
 
 	return (
-		<HardShadowDialog open={open} onClose={loading ? undefined : onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={loading ? undefined : onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>{title}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<Typography variant='body2' color='text.secondary'>
@@ -94,6 +94,6 @@ export const WaitlistNotifyDialog = ({ open, target, loading, onClose, onSubmit 
 					Dalej
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

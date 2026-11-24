@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { adminEnrollParticipant, getCourses } from '@services/courses';
 import { adminGetUsers, type UserProfile } from '@services/users';
@@ -13,7 +14,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -101,7 +101,7 @@ export const AdminEnrollDialog = ({ open, onClose, onEnrolled }: Props) => {
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={[hardShadowDialogTitleSx, { justifyContent: 'flex-start', gap: 1 }]}>
 				<PeopleIcon fontSize='small' />
 				Zapisz uczestnika
@@ -207,6 +207,6 @@ export const AdminEnrollDialog = ({ open, onClose, onEnrolled }: Props) => {
 					{submitting ? <CircularProgress size={14} /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

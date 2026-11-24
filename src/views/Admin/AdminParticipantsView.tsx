@@ -16,6 +16,7 @@ import {
 } from '@ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AdminPageHeader } from '@components';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { AdminCourseCompletionsDialog } from './forms/AdminCourseCompletionsDialog';
 import { AdminEnrollDialog } from './forms/AdminEnrollDialog';
@@ -45,16 +46,15 @@ const UsersInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack
-				direction='row'
-				sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
-			>
-				<Typography variant='h5'>Użytkownicy</Typography>
-				<Button variant='contained' onClick={() => setEnrollOpen(true)}>
-					Zapisz uczestnika
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='Użytkownicy'
+				actions={
+					<Button variant='contained' onClick={() => setEnrollOpen(true)} fullWidth>
+						Zapisz uczestnika
+					</Button>
+				}
+			/>
 
 			<AdminEnrollDialog
 				open={enrollOpen}
@@ -74,14 +74,21 @@ const UsersInner = () => {
 				{users.map((user) => (
 					<StaggerItem key={user.uid}>
 					<Paper variant='outlined' sx={{ p: 2 }}>
-						<Stack direction='row' sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+						<Stack
+							direction={{ xs: 'column', sm: 'row' }}
+							sx={{ alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 1 }}
+						>
 							<Box sx={{ minWidth: 0 }}>
 								<Typography sx={{ fontWeight: 600 }}>{user.displayName || '—'}</Typography>
 								<Typography variant='body2' color='text.secondary'>
 									{user.email} {user.phoneNumber ? `· ${user.phoneNumber}` : ''}
 								</Typography>
 							</Box>
-							<Stack direction='row' spacing={1} sx={{ flexShrink: 0 }}>
+							<Stack
+								direction={{ xs: 'column', sm: 'row' }}
+								spacing={1}
+								sx={{ flexShrink: 0, '& .MuiButton-root': { minHeight: 44 } }}
+							>
 								<Button
 									size='small'
 									variant='outlined'

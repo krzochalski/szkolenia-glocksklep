@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	Box,
@@ -9,7 +10,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -162,7 +162,7 @@ export const ParticipantCustomPriceDialog = ({
 		preview != null ? roundMoney(preview.finalPrice - currentNetto) : null;
 
 	return (
-		<HardShadowDialog open={open} onClose={loading ? undefined : onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={loading ? undefined : onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>Zmień cenę — {titleName}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<Typography variant='body2' color='text.secondary'>
@@ -318,6 +318,6 @@ export const ParticipantCustomPriceDialog = ({
 					{loading ? <CircularProgress size={14} /> : 'Zapisz i wyślij proformę'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

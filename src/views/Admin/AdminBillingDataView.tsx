@@ -17,6 +17,7 @@ import {
 } from '@ui';
 import { useState } from 'react';
 import type { BillingData } from '@/types/billingData';
+import { AdminPageHeader } from '@components';
 import { BillingDataFormDialog } from './forms/BillingDataFormDialog';
 
 export const AdminBillingDataView = () => <BillingInner />;
@@ -48,19 +49,22 @@ const BillingInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
-				<Typography variant='h5'>Dane rozliczeniowe</Typography>
-				<Button
-					variant='contained'
-					onClick={() => {
-						setEditing(null);
-						setDialogOpen(true);
-					}}
-				>
-					Dodaj
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='Dane rozliczeniowe'
+				actions={
+					<Button
+						variant='contained'
+						fullWidth
+						onClick={() => {
+							setEditing(null);
+							setDialogOpen(true);
+						}}
+					>
+						Dodaj
+					</Button>
+				}
+			/>
 
 			<BillingDataFormDialog
 				open={dialogOpen}
@@ -82,7 +86,11 @@ const BillingInner = () => {
 							<Typography variant='body2' color='text.secondary'>
 								{instructor?.name ?? item.instructorId} · NIP {item.nip} · {item.bankAccount}
 							</Typography>
-							<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
+							<Stack
+								direction={{ xs: 'column', sm: 'row' }}
+								spacing={1}
+								sx={{ mt: 1, '& .MuiButton-root': { minHeight: 44 } }}
+							>
 								<Button
 									size='small'
 									variant='outlined'

@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { Paths } from '@constants/paths';
 import { adminGetCourseDebriefings, deleteCourseDebriefing } from '@services/courseDebriefings';
@@ -15,7 +16,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -168,7 +168,7 @@ const DebriefingsInner = () => {
 						))}
 					</Stagger>
 
-					<HardShadowDialog
+					<AdminDialog
 						open={createOpen}
 						onClose={() => setCreateOpen(false)}
 						maxWidth='sm'
@@ -203,7 +203,7 @@ const DebriefingsInner = () => {
 								Utwórz
 							</Button>
 						</DialogActions>
-					</HardShadowDialog>
+					</AdminDialog>
 
 					<ConfirmDialog
 						open={Boolean(toDelete)}

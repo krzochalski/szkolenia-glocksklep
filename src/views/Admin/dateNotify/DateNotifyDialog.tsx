@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	DEFAULT_DATE_NOTIFY_BODY_MARKDOWN,
@@ -15,7 +16,6 @@ import {
 	FormControl,
 	FormControlLabel,
 	FormLabel,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -150,7 +150,7 @@ export const DateNotifyDialog = ({
 		resolved.recipients.length > 0;
 
 	return (
-		<HardShadowDialog
+		<AdminDialog
 			open={open}
 			onClose={loading ? undefined : onClose}
 			maxWidth='md'
@@ -355,6 +355,6 @@ export const DateNotifyDialog = ({
 					Wyślij
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	adminAwardBadge,
@@ -25,7 +26,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -190,7 +190,7 @@ export const AdminCourseCompletionsDialog = ({ open, user, onClose }: Props) => 
 		removeBadgeMutation.isPending;
 
 	return (
-		<HardShadowDialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={[hardShadowDialogTitleSx, { justifyContent: 'flex-start', gap: 1 }]}>
 				<MilitaryTechIcon fontSize='small' />
 				Ukończenia — {user?.displayName || user?.email || '…'}
@@ -406,6 +406,6 @@ export const AdminCourseCompletionsDialog = ({ open, user, onClose }: Props) => 
 					Zamknij
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

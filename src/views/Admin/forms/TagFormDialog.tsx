@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { createTag, updateTag } from '@services/tags';
 import type { Tag } from '@/types/course';
@@ -8,7 +9,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -56,7 +56,7 @@ export const TagFormDialog = ({ open, tag, onClose, onSaved }: TagFormDialogProp
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
+		<AdminDialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>{tag ? 'Edytuj tag' : 'Dodaj tag'}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<TextField
@@ -79,6 +79,6 @@ export const TagFormDialog = ({ open, tag, onClose, onSaved }: TagFormDialogProp
 					{saving ? <CircularProgress size={14} /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

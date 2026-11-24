@@ -17,6 +17,7 @@ import {
 import { useState } from 'react';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Place } from '@/types/course';
+import { AdminPageHeader } from '@components';
 import { PlaceFormDialog } from './forms/PlaceFormDialog';
 
 export const AdminPlacesView = () => <PlacesInner />;
@@ -44,19 +45,22 @@ const PlacesInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack direction='row' sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
-				<Typography variant='h5'>Obiekty</Typography>
-				<Button
-					variant='contained'
-					onClick={() => {
-						setEditing(null);
-						setDialogOpen(true);
-					}}
-				>
-					Dodaj
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='Obiekty'
+				actions={
+					<Button
+						variant='contained'
+						fullWidth
+						onClick={() => {
+							setEditing(null);
+							setDialogOpen(true);
+						}}
+					>
+						Dodaj
+					</Button>
+				}
+			/>
 
 			<PlaceFormDialog
 				open={dialogOpen}
@@ -77,7 +81,11 @@ const PlacesInner = () => {
 						<Typography variant='body2' color='text.secondary'>
 							/{place.slug}
 						</Typography>
-						<Stack direction='row' spacing={1} sx={{ mt: 1 }}>
+						<Stack
+							direction={{ xs: 'column', sm: 'row' }}
+							spacing={1}
+							sx={{ mt: 1, '& .MuiButton-root': { minHeight: 44 } }}
+						>
 							<Button
 								size='small'
 								variant='outlined'

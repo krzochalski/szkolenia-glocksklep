@@ -1,3 +1,5 @@
+export { AdminDialog } from './AdminDialog';
+export { AdminPageHeader } from './AdminPageHeader';
 export { AdminShell } from './AdminShell';
 export { AdminStickyActions } from './AdminStickyActions';
 export { CourseDateMeta } from './CourseDateMeta';

@@ -27,6 +27,8 @@ import {
 	compareCoursesByLegacyCatalogOrder,
 	coursesNeedOrderBackfill,
 } from '@/utils/courseOrder';
+import { AdminPageHeader } from '@components';
+import { adminIconButtonTouchSx } from '@components/adminResponsive';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
@@ -39,6 +41,7 @@ import {
 	ConfirmDialog,
 	ContentSwap,
 	IconButton,
+	Paper,
 	Price,
 	Stack,
 	Table,
@@ -65,6 +68,141 @@ const getUpcomingDates = (course: Course) =>
 type SortableCourseRowProps = {
 	readonly course: Course;
 	readonly onDelete: (course: Course) => void;
+};
+
+const CourseRowActions = ({
+	course,
+	onDelete,
+}: {
+	readonly course: Course;
+	readonly onDelete: (course: Course) => void;
+}) => (
+	<Stack direction='row' spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+		<Tooltip title='Terminy'>
+			<IconButton
+				size='small'
+				component={NextLink}
+				href={fillPath(Paths.adminCourseAllDates, { courseId: course.id })}
+				aria-label='Terminy'
+				sx={adminIconButtonTouchSx}
+			>
+				<CalendarMonth fontSize='small' />
+			</IconButton>
+		</Tooltip>
+		<Tooltip title='Edytuj'>
+			<IconButton
+				size='small'
+				component={NextLink}
+				href={fillPath(Paths.adminCourseEdit, { courseId: course.id })}
+				aria-label='Edytuj szkolenie'
+				sx={adminIconButtonTouchSx}
+			>
+				<Edit fontSize='small' />
+			</IconButton>
+		</Tooltip>
+		<Tooltip title='Usuń'>
+			<IconButton
+				size='small'
+				color='error'
+				onClick={() => onDelete(course)}
+				aria-label='Usuń szkolenie'
+				sx={adminIconButtonTouchSx}
+			>
+				<Delete fontSize='small' />
+			</IconButton>
+		</Tooltip>
+	</Stack>
+);
+
+const SortableCourseCard = ({ course, onDelete }: SortableCourseRowProps) => {
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: course.id,
+	});
+	const upcoming = getUpcomingDates(course);
+	const next = upcoming[0];
+	const totalDates = course.dates?.length ?? 0;
+	const levelLabel = COURSE_LEVEL_LABEL[course.level] ?? course.level;
+	const kind = getCourseKind(course);
+	const inactive = isCourseInactive(course);
+
+	return (
+		<Paper
+			ref={setNodeRef}
+			variant='outlined'
+			sx={{
+				p: 2,
+				transform: CSS.Transform.toString(transform),
+				transition,
+				opacity: isDragging ? 0.6 : 1,
+				...(inactive ? { bgcolor: 'action.hover', opacity: 0.85 } : {}),
+			}}
+		>
+			<Stack spacing={1.5}>
+				<Stack direction='row' spacing={1} sx={{ alignItems: 'flex-start' }}>
+					<IconButton
+						size='small'
+						{...attributes}
+						{...listeners}
+						aria-label={`Przenieś ${course.name}`}
+						sx={{ cursor: 'grab', touchAction: 'none', ...adminIconButtonTouchSx }}
+					>
+						<DragHandle fontSize='small' />
+					</IconButton>
+					<Box sx={{ flex: 1, minWidth: 0 }}>
+						<Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+							<Typography sx={{ fontWeight: 600 }}>{course.name}</Typography>
+							<Chip
+								label={COURSE_KIND_LABEL[kind]}
+								size='small'
+								variant='outlined'
+								color={kind === 'practice' ? 'primary' : 'default'}
+							/>
+							{inactive ? (
+								<Chip label='NIEAKTYWNE' size='small' variant='outlined' data-inactive-badge />
+							) : null}
+						</Stack>
+						<Typography variant='body2' color='text.secondary' sx={{ fontFamily: 'monospace', mt: 0.5 }}>
+							/{course.slug}
+						</Typography>
+					</Box>
+				</Stack>
+				<Stack spacing={0.5}>
+					<Typography variant='body2'>
+						Poziom: {levelLabel} · {course.hours} h ·{' '}
+						<Price
+							gross={bruttoFromNetto(course.price)}
+							net={course.price}
+							size='sm'
+							sx={{ display: 'inline-flex', verticalAlign: 'middle' }}
+						/>
+					</Typography>
+					{course.tags?.length ? (
+						<Stack direction='row' spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+							{course.tags.map((tag) => (
+								<Chip key={tag} label={tag} size='small' variant='outlined' />
+							))}
+						</Stack>
+					) : null}
+					<Typography variant='body2'>
+						{upcoming.length} nadchodzących / {totalDates} łącznie
+						{next ? (
+							<>
+								{' '}
+								· Następny: {next.date} {next.timeStart}
+								{next.place ? (
+									<>
+										{' '}
+										· <PlaceNameLink place={next.place} />
+									</>
+								) : null}
+							</>
+						) : null}
+					</Typography>
+				</Stack>
+				<CourseRowActions course={course} onDelete={onDelete} />
+			</Stack>
+		</Paper>
+	);
 };
 
 const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
@@ -187,40 +325,7 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 				)}
 			</TableCell>
 			<TableCell align='right'>
-				<Stack direction='row' spacing={0.25} sx={{ justifyContent: 'flex-end' }}>
-					<Tooltip title='Terminy'>
-						<IconButton
-							size='small'
-							component={NextLink}
-							href={fillPath(Paths.adminCourseAllDates, {
-								courseId: course.id,
-							})}
-							aria-label='Terminy'
-						>
-							<CalendarMonth fontSize='small' />
-						</IconButton>
-					</Tooltip>
-					<Tooltip title='Edytuj'>
-						<IconButton
-							size='small'
-							component={NextLink}
-							href={fillPath(Paths.adminCourseEdit, { courseId: course.id })}
-							aria-label='Edytuj szkolenie'
-						>
-							<Edit fontSize='small' />
-						</IconButton>
-					</Tooltip>
-					<Tooltip title='Usuń'>
-						<IconButton
-							size='small'
-							color='error'
-							onClick={() => onDelete(course)}
-							aria-label='Usuń szkolenie'
-						>
-							<Delete fontSize='small' />
-						</IconButton>
-					</Tooltip>
-				</Stack>
+				<CourseRowActions course={course} onDelete={onDelete} />
 			</TableCell>
 		</TableRow>
 	);
@@ -284,23 +389,45 @@ const AdminCoursesInner = () => {
 			{isLoading ? (
 				<CircularProgress />
 			) : (
-		<Box>
-			<Stack
-				direction='row'
-				sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}
-			>
-				<Typography variant='h5'>Szkolenia</Typography>
-				<Button component={NextLink} href={Paths.adminCourseNew} variant='contained'>
-					Nowe szkolenie
-				</Button>
-			</Stack>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title='Szkolenia'
+				actions={
+					<Button component={NextLink} href={Paths.adminCourseNew} variant='contained' fullWidth>
+						Nowe szkolenie
+					</Button>
+				}
+			/>
 
 			{courses.length === 0 ? (
 				<Typography color='text.secondary'>Brak szkoleń.</Typography>
 			) : (
 				<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-					<TableContainer sx={{ overflowX: 'auto' }}>
-						<Table size='small' stickyHeader>
+					<SortableContext
+						items={courses.map((c) => c.id)}
+						strategy={verticalListSortingStrategy}
+					>
+						<Stack
+							spacing={1.5}
+							sx={{ display: { xs: 'flex', md: 'none' } }}
+							aria-label='Lista szkoleń'
+						>
+							{courses.map((course) => (
+								<SortableCourseCard
+									key={course.id}
+									course={course}
+									onDelete={setToDelete}
+								/>
+							))}
+						</Stack>
+					<TableContainer
+						sx={{
+							display: { xs: 'none', md: 'block' },
+							overflowX: 'auto',
+							maxWidth: '100%',
+						}}
+					>
+						<Table size='small' stickyHeader sx={{ minWidth: 720 }}>
 							<TableHead>
 								<TableRow>
 									<TableCell sx={{ width: 48 }} aria-label='Kolejność' />
@@ -315,21 +442,17 @@ const AdminCoursesInner = () => {
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								<SortableContext
-									items={courses.map((c) => c.id)}
-									strategy={verticalListSortingStrategy}
-								>
-									{courses.map((course) => (
-										<SortableCourseRow
-											key={course.id}
-											course={course}
-											onDelete={setToDelete}
-										/>
-									))}
-								</SortableContext>
+								{courses.map((course) => (
+									<SortableCourseRow
+										key={course.id}
+										course={course}
+										onDelete={setToDelete}
+									/>
+								))}
 							</TableBody>
 						</Table>
 					</TableContainer>
+					</SortableContext>
 				</DndContext>
 			)}
 

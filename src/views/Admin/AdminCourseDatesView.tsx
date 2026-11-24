@@ -33,6 +33,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { AdminPageHeader } from '@components';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { AdminDateRowActions } from './AdminDateRowActions';
 import {
@@ -119,39 +120,41 @@ const DatesInner = ({ courseId }: Props) => {
 			) : !course ? (
 				<Typography>Nie znaleziono kursu.</Typography>
 			) : (
-		<Box>
-			<Stack
-				direction='row'
-				sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}
-			>
-				<Typography variant='h5'>Terminy: {course.name}</Typography>
-				<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
-					<FormControlLabel
-						control={
-							<Switch
-								checked={belowMinOnly}
-								onChange={(_, v) => setBelowMinOnly(v)}
-								size='small'
-							/>
-						}
-						label='Poniżej minimum'
-					/>
-					<Button
-						component={NextLink}
-						href={fillPath(Paths.adminCourseEdit, { courseId })}
-						variant='outlined'
-					>
-						Edytuj szkolenie
-					</Button>
-					<Button
-						component={NextLink}
-						href={fillPath(Paths.adminCourseDateNew, { courseId })}
-						variant='contained'
-					>
+		<Box sx={{ minWidth: 0, maxWidth: '100%' }}>
+			<AdminPageHeader
+				title={`Terminy: ${course.name}`}
+				actions={
+					<>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={belowMinOnly}
+									onChange={(_, v) => setBelowMinOnly(v)}
+									size='small'
+								/>
+							}
+							label='Poniżej minimum'
+							sx={{ minHeight: 44, mx: 0 }}
+						/>
+						<Button
+							component={NextLink}
+							href={fillPath(Paths.adminCourseEdit, { courseId })}
+							variant='outlined'
+							fullWidth
+						>
+							Edytuj szkolenie
+						</Button>
+						<Button
+							component={NextLink}
+							href={fillPath(Paths.adminCourseDateNew, { courseId })}
+							variant='contained'
+							fullWidth
+						>
 						Nowy termin
-					</Button>
-				</Stack>
-			</Stack>
+						</Button>
+					</>
+				}
+			/>
 
 			{dates.length === 0 ? (
 				<Typography color='text.secondary'>Brak terminów.</Typography>

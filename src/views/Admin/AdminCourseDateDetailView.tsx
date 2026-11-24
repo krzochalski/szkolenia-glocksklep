@@ -44,6 +44,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { adminParticipantRowActionsSx } from '@components/adminResponsive';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import type { Participant } from '@/types/course';
 import { warsawToday } from '@/utils/adminDashboard';
@@ -341,7 +342,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 			) : !course || !date ? (
 				<Typography>Nie znaleziono terminu.</Typography>
 			) : (
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0, maxWidth: '100%' }}>
 					<Button
 						component={NextLink}
 						href={fillPath(Paths.adminCourseAllDates, { courseId })}
@@ -412,7 +413,11 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 
 					<CourseDateEditForm courseId={courseId} courseDate={date} onSaved={invalidate} />
 
-					<Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap' }}>
+					<Stack
+						direction={{ xs: 'column', sm: 'row' }}
+						spacing={1}
+						sx={{ flexWrap: 'wrap', '& .MuiButton-root': { minHeight: 44 } }}
+					>
 						<Button variant='contained' onClick={() => setComposeOpen(true)}>
 							Wyślij wiadomość do uczestników
 						</Button>
@@ -516,15 +521,18 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 									<Stack
 										direction={{ xs: 'column', sm: 'row' }}
 										spacing={1}
-										sx={{
-											borderBottom: 1,
-											borderColor: 'divider',
-											px: 1.5,
-											py: 1,
-											mx: -1.5,
-											alignItems: { sm: 'center' },
-											bgcolor: rowBg,
-										}}
+										sx={[
+											{
+												borderBottom: 1,
+												borderColor: 'divider',
+												px: 1.5,
+												py: 1,
+												mx: { xs: 0, sm: -1.5 },
+												alignItems: { sm: 'center' },
+												bgcolor: rowBg,
+											},
+											adminParticipantRowActionsSx,
+										]}
 									>
 										<Box sx={{ flex: 1 }}>
 											<Typography sx={{ fontWeight: 600 }}>{p.name}</Typography>

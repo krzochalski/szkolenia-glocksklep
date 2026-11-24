@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { Paths } from '@constants/paths';
 import {
@@ -17,7 +18,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -172,7 +172,7 @@ const DescInner = () => {
 						))}
 					</Stagger>
 
-					<HardShadowDialog
+					<AdminDialog
 						open={createOpen}
 						onClose={() => setCreateOpen(false)}
 						maxWidth='sm'
@@ -211,7 +211,7 @@ const DescInner = () => {
 								Utwórz
 							</Button>
 						</DialogActions>
-					</HardShadowDialog>
+					</AdminDialog>
 
 					<ConfirmDialog
 						open={Boolean(toDelete)}

@@ -16,15 +16,16 @@ export const AdminStickyActions = ({
 	justifyContent = 'flex-start',
 }: AdminStickyActionsProps) => (
 	<Stack
-		direction='row'
+		direction={{ xs: 'column', sm: 'row' }}
 		spacing={1}
 		sx={{
 			position: 'sticky',
 			bottom: 0,
 			zIndex: 5,
 			justifyContent,
-			alignItems: 'center',
+			alignItems: { xs: 'stretch', sm: 'center' },
 			flexWrap: 'wrap',
+			'& .MuiButton-root': { minHeight: 44 },
 			bgcolor: 'background.paper',
 			borderTop: '3px solid',
 			borderColor: 'ink.main',

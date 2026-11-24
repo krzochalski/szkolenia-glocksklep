@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import {
 	Box,
@@ -6,7 +7,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -17,6 +17,7 @@ import {
 import { ImageOutlined, YouTube } from '@ui/icons';
 import MDEditor, { commands, type ICommand, type TextAreaTextApi, type TextState } from '@uiw/react-md-editor';
 import rehypeSanitize from 'rehype-sanitize';
+import { useAdminPhoneLayout } from '@hooks/useAdminPhoneLayout';
 import { useState } from 'react';
 import { extractYoutubeId } from '@/utils/youtube';
 
@@ -37,6 +38,8 @@ const insertBlock = (api: TextAreaTextApi, block: string) => {
 };
 
 export const MarkdownWysiwygEditorInner = ({ value, onChange, height = 480 }: Props) => {
+	const phone = useAdminPhoneLayout();
+	const editorHeight = phone ? Math.min(height, 360) : height;
 	const [dialog, setDialog] = useState<MediaDialog>(null);
 	const [mediaUrl, setMediaUrl] = useState('');
 	const [imageAlt, setImageAlt] = useState('');
@@ -104,6 +107,8 @@ export const MarkdownWysiwygEditorInner = ({ value, onChange, height = 480 }: Pr
 			<Box
 				data-color-mode='light'
 				sx={{
+					maxWidth: '100%',
+					overflow: 'hidden',
 					'& .w-md-editor': {
 						border: '1px solid',
 						borderColor: 'divider',
@@ -114,13 +119,17 @@ export const MarkdownWysiwygEditorInner = ({ value, onChange, height = 480 }: Pr
 						borderBottom: '1px solid',
 						borderColor: 'divider',
 						bgcolor: 'surface.muted',
+						flexWrap: 'wrap',
+					},
+					'& .w-md-editor-content': {
+						overflowX: 'auto',
 					},
 				}}
 			>
 				<MDEditor
 					value={value}
 					onChange={(next) => onChange(next ?? '')}
-					height={height}
+					height={editorHeight}
 					preview='live'
 					visibleDragbar={false}
 					commands={[...baseCommands, imageCommand, youtubeCommand]}
@@ -135,7 +144,7 @@ export const MarkdownWysiwygEditorInner = ({ value, onChange, height = 480 }: Pr
 				przycisk).
 			</Typography>
 
-			<HardShadowDialog open={Boolean(dialog)} onClose={closeDialog} maxWidth='sm' fullWidth>
+			<AdminDialog open={Boolean(dialog)} onClose={closeDialog} maxWidth='sm' fullWidth>
 				<DialogTitle sx={hardShadowDialogTitleSx}>
 					{dialog === 'youtube' ? 'Film YouTube' : 'Obraz z URL'}
 				</DialogTitle>
@@ -176,7 +185,7 @@ export const MarkdownWysiwygEditorInner = ({ value, onChange, height = 480 }: Pr
 						Wstaw
 					</Button>
 				</DialogActions>
-			</HardShadowDialog>
+			</AdminDialog>
 		</>
 	);
 };

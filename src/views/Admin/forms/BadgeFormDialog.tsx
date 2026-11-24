@@ -1,4 +1,5 @@
 'use client';
+import { AdminDialog } from '@components';
 
 import { badgeImageSelectOptions } from '@constants/catalogueImages';
 import { createBadge, updateBadge } from '@services/badges';
@@ -10,7 +11,6 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -76,7 +76,7 @@ export const BadgeFormDialog = ({ open, badge, onClose, onSaved }: BadgeFormDial
 	};
 
 	return (
-		<HardShadowDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+		<AdminDialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
 			<DialogTitle sx={hardShadowDialogTitleSx}>
 				{badge ? 'Edytuj odznakę' : 'Dodaj odznakę'}
 			</DialogTitle>
@@ -148,6 +148,6 @@ export const BadgeFormDialog = ({ open, badge, onClose, onSaved }: BadgeFormDial
 					{saving ? <CircularProgress size={14} /> : 'Zapisz'}
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</AdminDialog>
 	);
 };

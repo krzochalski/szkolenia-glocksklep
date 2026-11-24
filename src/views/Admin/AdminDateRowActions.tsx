@@ -1,5 +1,6 @@
 'use client';
 
+import { adminIconButtonTouchSx } from '@components/adminResponsive';
 import type { CourseClass } from '@/types/course';
 import { IconButton, Stack, Tooltip } from '@ui';
 import { Block, ContentCopy, Delete, Edit, EventAvailable } from '@ui/icons';
@@ -24,9 +25,19 @@ export const AdminDateRowActions = ({
 	onUncancel,
 	onDelete,
 }: AdminDateRowActionsProps) => (
-	<Stack direction='row' spacing={0.25} sx={{ flexShrink: 0 }}>
+	<Stack
+		direction='row'
+		spacing={0.25}
+		sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 0.5 }}
+	>
 		<Tooltip title='Klonuj'>
-			<IconButton size='small' disabled={pending} onClick={onClone} aria-label='Klonuj termin'>
+			<IconButton
+				size='small'
+				disabled={pending}
+				onClick={onClone}
+				aria-label='Klonuj termin'
+				sx={adminIconButtonTouchSx}
+			>
 				<ContentCopy fontSize='small' />
 			</IconButton>
 		</Tooltip>
@@ -37,6 +48,7 @@ export const AdminDateRowActions = ({
 				href={editHref}
 				disabled={pending}
 				aria-label='Edytuj termin'
+				sx={adminIconButtonTouchSx}
 			>
 				<Edit fontSize='small' />
 			</IconButton>
@@ -49,6 +61,7 @@ export const AdminDateRowActions = ({
 					onClick={onUncancel}
 					aria-label='Przywróć termin'
 					color='success'
+					sx={adminIconButtonTouchSx}
 				>
 					<EventAvailable fontSize='small' />
 				</IconButton>
@@ -61,6 +74,7 @@ export const AdminDateRowActions = ({
 					onClick={onCancel}
 					aria-label='Odwołaj termin'
 					color='warning'
+					sx={adminIconButtonTouchSx}
 				>
 					<Block fontSize='small' />
 				</IconButton>
@@ -73,6 +87,7 @@ export const AdminDateRowActions = ({
 				onClick={onDelete}
 				aria-label='Usuń termin'
 				color='error'
+				sx={adminIconButtonTouchSx}
 			>
 				<Delete fontSize='small' />
 			</IconButton>
