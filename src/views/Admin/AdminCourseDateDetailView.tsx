@@ -30,6 +30,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import {
 	Alert,
 	Box,
+	brand,
 	Button,
 	Checkbox,
 	Chip,
@@ -625,7 +626,12 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 						{participants.map((p) => {
 							const isCompleted = completedByUid.get(p.id) ?? false;
 							const overdue = isParticipantPaymentOverdue(p.paid, date.date);
-							const rowBg = p.paid ? 'success.light' : overdue ? 'error.light' : undefined;
+							// Soft washes — MUI error.light / success.light drown orange outlined buttons.
+							const rowBg = p.paid
+								? 'rgba(46, 125, 50, 0.12)'
+								: overdue
+									? brand.dangerTint
+									: undefined;
 							const payable = effectiveEnrollmentNetto(course, date, p);
 							const hasCustom = p.customPrice != null;
 							const paragonChip =

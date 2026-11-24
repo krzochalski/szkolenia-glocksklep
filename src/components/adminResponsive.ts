@@ -19,11 +19,28 @@ export const adminParticipantRowActionsSx = {
 		minHeight: 44,
 		alignSelf: { xs: 'stretch', sm: 'center' },
 	},
+	// Status rows use tinted bg (overdue/paid). Keep controls on paper so primary/error
+	// orange-red outlines stay readable instead of blending into the wash.
+	'& .MuiButton-outlined, & .MuiButton-text': {
+		bgcolor: 'background.paper',
+		'&:hover': {
+			bgcolor: 'background.paper',
+		},
+		'&.Mui-disabled': {
+			bgcolor: 'background.paper',
+		},
+	},
+	'& .MuiChip-outlined': {
+		bgcolor: 'background.paper',
+	},
 	'& .MuiFormControlLabel-root': {
 		minHeight: 44,
 		ml: 0,
 		mr: 0,
 		alignSelf: { xs: 'stretch', sm: 'center' },
+		px: 0.75,
+		borderRadius: 0,
+		bgcolor: 'background.paper',
 	},
 };
 

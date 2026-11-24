@@ -13,7 +13,7 @@ import {
 	type ParticipantProformaState,
 	updateParticipantProforma,
 } from './claim';
-import { resolveProformaBuyer, type SalesDocumentType, salesDocumentLabel } from '../salesDocument';
+import { resolveProformaBuyer, type SalesDocumentType } from '../salesDocument';
 import { sendProformaMail } from './mail';
 import { renderProformaPdf } from './pdf';
 

@@ -37,7 +37,7 @@ export const buildRegistrationReceiptPositions = (
 	const finalNet = roundMoney(input.amountNet);
 	const baseNet = roundMoney(input.baseAmountNet ?? finalNet);
 	const discount = roundMoney(input.discountTotal ?? Math.max(0, baseNet - finalNet));
-	const title = `${input.serviceLine.trim()}${discountNote(input)}`;
+	const title = `${input.serviceLine.trim()}${discountNote({ ...input, discountTotal: discount })}`;
 
 	return [
 		{
