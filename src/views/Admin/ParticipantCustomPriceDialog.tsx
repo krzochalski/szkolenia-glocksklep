@@ -26,7 +26,7 @@ import {
 	computeManualPrice,
 	parseAdjustmentValue,
 } from '@/utils/computeManualPrice';
-import { bruttoFromNetto, roundMoney } from '@/utils/pricing';
+import { roundMoney } from '@/utils/pricing';
 
 export type ParticipantPriceSavePayload = {
 	adjustment: { type: ManualPriceAdjustmentType; value: number } | null;
@@ -168,19 +168,14 @@ export const ParticipantCustomPriceDialog = ({
 				<Typography variant='body2' color='text.secondary'>
 					Cena z listy (termin / kurs):
 				</Typography>
-				<Price
-					gross={bruttoFromNetto(listNetto)}
-					net={roundMoney(listNetto)}
-					size='sm'
-					sx={{ display: 'block' }}
-				/>
+				<Price amount={roundMoney(listNetto)} basis='netto' size='inline' sx={{ display: 'block' }} />
 				<Typography variant='body2' color='text.secondary'>
 					Aktualna cena uczestnika:
 				</Typography>
 				<Price
-					gross={bruttoFromNetto(currentNetto)}
-					net={roundMoney(currentNetto)}
-					size='sm'
+					amount={roundMoney(currentNetto)}
+					basis='netto'
+					size='inline'
 					sx={{ display: 'block' }}
 				/>
 

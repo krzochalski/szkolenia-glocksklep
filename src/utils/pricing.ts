@@ -1,5 +1,5 @@
-import type { PriceMode } from '@ui';
-import { formatCurrencyAmount } from '@ui';
+import type { PriceBasis } from '@ui';
+import { formatPricePln } from '@ui';
 import type { Course, CourseClass, Participant } from '@/types/course';
 
 const VAT_RATE = 0.23;
@@ -55,7 +55,7 @@ export const bruttoFromNetto = (netto: number): number => {
 };
 
 /** Display PLN for nearest-date rows: `500 zł` (drops trailing `.00`). */
-export const formatPlnDisplay = (netto: number, mode?: PriceMode): string => {
+export const formatPlnDisplay = (netto: number, mode?: PriceBasis): string => {
 	const amount = roundMoney(mode === 'brutto' ? bruttoFromNetto(netto) : netto);
 	const formatted = Number.isInteger(amount) ? String(amount) : formatMoney(amount);
 	return `${formatted} zł`;
@@ -68,11 +68,11 @@ export const formatPlnDisplay = (netto: number, mode?: PriceMode): string => {
 export const formatPlnNettoBrutto = (netto: number): string => {
 	const gross = bruttoFromNetto(netto);
 	const n = roundMoney(netto);
-	return `${formatCurrencyAmount(gross)} brutto / ${formatCurrencyAmount(n)} netto`;
+	return `${formatPricePln(gross)} brutto / ${formatPricePln(n)} netto`;
 };
 
 /** Course list/detail price: stored as netto, shown as `850.00PLN`. */
-export const formatCoursePrice = (netto: number, mode: PriceMode): string => {
+export const formatCoursePrice = (netto: number, mode: PriceBasis): string => {
 	const amount = mode === 'brutto' ? bruttoFromNetto(netto) : roundMoney(netto);
 	return `${formatMoney(amount)}PLN`;
 };

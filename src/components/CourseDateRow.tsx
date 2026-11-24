@@ -10,8 +10,6 @@ import { isCourseClassCanceled } from '@/utils/courseDates';
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { fillPath } from '@/utils/paths';
-import { bruttoFromNetto } from '@/utils/pricing';
-
 export type CourseDateRowProps = {
 	readonly course: Pick<Course, 'name' | 'slug' | 'price' | 'kind' | 'minParticipants' | 'slotsMax'>;
 	readonly date: CourseClass;
@@ -129,7 +127,7 @@ export const CourseDateRow = ({
 								borderColor: 'divider',
 							}}
 						>
-							<Price gross={bruttoFromNetto(netto)} net={netto} size='sm' />
+							<Price amount={netto} basis='netto' size='inline' />
 						</Box>
 					) : null}
 				</Stack>

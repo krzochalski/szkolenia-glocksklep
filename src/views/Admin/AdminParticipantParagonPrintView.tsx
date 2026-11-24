@@ -325,7 +325,7 @@ export const AdminParticipantParagonPrintView = ({
 								{formatMoney(vatTotal)}
 							</TableCell>
 							<TableCell align='right'>
-								<Price gross={totalBrutto} net={totalNetto} size='sm' />
+								<Price amount={totalNetto} basis='netto' size='inline' />
 							</TableCell>
 						</TableRow>
 					</TableBody>

@@ -7,8 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Box, Price, Typography } from '@ui';
 import { useSearchParams } from 'next/navigation';
 import { courseSlugFromRedirect } from '@/utils/paths';
-import { bruttoFromNetto } from '@/utils/pricing';
-
 /** Compact “Zapisujesz się na…” banner when auth was entered from a course date. */
 export const AuthEnrollmentSummary = () => {
 	const searchParams = useSearchParams();
@@ -43,12 +41,7 @@ export const AuthEnrollmentSummary = () => {
 				Zapisujesz się na: {course.name}
 			</Typography>
 			<CourseDateMeta date={date.date} timeStart={date.timeStart} place={date.place} />
-			<Price
-				gross={bruttoFromNetto(netto)}
-				net={netto}
-				size='sm'
-				sx={{ mt: 1, display: 'block' }}
-			/>
+			<Price amount={netto} basis='netto' size='inline' sx={{ mt: 1, display: 'block' }} />
 			<PaymentDocumentInfo compact sx={{ mt: 1.5 }} />
 		</Box>
 	);

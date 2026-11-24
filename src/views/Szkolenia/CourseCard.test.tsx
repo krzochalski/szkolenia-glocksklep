@@ -25,9 +25,8 @@ describe('CourseCard', () => {
 		expect(screen.getByText('Glockatto — podstawy')).toBeInTheDocument();
 		expect(screen.getByText('8 H')).toBeInTheDocument();
 		expect(screen.getByText('Glock')).toBeInTheDocument();
-		expect(
-			screen.getByRole('group', { name: /1045,50.*brutto.*850,00.*netto/i })
-		).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena brutto 1045,50/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena netto 850,00/)).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: /szczegóły/i })).toHaveAttribute(
 			'href',
 			'/szkolenia/glockatto-podstawy'

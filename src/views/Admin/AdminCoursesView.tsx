@@ -32,7 +32,6 @@ import { adminIconButtonTouchSx } from '@components/adminResponsive';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { fillPath } from '@/utils/paths';
-import { bruttoFromNetto } from '@/utils/pricing';
 import {
 	Box,
 	Button,
@@ -170,9 +169,9 @@ const SortableCourseCard = ({ course, onDelete }: SortableCourseRowProps) => {
 					<Typography variant='body2'>
 						Poziom: {levelLabel} · {course.hours} h ·{' '}
 						<Price
-							gross={bruttoFromNetto(course.price)}
-							net={course.price}
-							size='sm'
+							amount={course.price}
+							basis='netto'
+							size='inline'
 							sx={{ display: 'inline-flex', verticalAlign: 'middle' }}
 						/>
 					</Typography>
@@ -282,9 +281,9 @@ const SortableCourseRow = ({ course, onDelete }: SortableCourseRowProps) => {
 			</TableCell>
 			<TableCell align='right'>
 				<Price
-					gross={bruttoFromNetto(course.price)}
-					net={course.price}
-					size='sm'
+					amount={course.price}
+					basis='netto'
+					size='inline'
 					sx={{ alignItems: 'flex-end', display: 'inline-flex' }}
 				/>
 			</TableCell>

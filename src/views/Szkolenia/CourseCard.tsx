@@ -10,8 +10,6 @@ import { useState } from 'react';
 import type { Course } from '@/types/course';
 import { COURSE_KIND_LABEL, getCourseKind } from '@/utils/courseKind';
 import { fillPath } from '@/utils/paths';
-import { bruttoFromNetto } from '@/utils/pricing';
-
 type CourseCardProps = {
 	readonly course: Course;
 	readonly imageSrc?: string;
@@ -102,7 +100,7 @@ export const CourseCard = ({ course, imageSrc, prerequisiteNames = [] }: CourseC
 					</Box>
 				</Box>
 			}
-			price={<Price gross={bruttoFromNetto(course.price)} net={course.price} size='md' />}
+			price={<Price amount={course.price} basis='netto' size='card' />}
 			action={
 				<Button
 					component={NextLink}

@@ -359,9 +359,9 @@ const ProformaDocument = ({
 					>
 						<Typography sx={{ fontWeight: 800 }}>Do zapłaty</Typography>
 						<Price
-							gross={invoice.amountGross}
-							net={invoice.amountNet}
-							size='md'
+							amount={invoice.amountNet}
+							basis='netto'
+							size='card'
 							sx={{ alignItems: 'flex-end' }}
 						/>
 					</Box>

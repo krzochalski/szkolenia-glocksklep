@@ -44,9 +44,8 @@ describe('CourseDateRow', () => {
 		expect(screen.getByText('18 października 2026 · 10:00')).toBeInTheDocument();
 		expect(screen.getByText('Strzelnica Czacz')).toBeInTheDocument();
 		expect(screen.getByText('wolne: 7')).toBeInTheDocument();
-		expect(
-			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
-		).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena brutto 615,00/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena netto 500,00/)).toBeInTheDocument();
 		expect(screen.getByText('Zapisano')).toBeInTheDocument();
 		expect(screen.queryByText(/wolne: 4500/)).toBeNull();
 	});
@@ -93,9 +92,8 @@ describe('CourseDateRow', () => {
 		expect(
 			screen.getByText('instruktor: Piotr "Glockacci" Krzoska · wolne: 7')
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole('group', { name: /615,00.*brutto.*500,00.*netto/i })
-		).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena brutto 615,00/)).toBeInTheDocument();
+		expect(screen.getByLabelText(/cena netto 500,00/)).toBeInTheDocument();
 		expect(screen.queryByRole('link', { name: 'Movement Fundamentals' })).toBeNull();
 	});
 

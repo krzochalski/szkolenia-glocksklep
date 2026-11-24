@@ -18,7 +18,6 @@ type Props = {
 export const MonthlyRevenueSection = ({ items, range, yearOptions, onRangeChange }: Props) => {
 	const maxBrutto = maxRevenueBrutto(items);
 	const totalNetto = items.reduce((sum, row) => sum + row.netto, 0);
-	const totalBrutto = items.reduce((sum, row) => sum + row.brutto, 0);
 	const hasAny = totalNetto > 0;
 
 	return (
@@ -63,7 +62,7 @@ export const MonthlyRevenueSection = ({ items, range, yearOptions, onRangeChange
 						<Typography variant='body2' color='text.secondary'>
 							Suma okresu:
 						</Typography>
-						<Price gross={totalBrutto} net={totalNetto} size='md' />
+						<Price amount={totalNetto} basis='netto' size='card' />
 					</Stack>
 					<Stack spacing={1.25}>
 						{items.map((row) => {
@@ -106,7 +105,7 @@ export const MonthlyRevenueSection = ({ items, range, yearOptions, onRangeChange
 											/>
 										</Box>
 										<Box sx={{ flexShrink: 0 }}>
-											<Price gross={row.brutto} net={row.netto} size='sm' />
+											<Price amount={row.netto} basis='netto' size='inline' />
 										</Box>
 									</Stack>
 								</Paper>

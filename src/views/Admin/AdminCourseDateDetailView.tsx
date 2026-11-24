@@ -59,7 +59,7 @@ import {
 	signedUpCount,
 } from '@/utils/minParticipants';
 import { fillPath } from '@/utils/paths';
-import { bruttoFromNetto, effectiveEnrollmentNetto } from '@/utils/pricing';
+import { effectiveEnrollmentNetto } from '@/utils/pricing';
 import { isParticipantPaymentOverdue } from '@/utils/proformaDue';
 import { prepareExternalTab } from '@/utils/externalTab';
 import { redirectAfterFakturowniaCreate } from '@/utils/fiscalPrint';
@@ -581,11 +581,7 @@ const DetailInner = ({ courseId, dateId }: Props) => {
 													: ''}
 											</Typography>
 											<Box sx={{ mt: 0.75, display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
-												<Price
-													gross={bruttoFromNetto(payable)}
-													net={payable}
-													size='sm'
-												/>
+												<Price amount={payable} basis='netto' size='inline' />
 												{hasCustom ? (
 													<Typography
 														variant='caption'

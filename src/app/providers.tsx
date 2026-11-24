@@ -17,7 +17,7 @@ import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useEffect } from 'react';
 import { CookieConsent, getCookieConsentValue } from 'react-cookie-consent';
-import { PriceModeProvider, useAppFreshness, usePhoneLayout } from '@/hooks';
+import { useAppFreshness, usePhoneLayout } from '@/hooks';
 import { initPwaInstallCapture, registerPwaServiceWorker } from '@/utils/pwaInstallPrompt';
 
 const pagePath = (pathname: string): string => {
@@ -161,13 +161,11 @@ export const AppProviders = ({ children }: { readonly children: ReactNode }) => 
 	return (
 		<AppRouterCacheProvider>
 			<UiProvider>
-				<PriceModeProvider>
-					<QueryClientProvider client={queryClient}>
-						{children}
-						<AppFreshnessBanners />
-						<CookieConsentBar onPathAccepted={() => startAnalyticsForPath(pathname)} />
-					</QueryClientProvider>
-				</PriceModeProvider>
+				<QueryClientProvider client={queryClient}>
+					{children}
+					<AppFreshnessBanners />
+					<CookieConsentBar onPathAccepted={() => startAnalyticsForPath(pathname)} />
+				</QueryClientProvider>
 			</UiProvider>
 		</AppRouterCacheProvider>
 	);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, formatCurrencyAmount, Price, Typography } from '@ui';
+import { Box, formatPricePln, Price, Typography } from '@ui';
 import { bruttoFromNetto } from '@/utils/pricing';
 
 type CoursePriceDisplayProps = {
@@ -33,10 +33,10 @@ export const CoursePriceDisplay = ({
 				Cena indywidualna
 			</Typography>
 		) : null}
-		<Price gross={bruttoFromNetto(price)} net={price} size='lg' />
+		<Price amount={price} basis='netto' size='hero' />
 		{individual && listPrice != null && listPrice !== price ? (
 			<Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 0.5 }}>
-				Cena z listy: {formatCurrencyAmount(bruttoFromNetto(listPrice))} brutto
+				Cena z listy: {formatPricePln(bruttoFromNetto(listPrice))} brutto
 			</Typography>
 		) : null}
 	</Box>

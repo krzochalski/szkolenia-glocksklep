@@ -35,7 +35,7 @@ import { formatCourseDatePl } from '@/utils/formatEnrollment';
 import { invalidateCourseQueries } from '@/utils/invalidateCourseQueries';
 import { normalizeNip } from '@/utils/nip';
 import { fillPath, withAuthReturnQuery } from '@/utils/paths';
-import { bruttoFromNetto, formatPlnNettoBrutto } from '@/utils/pricing';
+import { formatPlnNettoBrutto } from '@/utils/pricing';
 import { enrollInvoiceSchema, type EnrollInvoiceFormValues } from '@/utils/schemas';
 import { deriveDocumentType } from '@/utils/salesDocument';
 
@@ -281,9 +281,9 @@ export const CourseDateActions = ({
 					}}
 				>
 					<Price
-						gross={bruttoFromNetto(bookingPrice)}
-						net={bookingPrice}
-						size='sm'
+						amount={bookingPrice}
+						basis='netto'
+						size='inline'
 						sx={{ mr: { sm: 'auto' }, width: { xs: '100%', sm: 'auto' } }}
 					/>
 					<Button
