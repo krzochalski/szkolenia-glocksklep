@@ -17,6 +17,8 @@ export interface FaqItem {
 	order: number;
 	/** Category for grouping FAQ items */
 	category?: string;
+	/** When set, question also appears on matching course detail pages (`/szkolenia/{slug}`). */
+	courseSlugs?: string[];
 }
 
 export interface FaqCategory {

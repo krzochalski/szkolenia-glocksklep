@@ -332,26 +332,39 @@ export const SzkolenieSzczegolyView = ({ slug, dateId }: Props) => {
 								: ''}
 						</Typography>
 					) : null}
-					<Stack direction='row' spacing={2} sx={{ alignItems: 'center', mt: 2, flexWrap: 'wrap' }}>
+					<Stack
+						direction={{ xs: 'column', sm: 'row' }}
+						spacing={2}
+						sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mt: 2, flexWrap: 'wrap' }}
+					>
 						<Typography>
 							Status płatności: {participant?.paid ? 'Opłacone' : 'Nieopłacone'}
 							{participant?.paysByCash ? ' (gotówka)' : ''}
 						</Typography>
-						<Link component={NextLink} href={fillPath(Paths.proforma, { slug, dateId })}>
+						<Button
+							component={NextLink}
+							href={fillPath(Paths.proforma, { slug, dateId })}
+							variant='outlined'
+							size='small'
+							sx={{ minHeight: 44, alignSelf: { xs: 'stretch', sm: 'center' } }}
+						>
 							Proforma
-						</Link>
+						</Button>
 						{participant?.fakturownia?.viewUrl ? (
-							<Link
+							<Button
 								component='a'
 								href={participant.fakturownia.viewUrl}
 								target='_blank'
 								rel='noopener noreferrer'
+								variant='outlined'
+								size='small'
+								sx={{ minHeight: 44, alignSelf: { xs: 'stretch', sm: 'center' } }}
 							>
 								Paragon
 								{participant.fakturownia.number
 									? ` (${participant.fakturownia.number})`
 									: ''}
-							</Link>
+							</Button>
 						) : null}
 					</Stack>
 

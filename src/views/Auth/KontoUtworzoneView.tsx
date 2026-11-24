@@ -17,7 +17,7 @@ export const KontoUtworzoneView = () => {
 	});
 
 	return (
-		<Box sx={{ px: 2, py: 6, maxWidth: 560, mx: 'auto' }}>
+		<Box sx={{ py: { xs: 2, sm: 6 }, maxWidth: 560, mx: 'auto', width: '100%', minWidth: 0 }}>
 			<Stack spacing={3}>
 				<Typography variant='h4' component='h1' sx={{ textAlign: 'center', fontWeight: 800 }}>
 					Konto zostało utworzone

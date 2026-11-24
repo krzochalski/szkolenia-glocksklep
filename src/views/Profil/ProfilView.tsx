@@ -64,7 +64,7 @@ export const ProfilView = () => {
 					<CircularProgress />
 				</Box>
 			) : (
-				<Box sx={{ maxWidth: 480 }}>
+				<Box sx={{ maxWidth: 480, minWidth: 0, width: '100%' }}>
 					<Typography variant='h5' component='h1' gutterBottom>
 						Mój profil
 					</Typography>
@@ -103,7 +103,16 @@ export const ProfilView = () => {
 						<Controller
 							name='phone'
 							control={control}
-							render={({ field }) => <TextField {...field} label='Telefon' fullWidth />}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label='Telefon'
+									type='tel'
+									autoComplete='tel'
+									fullWidth
+									slotProps={{ input: { inputMode: 'tel' } }}
+								/>
+							)}
 						/>
 						<Controller
 							name='nip'
@@ -114,6 +123,7 @@ export const ProfilView = () => {
 									label='NIP'
 									fullWidth
 									helperText='opcjonalnie, do faktury'
+									slotProps={{ input: { inputMode: 'numeric' } }}
 								/>
 							)}
 						/>

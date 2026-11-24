@@ -13,7 +13,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	FormControlLabel,
-	HardShadowDialog,
 	hardShadowDialogActionsSx,
 	hardShadowDialogContentSx,
 	hardShadowDialogTitleSx,
@@ -28,6 +27,8 @@ import NextLink from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { PaymentDocumentInfo } from '@/components/PaymentDocumentInfo';
 import { PlaceNameLink } from '@/components/PlaceNameLink';
+import { PublicDialog } from '@/components/PublicDialog';
+import { publicDialogActionsStackSx, publicTouchTargetSx } from '@/components/publicResponsive';
 import type { Course, CourseClass, Participant } from '@/types/course';
 import { getSlotsLeft } from '@/utils/courseDates';
 import { formatCourseDatePl } from '@/utils/formatEnrollment';
@@ -212,12 +213,7 @@ export const CourseDateActions = ({
 
 	const enrollDialog =
 		confirmAction === 'enroll' ? (
-			<HardShadowDialog
-				open
-				onClose={pending ? undefined : closeEnrollDialog}
-				fullWidth
-				maxWidth='sm'
-			>
+			<PublicDialog open onClose={pending ? undefined : closeEnrollDialog}>
 				<DialogTitle sx={hardShadowDialogTitleSx}>Potwierdź zapis</DialogTitle>
 				<DialogContent sx={hardShadowDialogContentSx}>
 					<Stack spacing={1.5}>
@@ -280,18 +276,22 @@ export const CourseDateActions = ({
 				<DialogActions
 					sx={{
 						...hardShadowDialogActionsSx,
-						justifyContent: 'space-between',
-						alignItems: 'center',
-						gap: 1.5,
+						...publicDialogActionsStackSx,
+						justifyContent: { xs: 'flex-start', sm: 'space-between' },
 					}}
 				>
 					<Price
 						gross={bruttoFromNetto(bookingPrice)}
 						net={bookingPrice}
 						size='sm'
-						sx={{ mr: 'auto' }}
+						sx={{ mr: { sm: 'auto' }, width: { xs: '100%', sm: 'auto' } }}
 					/>
-					<Button onClick={closeEnrollDialog} disabled={pending} variant='outlined'>
+					<Button
+						onClick={closeEnrollDialog}
+						disabled={pending}
+						variant='outlined'
+						sx={publicTouchTargetSx}
+					>
 						Anuluj
 					</Button>
 					<Button
@@ -299,11 +299,12 @@ export const CourseDateActions = ({
 						color='primary'
 						disabled={pending}
 						onClick={() => enroll.mutate()}
+						sx={publicTouchTargetSx}
 					>
 						Zapisz się
 					</Button>
 				</DialogActions>
-			</HardShadowDialog>
+			</PublicDialog>
 		) : null;
 
 	const waitlistDialog =
@@ -333,12 +334,7 @@ export const CourseDateActions = ({
 	);
 
 	const authGate = (
-		<HardShadowDialog
-			open={authGateOpen}
-			onClose={() => setAuthGateOpen(false)}
-			fullWidth
-			maxWidth='sm'
-		>
+		<PublicDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)}>
 			<DialogTitle sx={hardShadowDialogTitleSx}>Zapisz się na szkolenie</DialogTitle>
 			<DialogContent sx={hardShadowDialogContentSx}>
 				<Stack spacing={1.5}>
@@ -349,18 +345,23 @@ export const CourseDateActions = ({
 					<PaymentDocumentInfo compact />
 				</Stack>
 			</DialogContent>
-			<DialogActions sx={hardShadowDialogActionsSx}>
-				<Button onClick={() => setAuthGateOpen(false)} variant='outlined'>
+			<DialogActions sx={{ ...hardShadowDialogActionsSx, ...publicDialogActionsStackSx }}>
+				<Button onClick={() => setAuthGateOpen(false)} variant='outlined' sx={publicTouchTargetSx}>
 					Anuluj
 				</Button>
-				<Button component={NextLink} href={loginHref} variant='outlined'>
+				<Button
+					component={NextLink}
+					href={loginHref}
+					variant='outlined'
+					sx={publicTouchTargetSx}
+				>
 					Zaloguj się
 				</Button>
-				<Button component={NextLink} href={registerHref} variant='contained'>
+				<Button component={NextLink} href={registerHref} variant='contained' sx={publicTouchTargetSx}>
 					Załóż konto
 				</Button>
 			</DialogActions>
-		</HardShadowDialog>
+		</PublicDialog>
 	);
 
 	if (enrolled) {
@@ -379,6 +380,8 @@ export const CourseDateActions = ({
 					href={`${courseUrl}#${WAITLIST_SECTION_ID}`}
 					variant='outlined'
 					size={size}
+					sx={publicTouchTargetSx}
+					fullWidth
 				>
 					Lista oczekujących
 				</Button>
@@ -387,7 +390,13 @@ export const CourseDateActions = ({
 
 		return (
 			<>
-				<Button variant='contained' size={size} onClick={() => setAuthGateOpen(true)}>
+				<Button
+					variant='contained'
+					size={size}
+					onClick={() => setAuthGateOpen(true)}
+					sx={publicTouchTargetSx}
+					fullWidth
+				>
 					Zapisz się
 				</Button>
 				{authGate}
@@ -414,6 +423,8 @@ export const CourseDateActions = ({
 					size={size}
 					disabled={pending || eligibility.loading}
 					onClick={() => setConfirmAction('enroll')}
+					sx={publicTouchTargetSx}
+					fullWidth
 				>
 					Zapisz się
 				</Button>
@@ -432,9 +443,10 @@ export const CourseDateActions = ({
 					<Button
 						variant='outlined'
 						color='inherit'
-						size='small'
 						disabled={pending}
 						onClick={() => setConfirmAction('leaveWaitlist')}
+						sx={publicTouchTargetSx}
+						fullWidth
 					>
 						Opuść listę
 					</Button>
@@ -451,6 +463,8 @@ export const CourseDateActions = ({
 				size={size}
 				disabled={pending || eligibility.loading}
 				onClick={() => setConfirmAction('joinWaitlist')}
+				sx={publicTouchTargetSx}
+				fullWidth
 			>
 				Lista oczekujących
 			</Button>

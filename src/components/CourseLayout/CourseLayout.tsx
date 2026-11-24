@@ -103,7 +103,9 @@ export const CourseLayout = ({
 					<OptimizedImage
 						src={hero}
 						alt=''
-						loading='lazy'
+						loading='eager'
+						fetchPriority='high'
+						sizes='(max-width: 900px) 100vw, 1200px'
 						onError={() => setImageFailed(true)}
 						sx={{
 							position: 'absolute',

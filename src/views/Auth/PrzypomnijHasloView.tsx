@@ -24,7 +24,7 @@ export const PrzypomnijHasloView = () => {
 	const [loading, setLoading] = useState(false);
 
 	return (
-		<Box sx={{ px: 2, py: 6, maxWidth: 420, mx: 'auto' }}>
+		<Box sx={{ py: { xs: 2, sm: 6 }, maxWidth: 420, mx: 'auto', width: '100%', minWidth: 0 }}>
 			<Typography variant='h4' component='h1' gutterBottom>
 				Przypomnij hasło
 			</Typography>

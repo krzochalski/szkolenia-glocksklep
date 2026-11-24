@@ -146,7 +146,7 @@ const ProformaDocument = ({
 					</Box>
 				</Box>
 
-				<Box sx={{ textAlign: { xs: 'left', sm: 'right' }, minWidth: 220 }}>
+				<Box sx={{ textAlign: { xs: 'left', sm: 'right' }, minWidth: 0, flex: { sm: '0 1 auto' } }}>
 					<MonoText sx={{ display: 'block', color: 'primary.main', fontSize: 12, mb: 0.5 }}>
 						Faktura proforma
 					</MonoText>

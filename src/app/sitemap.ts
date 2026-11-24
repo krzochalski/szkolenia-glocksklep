@@ -1,4 +1,5 @@
 import { SITEMAP_STATIC_PATHS, SITE_ORIGIN } from '@constants/seo';
+import { courseSitemapEntries } from '@seo/sitemapBuilder';
 import { getCourses } from '@services/courses';
 import type { MetadataRoute } from 'next';
 
@@ -9,12 +10,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
 	try {
 		const courses = await getCourses();
-		const courseEntries: MetadataRoute.Sitemap = courses
-			.filter((c) => !c.inactive)
-			.map((c) => ({
-				url: `${SITE_ORIGIN}/szkolenia/${c.slug}`,
-			}));
-		return [...staticEntries, ...courseEntries];
+		const dynamicEntries: MetadataRoute.Sitemap = courseSitemapEntries(courses).map((entry) => ({
+			url: entry.url,
+			...(entry.lastModified ? { lastModified: entry.lastModified } : {}),
+		}));
+		return [...staticEntries, ...dynamicEntries];
 	} catch {
 		return staticEntries;
 	}

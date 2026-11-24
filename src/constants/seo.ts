@@ -10,7 +10,7 @@ export const META_TITLE_MAX = 120;
 
 export const DEFAULT_TITLE = 'GLOCKSKLEP Szkolenia — trening strzelecki i zapisy';
 export const DEFAULT_DESCRIPTION =
-	'Szkolenia strzeleckie Glocksklep: terminy, zapisy online, instruktorzy i materiały dla uczestników.';
+	'Szkolenia strzeleckie Glocksklep w Wielkopolsce: IPSC, strzelectwo praktyczne, terminy w rejonie Poznania, zapisy online.';
 
 export type StaticSeoPage =
 	| 'home'
@@ -48,13 +48,13 @@ export const STATIC_SEO: Record<StaticSeoPage, StaticSeoConfig> = {
 	nearest: {
 		title: 'Najbliższe szkolenia',
 		description:
-			'Najbliższe terminy szkoleń strzeleckich Glocksklep — wolne miejsca i zapisy online.',
+			'Najbliższe terminy szkoleń strzeleckich w Wielkopolsce — Poznań i okolice, IPSC, wolne miejsca i zapisy online.',
 		path: '/najblizsze-szkolenia',
 	},
 	courses: {
 		title: 'Szkolenia',
 		description:
-			'Katalog szkoleń strzeleckich Glocksklep: poziomy, programy i aktualne terminy.',
+			'Katalog szkoleń strzeleckich Glocksklep: strzelectwo praktyczne, IPSC/IDPA, Poznań i Wielkopolska, programy i terminy.',
 		path: '/szkolenia',
 	},
 	faq: {

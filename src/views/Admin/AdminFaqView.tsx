@@ -30,23 +30,36 @@ import {
 
 export const AdminFaqView = () => <FaqInner />;
 
+const parseCourseSlugs = (raw: string): string[] | undefined => {
+	const slugs = raw
+		.split(',')
+		.map((s) => s.trim())
+		.filter(Boolean);
+	return slugs.length ? slugs : undefined;
+};
+
 const toForm = (item: FaqItem): FaqFormData => ({
 	question: item.question,
 	answer: item.answer,
 	linkHref: item.link?.href ?? '',
 	linkLabel: item.link?.label ?? '',
 	category: item.category ?? 'rekrutacja',
+	courseSlugs: item.courseSlugs?.join(', ') ?? '',
 });
 
-const fromForm = (data: FaqFormData, order: number): Omit<FaqItem, 'id'> => ({
+const fromForm = (data: FaqFormData, order: number): Omit<FaqItem, 'id'> => {
+	const courseSlugs = parseCourseSlugs(data.courseSlugs);
+	return {
 	question: data.question.trim(),
 	answer: data.answer.trim(),
 	order,
 	category: data.category,
+	...(courseSlugs ? { courseSlugs } : {}),
 	...(data.linkHref.trim() && data.linkLabel.trim()
 		? { link: { href: data.linkHref.trim(), label: data.linkLabel.trim() } }
 		: {}),
-});
+};
+};
 
 const FaqInner = () => {
 	const queryClient = useQueryClient();

@@ -25,6 +25,8 @@ export type FaqFormData = {
 	linkHref: string;
 	linkLabel: string;
 	category: string;
+	/** Comma-separated course slugs for per-course FAQ blocks. */
+	courseSlugs: string;
 };
 
 export const emptyFaqForm: FaqFormData = {
@@ -33,6 +35,7 @@ export const emptyFaqForm: FaqFormData = {
 	linkHref: '',
 	linkLabel: '',
 	category: 'rekrutacja',
+	courseSlugs: '',
 };
 
 type AdminFaqDialogProps = {
@@ -72,7 +75,7 @@ export const AdminFaqDialog = ({
 			<DialogTitle sx={hardShadowDialogTitleSx}>{title}</DialogTitle>
 			<DialogContent sx={[hardShadowDialogContentSx, { gap: 2 }]}>
 				<Typography variant='body2' color='text.secondary'>
-					Pytania FAQ wyświetlają się na publicznej stronie FAQ.
+					Pytania FAQ wyświetlają się na /faq; opcjonalnie na kartach szkoleń (slugi poniżej).
 				</Typography>
 				<TextField
 					label='Pytanie'
@@ -104,6 +107,14 @@ export const AdminFaqDialog = ({
 						</MenuItem>
 					))}
 				</TextField>
+				<TextField
+					label='Slugi szkoleń (opcjonalnie, po przecinku)'
+					value={form.courseSlugs}
+					onChange={(e) => setForm((f) => ({ ...f, courseSlugs: e.target.value }))}
+					fullWidth
+					placeholder='movement-fundamentals, idpa-basic'
+					helperText='Puste = tylko /faq; wypełnione = dodatkowo na stronach /szkolenia/{slug}.'
+				/>
 				<TextField
 					label='Link URL (opcjonalny)'
 					value={form.linkHref}
