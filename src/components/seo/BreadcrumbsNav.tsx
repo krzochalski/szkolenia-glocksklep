@@ -1,3 +1,5 @@
+'use client';
+
 import { Box, Link, Typography } from '@ui';
 import NextLink from 'next/link';
 

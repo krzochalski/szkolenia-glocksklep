@@ -1,3 +1,5 @@
+'use client';
+
 import { Paths } from '@constants/paths';
 import { buildCourseFaqItems } from '@seo/courseFaq';
 import { pickRelatedCourses } from '@seo/relatedCourses';
